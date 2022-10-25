@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       ),
       home: FutureBuilder(
         future: _fbApp,
-        builder: ((context, snapshot) {
+        builder: (context, snapshot) {
           if (snapshot.hasError) {
             print('You have an error! ${snapshot.error.toString()}');
             return Text('Something went wrong!');
@@ -43,7 +43,8 @@ class MyApp extends StatelessWidget {
               child: CircularProgressIndicator(),
               );
           }
-        }),) 
+        },
+      ) 
       //const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
