@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "814375727309",
+    "project_id": "brick-hold-em",
+    "storage_bucket": "brick-hold-em.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:814375727309:android:9cd919774020d4edf1f984",
+        "android_client_info": {
+          "package_name": "com.example.brick_hold_em"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "814375727309-co7lim3l3ujpav27qb5s1nn5blirb6ni.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBazVbUCC54MgsDi_QH-TFhAkZ7hVpNmQo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "814375727309-co7lim3l3ujpav27qb5s1nn5blirb6ni.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

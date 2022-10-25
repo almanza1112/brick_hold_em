@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>814375727309-unr7ibkbn2tu9qdhe7378u9mmi6a5kav.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.814375727309-unr7ibkbn2tu9qdhe7378u9mmi6a5kav</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDM20GaN0ob3-VAVc6k0oWwQC-JFPDD9DA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>814375727309</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.brickHoldEm</string>
+	<key>PROJECT_ID</key>
+	<string>brick-hold-em</string>
+	<key>STORAGE_BUCKET</key>
+	<string>brick-hold-em.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:814375727309:ios:3449dd657d3862def1f984</string>
+</dict>
+</plist>
