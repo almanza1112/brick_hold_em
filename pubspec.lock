@@ -7,7 +7,7 @@ packages:
       name: _flutterfire_internals
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.5"
+    version: "1.0.7"
   async:
     dependency: transitive
     description:
@@ -42,14 +42,14 @@ packages:
       name: cloud_firestore_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.8.2"
+    version: "5.8.4"
   cloud_firestore_web:
     dependency: transitive
     description:
       name: cloud_firestore_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.2"
+    version: "3.0.4"
   collection:
     dependency: transitive
     description:
@@ -77,21 +77,21 @@ packages:
       name: firebase_auth
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.0"
+    version: "4.1.1"
   firebase_auth_platform_interface:
     dependency: transitive
     description:
       name: firebase_auth_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.10.4"
+    version: "6.11.1"
   firebase_auth_web:
     dependency: transitive
     description:
       name: firebase_auth_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.1.0"
+    version: "5.1.1"
   firebase_core:
     dependency: "direct main"
     description:
@@ -119,21 +119,21 @@ packages:
       name: firebase_database
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "10.0.2"
+    version: "10.0.4"
   firebase_database_platform_interface:
     dependency: transitive
     description:
       name: firebase_database_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.2+10"
+    version: "0.2.2+12"
   firebase_database_web:
     dependency: transitive
     description:
       name: firebase_database_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.1+12"
+    version: "0.2.1+14"
   flame:
     dependency: "direct main"
     description:
@@ -225,7 +225,7 @@ packages:
       name: lints
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   matcher:
     dependency: transitive
     description:
