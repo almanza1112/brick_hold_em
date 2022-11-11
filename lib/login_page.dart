@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'auth_service.dart';
 
@@ -17,30 +16,31 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text("Google Login"),
-        backgroundColor: Colors.green,
-      ),
       body: Container(
         width: size.width,
         height: size.height,
-        padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: size.height * 0.2,
-            bottom: size.height * 0.5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("Hello, \nGoogle sign in",
-                style: TextStyle(fontSize: 30)),
-            GestureDetector(
-                onTap: () {
+            const Text("Sign up to Brick Hold Em",
+                style: TextStyle(fontSize: 40)),
+            ElevatedButton(
+              onPressed: (){
                   AuthService().signInWithGoogle();
-                },
-                child: const Image(
-                    width: 100, image: AssetImage('assets/google.png'))),
+              },
+              child: Text("Google")
+            ),
+            ElevatedButton(
+              onPressed: (){
+                  AuthService().signInWithGoogle();
+
+              },
+              child: Text("Facebook")
+            )
+          
+            
+
           ],
         ),
       ),
