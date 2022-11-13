@@ -25,8 +25,9 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             const Text("Brick Hold Em",
                 style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-            ElevatedButton.icon(onPressed: (){
-
+            ElevatedButton.icon(
+              onPressed: (){
+                AuthService().signInWithGoogle();
               }, 
               icon: const Icon(
                 Icons.abc, 
@@ -58,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
 
             ElevatedButton.icon(
               onPressed: (){
-
+                AuthService().signInWithFacebook();
               }, 
               icon: const Icon(Icons.facebook), 
               label: const Text("Login with Facebook"),
