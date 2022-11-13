@@ -2,6 +2,21 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+
+	
+	<key>FacebookAppID</key>
+	<string>5565520353563727</string>
+	<key>FacebookClientToken</key>
+	<string>9a0162cadabf7d558145e79ed1212aca</string>
+	<key>FacebookDisplayName</key>
+	<string>BrickHoldEm</string>
+
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+	<string>fbapi</string>
+	<string>fb-messenger-share-api</string>
+	</array>
+
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -29,6 +44,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>fb5565520353563727</string>
 				<string>com.googleusercontent.apps.814375727309-unr7ibkbn2tu9qdhe7378u9mmi6a5kav</string>
 			</array>
 		</dict>
