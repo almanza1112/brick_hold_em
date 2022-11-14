@@ -13,6 +13,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   //String? user = FirebaseAuth.instance.currentUser!.email ?? FirebaseAuth.instance.currentUser!.displayName;
+  //              FirebaseAuth.instance.currentUser!.displayName!,
+  //              FirebaseAuth.instance.currentUser!.email!,
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

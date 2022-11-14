@@ -21,14 +21,14 @@ PODS:
   - Firebase/Database (10.0.0):
     - Firebase/CoreOnly
     - FirebaseDatabase (~> 10.0.0)
-  - firebase_auth (4.1.1):
+  - firebase_auth (4.1.0):
     - Firebase/Auth (= 10.0.0)
     - firebase_core
     - Flutter
   - firebase_core (2.1.1):
     - Firebase/CoreOnly (= 10.0.0)
     - Flutter
-  - firebase_database (10.0.4):
+  - firebase_database (10.0.2):
     - Firebase/Database (= 10.0.0)
     - firebase_core
     - Flutter
@@ -127,9 +127,9 @@ SPEC CHECKSUMS:
   FBSDKCoreKit_Basics: 6e578c9bdc7aa1365dbbbde633c9ebb536bcaa98
   FBSDKLoginKit: 787de205d524c3a4b17d527916f1d066e4361660
   Firebase: 1b810f3d0c0532e27a48f1961f8c0400a668a2cf
-  firebase_auth: dd33e93fce72a1c72040f7380dacf06e89db5705
+  firebase_auth: e07b2260d936b7b20f45f9ddafc871f75778be66
   firebase_core: 5c0bb0ca7d0e70480a68a6e9ad9bf55d1edd5305
-  firebase_database: 516eb6be4a2133fac62ae827b3a303edc9d90349
+  firebase_database: 8455f9246ebaa74de8afbbc440d85618fe26171e
   FirebaseAuth: 493382cf533cc45e2862b00e9aa4cfe4c98daf71
   FirebaseCore: 97f48a3a567a72b8d4daa0f03c3aadb78df4e995
   FirebaseCoreInternal: 5eb3960335da5ea30115d57d39db6988c4ad06f3
@@ -144,6 +144,6 @@ SPEC CHECKSUMS:
   leveldb-library: 50c7b45cbd7bf543c81a468fe557a16ae3db8729
   PromisesObjC: ab77feca74fa2823e7af4249b8326368e61014cb
 
-PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
+PODFILE CHECKSUM: 7368163408c647b7eb699d0d788ba6718e18fb8d
 
 COCOAPODS: 1.11.3
