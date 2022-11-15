@@ -57,7 +57,6 @@ class _HomePageState extends State<HomePage> {
                         ),
                         IconButton(
                           onPressed: () {
-                            print("im being pressed");
                             Navigator.push(
                               context, 
                               MaterialPageRoute(builder: (context) =>  SettingsPage()));
