@@ -1,3 +1,4 @@
+import 'package:flame/game.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -5,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'auth_service.dart';
 import 'settings_page.dart';
+import 'game_page.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -41,7 +43,7 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: Container(
                     alignment: Alignment.center,
-                    child: Text('1000 coins')
+                    child: const Text('1000 chips')
                   )
                 ),
               
@@ -69,39 +71,21 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            Text(
-              FirebaseAuth.instance.currentUser!.displayName!,
-              style: const TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Text(
-              FirebaseAuth.instance.currentUser!.email!,
-              style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87),
-            ),
-            const SizedBox(
-              height: 30,
-            ),
+
             MaterialButton(
-              padding: const EdgeInsets.all(10),
-              color: Colors.green,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5)),
-              child: const Text(
-                'LOG OUT',
-                style: TextStyle(color: Colors.white, fontSize: 15),
-              ),
-              onPressed: () {
-                AuthService().signOut();
-              },
-            ),
+                    onPressed: () {
+                       Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => GameWidget(game: GamePage())));
+                    },
+                    padding: const EdgeInsets.all(16.0),
+                    color: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)),
+                    child: const Text(
+                      "Start Playing",
+                      style: TextStyle(color: Colors.white, fontSize: 20),),
+                  )
+
           ],
         ),
       ),
