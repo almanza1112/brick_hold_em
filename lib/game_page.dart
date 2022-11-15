@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 
-class HomePage extends FlameGame {
+class GamePage extends FlameGame {
   SpriteComponent background = SpriteComponent();
   SpriteComponent twoClubs = SpriteComponent();
 
