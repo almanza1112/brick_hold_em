@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'auth_service.dart';
+import 'settings_page.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -20,12 +21,55 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+     
       body: Container(
-        color: Colors.white,
+        color: Colors.brown,
         width: MediaQuery.of(context).size.width,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      onPressed: () {}, icon: const Icon(Icons.group)),
+                  ) 
+                ),
+                
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Text('1000 coins')
+                  )
+                ),
+              
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        IconButton(
+                          onPressed: () {},
+                          icon: const Icon(Icons.local_movies)
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            print("im being pressed");
+                            Navigator.push(
+                              context, 
+                              MaterialPageRoute(builder: (context) =>  SettingsPage()));
+                          },
+                          icon: const Icon(Icons.settings)
+                        )
+                      ],
+                    )
+                  )
+                ),
+              ],
+            ),
             Text(
               FirebaseAuth.instance.currentUser!.displayName!,
               style: const TextStyle(
