@@ -1,10 +1,7 @@
 import 'package:flame/game.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
 
-import 'auth_service.dart';
 import 'settings_page.dart';
 import 'game_page.dart';
 
@@ -15,11 +12,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //String? user = FirebaseAuth.instance.currentUser!.email ?? FirebaseAuth.instance.currentUser!.displayName;
-  //              FirebaseAuth.instance.currentUser!.displayName!,
-  //              FirebaseAuth.instance.currentUser!.email!,
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,7 +76,20 @@ class _HomePageState extends State<HomePage> {
                     child: const Text(
                       "Start Playing",
                       style: TextStyle(color: Colors.white, fontSize: 20),),
-                  )
+                  ),
+            MaterialButton(
+              onPressed: () {
+
+              },
+              color: Colors.yellow,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: const Text(
+                "Test Button",
+                style: TextStyle(color: Colors.black),
+              ),
+            )
 
           ],
         ),
