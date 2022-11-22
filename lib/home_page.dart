@@ -13,33 +13,32 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Create a CollectionReference called users that references the firestore collection
-  CollectionReference users = FirebaseFirestore.instance.collection('users');
-
-  Future<void> addUser() {
-    // Call the user's CollectionReference to add a new user
-    return users
-        .add({'firstName': 'Bryant', 'lastName': 'Almanza', 'age': '29'})
-        .then((value) => print("User Added"))
-        .catchError((error) => print("Failed to add user: $error"));
-  }
-
-  var docId = '62XgoUPzHzUHtedwibyL';
   
-  readData(){
-    return FirebaseFirestore.instance
-      .collection('users')
-      .doc(docId)
-      .get()
-      .then((DocumentSnapshot documentSnapshot) {
-        if(documentSnapshot.exists) {
-          print("document does exist! yayy!!");
-        } else {
-          print("youre wack!");
-        }
-      });
+  FirebaseFirestore db = FirebaseFirestore.instance;
+
+  var chips;
+
+  _HomePageState() {
+    //getChips();
   }
 
+  getChips() {
+    var docRef =  db.collection('users').doc(FirebaseAuth.instance.currentUser!.uid);
+    docRef.get().then(
+      (DocumentSnapshot doc){
+        final data = doc.data() as Map<String, dynamic>;
+        chips = data["chips"];
+        print(chips);
+        return chips;
+      },
+      onError: (e) {
+        print("Error getting document: $e");
+        return "nothing";
+      },
+    );
+  }
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +59,19 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                     child: Container(
                         alignment: Alignment.center,
-                        child: const Text('1000 chips'))),
+                        child: FutureBuilder<Map<String, dynamic>?>(
+                          future: readUser(),
+                          builder: (context, snapshot) {
+                            /** TODO need to clean this up */
+                              if (snapshot.hasData) {
+                                var data = snapshot.data;
+                                int chips = data!["chips"];
+                                return Text("$chips chips");
+                              } else {
+                                return Text('i suck');
+                              }
+                          },
+                        ))),
                 Expanded(
                     child: Container(
                         alignment: Alignment.centerRight,
@@ -103,9 +114,7 @@ class _HomePageState extends State<HomePage> {
             /* TEST BUTTON TODO: remove this eventaully */
             MaterialButton(
               onPressed: () {
-                //addUser();
-                //print(FirebaseAuth.instance.currentUser!.uid);
-                readData();
+                getChips();
               },
               color: Colors.yellow,
               shape: RoundedRectangleBorder(
@@ -121,4 +130,20 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  Future<Map<String , dynamic>?> readUser() async {
+    final docUser = FirebaseFirestore.instance
+        .collection("users")
+        .doc(FirebaseAuth.instance.currentUser!.uid);
+    final snapshot = await docUser.get();
+
+    if (snapshot.exists) {
+      return snapshot.data();
+    } else {
+      /** TODO: need to clean this up */
+      return {"chips": '20'};
+    }
+  }
+
+
 }
