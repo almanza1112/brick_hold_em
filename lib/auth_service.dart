@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flame/game.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -39,34 +38,10 @@ class AuthService {
     // Once signed in, return the UserCredential
     var userCred = await FirebaseAuth.instance.signInWithCredential(credential);
 
-
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-
-    FirebaseFirestore db = FirebaseFirestore.instance;
-
-    FirebaseFirestore.instance
-      .collection('users')
-      .doc(uid)
-      .get()
-      .then((DocumentSnapshot documentSnapshot) {
-        if(documentSnapshot.exists){
-          return userCred;
-        } else {
-
-          db.collection("users")
-            .doc(uid)
-            .set({
-              'coins': 1000
-            })
-            .then((value) => print("User Added"))
-            .catchError((error) => print("Failed to add user: $error"));
-        }
-      });
-
-    return userCred;
+    return checkIfUserExists(userCred);
   }
 
-  Future<UserCredential> signInWithFacebook() async {
+  signInWithFacebook() async {
     // Trigger the sign-in flow
     final LoginResult loginResult = await FacebookAuth.instance.login();
 
@@ -75,10 +50,40 @@ class AuthService {
         FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
     // Once signed in, return the UserCredential
-    return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+    var userCred = await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+
+    return checkIfUserExists(userCred);
   }
 
   signOut() {
     FirebaseAuth.instance.signOut();
+  }
+
+  checkIfUserExists(var userCred) {
+    // Get the UID of the user from Firebase Authentication
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+
+    FirebaseFirestore db = FirebaseFirestore.instance;
+
+    // Check if user already exists in Firestore Database
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        // If it does exist then proceed to return the user credentials
+        return userCred;
+      } else {
+        // If it does not exist then create a document with Id equal to the Firebase
+        // Authentication User UID, also give user n chips
+        db
+            .collection("users")
+            .doc(uid)
+            .set({'chips': 1000})
+            .then((value) => print("User Added"))
+            .catchError((error) => print("Failed to add user: $error"));
+      }
+    });
   }
 }
