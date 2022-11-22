@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'settings_page.dart';
 import 'game_page.dart';
+import 'friends_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,31 +14,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  
-  FirebaseFirestore db = FirebaseFirestore.instance;
-
-  var chips;
-
-  _HomePageState() {
-    //getChips();
-  }
-
-  getChips() {
-    var docRef =  db.collection('users').doc(FirebaseAuth.instance.currentUser!.uid);
-    docRef.get().then(
-      (DocumentSnapshot doc){
-        final data = doc.data() as Map<String, dynamic>;
-        chips = data["chips"];
-        print(chips);
-        return chips;
-      },
-      onError: (e) {
-        print("Error getting document: $e");
-        return "nothing";
-      },
-    );
-  }
-
   
   @override
   Widget build(BuildContext context) {
@@ -54,7 +30,13 @@ class _HomePageState extends State<HomePage> {
                     child: Container(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                      onPressed: () {}, icon: const Icon(Icons.group)),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => FriendsPage()));
+                      }, 
+                      icon: const Icon(Icons.group)),
                 )),
                 Expanded(
                     child: Container(
@@ -68,7 +50,7 @@ class _HomePageState extends State<HomePage> {
                                 int chips = data!["chips"];
                                 return Text("$chips chips");
                               } else {
-                                return Text('i suck');
+                                return const Text('i suck');
                               }
                           },
                         ))),
@@ -114,7 +96,7 @@ class _HomePageState extends State<HomePage> {
             /* TEST BUTTON TODO: remove this eventaully */
             MaterialButton(
               onPressed: () {
-                getChips();
+                
               },
               color: Colors.yellow,
               shape: RoundedRectangleBorder(
