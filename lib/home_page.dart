@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'settings_page.dart';
 import 'game_page.dart';
 import 'friends_page.dart';
+import 'ads_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -48,7 +49,9 @@ class _HomePageState extends State<HomePage> {
                               if (snapshot.hasData) {
                                 var data = snapshot.data;
                                 int chips = data!["chips"];
-                                return Text("$chips chips");
+                                return Text(
+                                  "$chips chips",
+                                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),);
                               } else {
                                 return const Text('i suck');
                               }
@@ -61,7 +64,13 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: <Widget>[
                             IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              AdsPage()));
+                                },
                                 icon: const Icon(Icons.local_movies)),
                             IconButton(
                                 onPressed: () {
