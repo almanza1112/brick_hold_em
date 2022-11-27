@@ -45,7 +45,7 @@ class AuthService {
     // Trigger the sign-in flow
     final LoginResult loginResult = await FacebookAuth.instance.login();
 
-    // Create a credential from the access token
+    // Create a credential from thex   access token
     final OAuthCredential facebookAuthCredential =
         FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
