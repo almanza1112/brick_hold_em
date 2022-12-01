@@ -1,5 +1,6 @@
 
 
+import 'package:brick_hold_em/game/game_players.dart';
 import 'package:brick_hold_em/game/game_sidemenu.dart';
 import 'package:brick_hold_em/game/game_table.dart';
 import 'package:flame/game.dart';
@@ -24,7 +25,8 @@ class _GameMainState extends State<GameMain> {
         fit: StackFit.expand,
         children: [
           GameWidget(game: game),
-          GameSideMenu(game: game)
+          GameSideMenu(game: game),
+          GamePlayers(game: game)
 
         ],
       )

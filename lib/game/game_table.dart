@@ -16,6 +16,7 @@ class GameTable extends FlameGame with HasTappables {
   late Cards fourSpade;
   late Cards aceDiamond;
 
+  SpriteComponent dealer = SpriteComponent();
   // User is Player 1, going counter clockwise players are numbered
   // Player 2
   SpriteComponent player2Card1 = SpriteComponent();
@@ -58,6 +59,13 @@ class GameTable extends FlameGame with HasTappables {
     add(background
       ..sprite = await loadSprite('background.webp')
       ..size = size);
+
+    dealer
+      ..sprite = await loadSprite('dealer.png')
+      ..size = Vector2(60, 60)
+      ..x = screenWidth / 2
+      ..y = 10;
+    add(dealer);
 
     // PLAYER 1
     brickCard = Cards()
@@ -359,7 +367,7 @@ class GameTable extends FlameGame with HasTappables {
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    sampleText.render(canvas, "Table 1", Vector2(size[0] / 2, 10));
+    //sampleText.render(canvas, "Table 1", Vector2(size[0] / 2, 10));
   }
 }
 
