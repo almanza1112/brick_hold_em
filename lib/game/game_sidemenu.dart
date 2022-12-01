@@ -28,6 +28,8 @@ class _GameSideMenuState extends State<GameSideMenu>
     ).animate(CurvedAnimation(parent: controller, curve: Curves.easeIn));
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -69,7 +71,21 @@ class _GameSideMenuState extends State<GameSideMenu>
                     )
                   ),
                   
-                  Text("aaaaaaaaaa")
+                  GestureDetector(
+                    onTap: (){
+                      
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(3.0),
+                      decoration: const BoxDecoration(
+                        border:
+                            Border(bottom: BorderSide(color: Colors.black))),
+                      child: const Text(
+                        "Start Game",
+                        style: TextStyle(color: Colors.black),
+                    ),
+                    ),
+                  )
                 ],
               ),
             ),

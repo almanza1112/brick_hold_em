@@ -5,16 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 List<String> cardsSelected = [];
 
 class GameTable extends FlameGame with HasTappables {
   SpriteComponent background = SpriteComponent();
-  late Cards twoClubs;
-  late Cards eightHearts;
-  late Cards brickCard;
-  late Cards fourSpade;
-  late Cards aceDiamond;
+  late Cards player1card1;
+  late Cards player1card2;
+  late Cards player1card3;
+  late Cards player1card4;
+  late Cards player1card5;
 
   SpriteComponent dealer = SpriteComponent();
   // User is Player 1, going counter clockwise players are numbered
@@ -48,10 +50,27 @@ class GameTable extends FlameGame with HasTappables {
 
   TextPaint sampleText = TextPaint(style: const TextStyle(fontSize: 18));
 
+  void fetchCards() async {
+    http.Response response = await http
+        .get(Uri.parse('https://brick-hold-em-api.herokuapp.com/table'));
+
+    Map data = jsonDecode(response.body);
+
+    //print(cardSetter.setCard(data));
+  }
+
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
+
+    http.Response response = await http
+        .get(Uri.parse('https://brick-hold-em-api.herokuapp.com/table'));
+
+    Map data = jsonDecode(response.body);
+
+    List startingHand = CardSetter().setCard(data);
+
 
     final screenWidth = size[0];
     final screenHeight = size[1];
@@ -68,40 +87,40 @@ class GameTable extends FlameGame with HasTappables {
     add(dealer);
 
     // PLAYER 1
-    brickCard = Cards()
-      ..sprite = await loadSprite('brick_card.png')
+    player1card1 = Cards()
+      ..sprite = await loadSprite(startingHand[0])
       ..size = Vector2(cardWidth, cardHeight)
       ..y = screenHeight - (cardHeight * 1.5)
       ..x = screenWidth / 2.2;
-    add(brickCard);
+    add(player1card1);
 
-    eightHearts = Cards()
-      ..sprite = await loadSprite('hearts_8.png')
+    player1card2 = Cards()
+      ..sprite = await loadSprite(startingHand[1])
       ..size = Vector2(cardWidth, cardHeight)
       ..y = screenHeight - (cardHeight * 1.5)
       ..x = screenWidth / 2.1;
-    add(eightHearts);
+    add(player1card2);
 
-    twoClubs = Cards()
-      ..sprite = await loadSprite('club_2.png')
+    player1card3 = Cards()
+      ..sprite = await loadSprite(startingHand[2])
       ..size = Vector2(cardWidth, cardHeight)
       ..y = screenHeight - (cardHeight * 1.5)
       ..x = screenWidth / 2;
-    add(twoClubs);
+    add(player1card3);
 
-    fourSpade = Cards()
-      ..sprite = await loadSprite('spade_4.png')
+    player1card4 = Cards()
+      ..sprite = await loadSprite(startingHand[3])
       ..size = Vector2(cardWidth, cardHeight)
       ..y = screenHeight - (cardHeight * 1.5)
       ..x = screenWidth / 1.9;
-    add(fourSpade);
+    add(player1card4);
 
-    aceDiamond = Cards()
-      ..sprite = await loadSprite('diamond_a.png')
+    player1card5 = Cards()
+      ..sprite = await loadSprite(startingHand[4])
       ..size = Vector2(cardWidth, cardHeight)
       ..y = screenHeight - (cardHeight * 1.5)
       ..x = screenWidth / 1.8;
-    add(aceDiamond);
+    add(player1card5);
 
     // PLAYER 2
     // player2Card1
@@ -258,36 +277,36 @@ class GameTable extends FlameGame with HasTappables {
     //twoClubs.y -= 30 * dt;
     //}
     //print(aceDiamond.isExpanded);
-    if (aceDiamond.isExpanded ||
-        brickCard.isExpanded ||
-        eightHearts.isExpanded ||
-        twoClubs.isExpanded ||
-        fourSpade.isExpanded) {
-      if (aceDiamond.height < size[1] / 3) {
-        brickCard.height += 1;
-        brickCard.width += 1;
-        brickCard.y = size[1] / 3;
-        brickCard.x = size[0] / 5;
+    if (player1card1.isExpanded ||
+        player1card2.isExpanded ||
+        player1card3.isExpanded ||
+        player1card4.isExpanded ||
+        player1card5.isExpanded) {
+      if (player1card1.height < size[1] / 3) {
+        player1card2.height += 1;
+        player1card2.width += 1;
+        player1card2.y = size[1] / 3;
+        player1card2.x = size[0] / 5;
 
-        eightHearts.height += 1;
-        eightHearts.width += 1;
-        eightHearts.y = size[1] / 3;
-        eightHearts.x = size[0] / 3;
+        player1card3.height += 1;
+        player1card3.width += 1;
+        player1card3.y = size[1] / 3;
+        player1card3.x = size[0] / 3;
 
-        twoClubs.height += 1;
-        twoClubs.width += 1;
-        twoClubs.y = size[1] / 3;
-        twoClubs.x = size[0] / 2.15;
+        player1card4.height += 1;
+        player1card4.width += 1;
+        player1card4.y = size[1] / 3;
+        player1card4.x = size[0] / 2.15;
 
-        fourSpade.height += 1;
-        fourSpade.width += 1;
-        fourSpade.y = size[1] / 3;
-        fourSpade.x = size[0] / 1.67;
+        player1card5.height += 1;
+        player1card5.width += 1;
+        player1card5.y = size[1] / 3;
+        player1card5.x = size[0] / 1.67;
 
-        aceDiamond.height += 1;
-        aceDiamond.width += 1;
-        aceDiamond.y = size[1] / 3;
-        aceDiamond.x = size[0] / 1.36;
+        player1card1.height += 1;
+        player1card1.width += 1;
+        player1card1.y = size[1] / 3;
+        player1card1.x = size[0] / 1.36;
 
         cancelButton.y = size[1] - (cancelButton.height * 2);
         cancelButton.x = size[0] / 3;
@@ -296,34 +315,34 @@ class GameTable extends FlameGame with HasTappables {
         checkButton.x = size[0] / 1.5;
       }
 
-      if (brickCard.isBrickSelected) {
-        brickCard.y = size[1] / 7;
+      if (player1card2.isBrickSelected) {
+        player1card2.y = size[1] / 7;
       } else {
-        brickCard.y = size[1] / 3;
+        player1card2.y = size[1] / 3;
       }
 
-      if (eightHearts.isEightSelected) {
-        eightHearts.y = size[1] / 7;
+      if (player1card3.isEightSelected) {
+        player1card3.y = size[1] / 7;
       } else {
-        eightHearts.y = size[1] / 3;
+        player1card3.y = size[1] / 3;
       }
 
-      if (twoClubs.isTwoSelected) {
-        twoClubs.y = size[1] / 7;
+      if (player1card4.isTwoSelected) {
+        player1card4.y = size[1] / 7;
       } else {
-        twoClubs.y = size[1] / 3;
+        player1card4.y = size[1] / 3;
       }
 
-      if (fourSpade.isFourSelected) {
-        fourSpade.y = size[1] / 7;
+      if (player1card5.isFourSelected) {
+        player1card5.y = size[1] / 7;
       } else {
-        fourSpade.y = size[1] / 3;
+        player1card5.y = size[1] / 3;
       }
 
-      if (aceDiamond.isAceSelected) {
-        aceDiamond.y = size[1] / 7;
+      if (player1card1.isAceSelected) {
+        player1card1.y = size[1] / 7;
       } else {
-        aceDiamond.y = size[1] / 3;
+        player1card1.y = size[1] / 3;
       }
     }
 
@@ -337,29 +356,29 @@ class GameTable extends FlameGame with HasTappables {
       checkButton.y = size[1];
       checkButton.x = size[0];
 
-      brickCard.y = size[1] - (cardHeight * 1.5);
-      brickCard.x = size[0] / 2.2;
-      brickCard.size = Vector2(cardWidth, cardHeight);
+      player1card2.y = size[1] - (cardHeight * 1.5);
+      player1card2.x = size[0] / 2.2;
+      player1card2.size = Vector2(cardWidth, cardHeight);
       //brickCard.isExpanded = false;
 
-      eightHearts.y = size[1] - (cardHeight * 1.5);
-      eightHearts.x = size[0] / 2.1;
-      eightHearts.size = Vector2(cardWidth, cardHeight);
+      player1card3.y = size[1] - (cardHeight * 1.5);
+      player1card3.x = size[0] / 2.1;
+      player1card3.size = Vector2(cardWidth, cardHeight);
       //eightHearts.isExpanded = false;
 
-      twoClubs.y = size[1] - (cardHeight * 1.5);
-      twoClubs.x = size[0] / 2;
-      twoClubs.size = Vector2(cardWidth, cardHeight);
+      player1card4.y = size[1] - (cardHeight * 1.5);
+      player1card4.x = size[0] / 2;
+      player1card4.size = Vector2(cardWidth, cardHeight);
       //twoClubs.isExpanded = false;
 
-      fourSpade.y = size[1] - (cardHeight * 1.5);
-      fourSpade.x = size[0] / 1.9;
-      fourSpade.size = Vector2(cardWidth, cardHeight);
+      player1card5.y = size[1] - (cardHeight * 1.5);
+      player1card5.x = size[0] / 1.9;
+      player1card5.size = Vector2(cardWidth, cardHeight);
       //fourSpade.isExpanded = false;
 
-      aceDiamond.y = size[1] - (cardHeight * 1.5);
-      aceDiamond.x = size[0] / 1.8;
-      aceDiamond.size = Vector2(cardWidth, cardHeight);
+      player1card1.y = size[1] - (cardHeight * 1.5);
+      player1card1.x = size[0] / 1.8;
+      player1card1.size = Vector2(cardWidth, cardHeight);
       //aceDiamond.isExpanded = false;
     }
   }
@@ -445,5 +464,17 @@ class CheckButton extends SpriteComponent with Tappable {
     isPressed = true;
     
     return true;
+  }
+}
+
+class CardSetter {
+  List setCard(Map map) {
+    List cardList = map['cards'];
+    List startingHand = ([]);
+
+    for(var i = 0; i < 5; i++){
+      startingHand.add(cardList[i]+'.png');
+    }
+    return startingHand;
   }
 }
