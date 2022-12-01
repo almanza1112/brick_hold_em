@@ -19,25 +19,25 @@ class GameTable extends FlameGame with HasTappables {
   SpriteComponent dealer = SpriteComponent();
   // User is Player 1, going counter clockwise players are numbered
   // Player 2
-  SpriteComponent player2Card1 = SpriteComponent();
-  SpriteComponent player2Card2 = SpriteComponent();
-  SpriteComponent player2Card3 = SpriteComponent();
-  SpriteComponent player2Card4 = SpriteComponent();
-  // Player 3
-  SpriteComponent player3Card1 = SpriteComponent();
-  SpriteComponent player3Card2 = SpriteComponent();
-  SpriteComponent player3Card3 = SpriteComponent();
-  SpriteComponent player3Card4 = SpriteComponent();
-  // Player 4
-  SpriteComponent player4Card1 = SpriteComponent();
-  SpriteComponent player4Card2 = SpriteComponent();
-  SpriteComponent player4Card3 = SpriteComponent();
-  SpriteComponent player4Card4 = SpriteComponent();
-  // Player 5
-  SpriteComponent player5Card1 = SpriteComponent();
-  SpriteComponent player5Card2 = SpriteComponent();
-  SpriteComponent player5Card3 = SpriteComponent();
-  SpriteComponent player5Card4 = SpriteComponent();
+  // SpriteComponent player2Card1 = SpriteComponent();
+  // SpriteComponent player2Card2 = SpriteComponent();
+  // SpriteComponent player2Card3 = SpriteComponent();
+  // SpriteComponent player2Card4 = SpriteComponent();
+  // // Player 3
+  // SpriteComponent player3Card1 = SpriteComponent();
+  // SpriteComponent player3Card2 = SpriteComponent();
+  // SpriteComponent player3Card3 = SpriteComponent();
+  // SpriteComponent player3Card4 = SpriteComponent();
+  // // Player 4
+  // SpriteComponent player4Card1 = SpriteComponent();
+  // SpriteComponent player4Card2 = SpriteComponent();
+  // SpriteComponent player4Card3 = SpriteComponent();
+  // SpriteComponent player4Card4 = SpriteComponent();
+  // // Player 5
+  // SpriteComponent player5Card1 = SpriteComponent();
+  // SpriteComponent player5Card2 = SpriteComponent();
+  // SpriteComponent player5Card3 = SpriteComponent();
+  // SpriteComponent player5Card4 = SpriteComponent();
 
   CancelButton cancelButton = CancelButton();
   CheckButton checkButton = CheckButton();
@@ -104,136 +104,136 @@ class GameTable extends FlameGame with HasTappables {
     add(aceDiamond);
 
     // PLAYER 2
-    player2Card1
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight - 60
-      ..x = screenWidth - 200
-      ..angle = radians(315);
-    add(player2Card1);
+    // player2Card1
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight - 60
+    //   ..x = screenWidth - 200
+    //   ..angle = radians(315);
+    // add(player2Card1);
 
-    player2Card2
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.1
-      ..x = cardWidth
-      ..angle = radians(315);
-    add(player2Card2);
+    // player2Card2
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.1
+    //   ..x = cardWidth
+    //   ..angle = radians(315);
+    // add(player2Card2);
 
-    player2Card3
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2
-      ..x = cardWidth
-      ..angle = radians(315);
-    add(player2Card3);
+    // player2Card3
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2
+    //   ..x = cardWidth
+    //   ..angle = radians(315);
+    // add(player2Card3);
 
-    player2Card4
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 1.9
-      ..x = cardWidth
-      ..angle = radians(315);
-    add(player2Card4);
+    // player2Card4
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 1.9
+    //   ..x = cardWidth
+    //   ..angle = radians(315);
+    // add(player2Card4);
 
-    // Player 3
-    player3Card1
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 1.8
-      ..x = cardWidth
-      ..angle = radians(270);
-    add(player3Card1);
+    // // Player 3
+    // player3Card1
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 1.8
+    //   ..x = cardWidth
+    //   ..angle = radians(270);
+    // add(player3Card1);
 
-    player3Card2
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.5
-      ..x = screenWidth - cardWidth
-      ..angle = radians(90);
-    add(player3Card2);
+    // player3Card2
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.5
+    //   ..x = screenWidth - cardWidth
+    //   ..angle = radians(90);
+    // add(player3Card2);
 
-    player3Card3
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.4
-      ..x = screenWidth - cardWidth
-      ..angle = radians(90);
-    add(player3Card3);
+    // player3Card3
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.4
+    //   ..x = screenWidth - cardWidth
+    //   ..angle = radians(90);
+    // add(player3Card3);
 
-    player3Card4
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.3
-      ..x = screenWidth - cardWidth
-      ..angle = radians(90);
-    add(player3Card4);
+    // player3Card4
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.3
+    //   ..x = screenWidth - cardWidth
+    //   ..angle = radians(90);
+    // add(player3Card4);
 
-    // Player 4
-    player4Card1
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.2
-      ..x = screenWidth - cardWidth
-      ..angle = radians(90);
-    add(player4Card1);
+    // // Player 4
+    // player4Card1
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.2
+    //   ..x = screenWidth - cardWidth
+    //   ..angle = radians(90);
+    // add(player4Card1);
 
-    player4Card2
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.1
-      ..x = screenWidth - cardWidth
-      ..angle = radians(90);
-    add(player4Card2);
+    // player4Card2
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.1
+    //   ..x = screenWidth - cardWidth
+    //   ..angle = radians(90);
+    // add(player4Card2);
 
-    player4Card3
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.2
-      ..x = screenWidth - cardWidth
-      ..angle = radians(90);
-    add(player4Card3);
+    // player4Card3
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.2
+    //   ..x = screenWidth - cardWidth
+    //   ..angle = radians(90);
+    // add(player4Card3);
 
-    player4Card4
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.1
-      ..x = screenWidth - cardWidth
-      ..angle = radians(90);
-    add(player4Card4);
+    // player4Card4
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.1
+    //   ..x = screenWidth - cardWidth
+    //   ..angle = radians(90);
+    // add(player4Card4);
 
-    // Player 5
-    player5Card1
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.2
-      ..x = screenWidth - cardWidth
-      ..angle = radians(90);
-    add(player5Card1);
+    // // Player 5
+    // player5Card1
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.2
+    //   ..x = screenWidth - cardWidth
+    //   ..angle = radians(90);
+    // add(player5Card1);
 
-    player5Card2
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.1
-      ..x = screenWidth - cardWidth
-      ..angle = radians(90);
-    add(player5Card2);
+    // player5Card2
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.1
+    //   ..x = screenWidth - cardWidth
+    //   ..angle = radians(90);
+    // add(player5Card2);
 
-    player5Card3
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.2
-      ..x = screenWidth - cardWidth
-      ..angle = radians(90);
-    add(player5Card3);
+    // player5Card3
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.2
+    //   ..x = screenWidth - cardWidth
+    //   ..angle = radians(90);
+    // add(player5Card3);
 
-    player5Card4
-      ..sprite = await loadSprite('backside.png')
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight / 2.1
-      ..x = screenWidth - cardWidth
-      ..angle = radians(90);
-    add(player5Card4);
+    // player5Card4
+    //   ..sprite = await loadSprite('backside.png')
+    //   ..size = Vector2(cardWidth, cardHeight)
+    //   ..y = screenHeight / 2.1
+    //   ..x = screenWidth - cardWidth
+    //   ..angle = radians(90);
+    // add(player5Card4);
 
     cancelButton
       ..sprite = await loadSprite("cancel.png")
