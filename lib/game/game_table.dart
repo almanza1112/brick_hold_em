@@ -8,7 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 List<String> cardsSelected = [];
 
-class GamePage extends FlameGame with HasTappables {
+class GameTable extends FlameGame with HasTappables {
   SpriteComponent background = SpriteComponent();
   late Cards twoClubs;
   late Cards eightHearts;
@@ -38,7 +38,6 @@ class GamePage extends FlameGame with HasTappables {
   SpriteComponent player5Card3 = SpriteComponent();
   SpriteComponent player5Card4 = SpriteComponent();
 
-  ExitButton exitButton = ExitButton();
   CancelButton cancelButton = CancelButton();
   CheckButton checkButton = CheckButton();
   final Vector2 exitButtonSize = Vector2(50.0, 30.0);
@@ -59,12 +58,6 @@ class GamePage extends FlameGame with HasTappables {
     add(background
       ..sprite = await loadSprite('background.webp')
       ..size = size);
-
-    exitButton
-      ..sprite = await loadSprite('exit.png')
-      ..size = exitButtonSize
-      ..position = Vector2(10, 10);
-    add(exitButton);
 
     // PLAYER 1
     brickCard = Cards()
@@ -370,19 +363,6 @@ class GamePage extends FlameGame with HasTappables {
   }
 }
 
-class ExitButton extends SpriteComponent with Tappable {
-  @override
-  bool onTapDown(TapDownInfo event) {
-    try {
-      print("object");
-
-      return true;
-    } catch (error) {
-      print(error);
-      return false;
-    }
-  }
-}
 
 class Cards extends SpriteComponent with Tappable {
   bool isExpanded = false;

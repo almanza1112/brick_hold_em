@@ -1,11 +1,13 @@
+import 'package:brick_hold_em/game/game_main.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 import 'settings_page.dart';
-import 'game_page.dart';
+import 'game/game_table.dart';
 import 'friends_page.dart';
 import 'ads_page.dart';
 
@@ -18,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     return Scaffold(
       body: Container(
         color: Colors.brown,
@@ -90,7 +93,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => GameWidget(game: GamePage())));
+                        builder: (context) => GameMain()));
               },
               padding: const EdgeInsets.all(16.0),
               color: Colors.green,
