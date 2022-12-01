@@ -40,12 +40,16 @@ class _GamePlayersState extends State<GamePlayers> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      CircleAvatar(
-                        backgroundImage:
-                            AssetImage('assets/images/TESTING.jpg'),
-                        radius: imageRadius,
+                      Stack(
+                        children: <Widget>[
+                          CircleAvatar(
+                            backgroundImage:
+                                AssetImage('assets/images/TESTING.jpg'),
+                            radius: imageRadius,
+                          ),
+                        ],
                       ),
-                      Text("1,000,000", style: chipsText)
+                      Text("1,000", style: chipsText)
                     ],
                   ),
                 ),
@@ -61,7 +65,7 @@ class _GamePlayersState extends State<GamePlayers> {
                             AssetImage('assets/images/TESTING.jpg'),
                         radius: imageRadius,
                       ),
-                      Text("1,000,000", style: chipsText,)
+                      Text("1,000", style: chipsText,)
                     ],
                   ),
                 ),
@@ -78,7 +82,7 @@ class _GamePlayersState extends State<GamePlayers> {
                         radius: imageRadius,
                       ),
                       Text(
-                        "1,000,000",
+                        "1,000",
                         style: chipsText,
                       )
                     ],
@@ -97,7 +101,7 @@ class _GamePlayersState extends State<GamePlayers> {
                         radius: imageRadius,
                       ),
                       Text(
-                        "1,000,000",
+                        "1,000",
                         style: chipsText,
                       )
                     ],
