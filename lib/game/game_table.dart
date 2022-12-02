@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/input.dart';
 import 'package:flame/widgets.dart';
@@ -55,19 +56,24 @@ class GameTable extends FlameGame with HasTappables {
 
   TextPaint sampleText = TextPaint(style: const TextStyle(fontSize: 18));
 
-  void fetchCards() async {
-    http.Response response = await http
-        .get(Uri.parse('https://brick-hold-em-api.herokuapp.com/table'));
+  // void fetchCards() async {
+  //   http.Response response = await http
+  //       .get(Uri.parse('https://brick-hold-em-api.herokuapp.com/table'));
 
-    Map data = jsonDecode(response.body);
+  //   Map data = jsonDecode(response.body);
 
-    //print(cardSetter.setCard(data));
-  }
+  //   print(cardSetter.setCard(data));
+  // }
 
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
+      DatabaseReference database = FirebaseDatabase.instance.ref('tables');
+      database.onValue.listen((event) {
+        final data = event.snapshot.value;
+        print(data);
+      });
 
     http.Response response = await http
         .get(Uri.parse('https://brick-hold-em-api.herokuapp.com/table'));

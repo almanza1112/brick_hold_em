@@ -31,14 +31,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flame: 1.4.0
+  flame: ^1.5.0
   cupertino_icons: ^1.0.2
-  firebase_core: ^2.1.0
+  firebase_core: ^2.2.0
   firebase_database: ^10.0.0
   firebase_auth: ^4.1.0
   google_sign_in: ^5.4.2
-  flutter_facebook_auth: '^4.4.1'
-  cloud_firestore: ^4.0.0
+  flutter_facebook_auth: 4.4.1
+  cloud_firestore: ^4.1.0
   http: ^0.13.5
   
 
