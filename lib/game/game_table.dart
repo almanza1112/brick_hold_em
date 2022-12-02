@@ -11,6 +11,11 @@ import 'dart:convert';
 List<String> cardsSelected = [];
 
 class GameTable extends FlameGame with HasTappables {
+
+  GameTable({required this.notchPadding});
+    
+  num notchPadding;
+
   SpriteComponent background = SpriteComponent();
   late Cards player1card1;
   late Cards player1card2;
@@ -71,8 +76,9 @@ class GameTable extends FlameGame with HasTappables {
 
     List startingHand = CardSetter().setCard(data);
 
+    
 
-    final screenWidth = size[0];
+    final screenWidth = size[0] - notchPadding;
     final screenHeight = size[1];
 
     add(background
@@ -82,7 +88,7 @@ class GameTable extends FlameGame with HasTappables {
     dealer
       ..sprite = await loadSprite('dealer.png')
       ..size = Vector2(60, 60)
-      ..x = screenWidth / 2
+      ..x = (screenWidth / 2)
       ..y = 10;
     add(dealer);
 

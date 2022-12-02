@@ -1,6 +1,3 @@
-
-
-import 'package:brick_hold_em/game/game_chat.dart';
 import 'package:brick_hold_em/game/game_players.dart';
 import 'package:brick_hold_em/game/game_sidemenu.dart';
 import 'package:brick_hold_em/game/game_table.dart';
@@ -17,9 +14,10 @@ class _GameMainState extends State<GameMain> {
 
   @override
   Widget build(BuildContext context) {
+    final leftPadding = MediaQuery.of(context).padding.left;
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
 
-    var game = GameTable();
+    var game = GameTable(notchPadding: leftPadding);
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -27,7 +25,6 @@ class _GameMainState extends State<GameMain> {
           GameWidget(game: game),
           GamePlayers(game: game),
           GameSideMenu(game: game),
-          //GameChat(game: game)
 
         ],
       )

@@ -21,7 +21,6 @@ class _GameSideMenuState extends State<GameSideMenu>
   late AnimationController controller2;
   late Animation<Offset> offsetAnimation2;
 
-  final GameChat gameChat = GameChat(game: GameTable());
 
   @override
   void initState() {
