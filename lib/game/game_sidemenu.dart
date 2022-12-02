@@ -1,3 +1,4 @@
+import 'package:brick_hold_em/game/game_chat.dart';
 import 'package:brick_hold_em/game/game_table.dart';
 import 'package:flutter/material.dart';
 
@@ -13,25 +14,46 @@ class GameSideMenu extends StatefulWidget {
 }
 
 class _GameSideMenuState extends State<GameSideMenu>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController controller;
   late Animation<Offset> offsetAnimation;
+
+  late AnimationController controller2;
+  late Animation<Offset> offsetAnimation2;
+
+  final GameChat gameChat = GameChat(game: GameTable());
 
   @override
   void initState() {
     super.initState();
     controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+        controller2 =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
     offsetAnimation = Tween<Offset>(
       begin: const Offset(-1.0, 0.0),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: controller, curve: Curves.easeIn));
+     offsetAnimation2 = Tween<Offset>(
+      begin: const Offset(-1.0, 0.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: controller2, curve: Curves.easeIn));
+    
   }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
+        Align(
+          alignment: Alignment.bottomLeft,
+          child: IconButton(
+              onPressed: () {
+                controller2.forward();
+              },
+              color: Colors.white,
+              icon: const Icon(Icons.chat_bubble)),
+        ),
         IconButton(
             onPressed: () {
               controller.forward();
@@ -112,10 +134,79 @@ class _GameSideMenuState extends State<GameSideMenu>
                         ),
                       ),
                     ),
-                    
+                    // BUY MORE CHIPS
+                    InkWell(
+                      splashColor: Colors.black,
+                      onTap: () {
+                        //Navigator.pop(context);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 20, bottom: 10),
+                        child: Row(
+                          children: const [
+                            Expanded(
+                                flex: 0,
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 8),
+                                  child: Icon(Icons.money),
+                                )),
+                            Expanded(flex: 1, child: Text("Buy Chips"))
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 ),
+            ),
+          ),
+        ),
+        SlideTransition(
+          position: offsetAnimation2,
+          child: Container(
+            width: 300,
+            color: Colors.blue,
+            child: SafeArea(
+              child: Material(
+                color: Colors.blue,
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      children: [
+                        const Expanded(
+                          flex: 1,
+                          child: Text(
+                            "CHAT",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Expanded(
+                            flex: 0,
+                            child: IconButton(
+                                onPressed: () {
+                                  controller2.reverse();
+                                },
+                                icon: const Icon(Icons.close)))
+                      ],
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text("Messages will appear here")),
+                    Expanded(
+                      flex: 0,
+                      child: TextField(
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(),
+                          hintText: "Send message"
+                        ),
+                      )
+                    )
+                  ],
+                ),
+              ),
             ),
           ),
         )
