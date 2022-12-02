@@ -28,69 +28,98 @@ class _GameSideMenuState extends State<GameSideMenu>
     ).animate(CurvedAnimation(parent: controller, curve: Curves.easeIn));
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     return Stack(
-        children: <Widget>[
-          IconButton(
-              onPressed: () {controller.forward();},
-              color: Colors.white,
-              icon: const Icon(Icons.menu)),
-          SlideTransition(
-            position: offsetAnimation,
-            child: Container(
-              width: 200,
-              color: Colors.amber,
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: IconButton(
-                      onPressed: (){
-                        controller.reverse();
+      children: <Widget>[
+        IconButton(
+            onPressed: () {
+              controller.forward();
+            },
+            color: Colors.white,
+            icon: const Icon(Icons.menu)),
+        SlideTransition(
+          position: offsetAnimation,
+          child: Container(
+            width: 250,
+            color: Colors.amber,
+            child: SafeArea(
+                child: Material(
+                  color: Colors.amber,
+                  child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const Expanded(
+                          flex: 1,
+                          child: Text(
+                            "MENU",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Expanded(
+                            flex: 0,
+                            child: IconButton(
+                              onPressed: () {
+                                controller.reverse();
+                              },
+                              color: Colors.black,
+                              icon: const Icon(Icons.close),
+                            ))
+                      ],
+                    ),
+                    // EXIT TABLE
+                    InkWell(
+                      splashColor: Colors.black,
+                      onTap: () {
+                        Navigator.pop(context);
                       },
-                      color: Colors.black,
-                      icon: const Icon(Icons.close),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: (){
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(3.0),
-                      decoration: const BoxDecoration(
-                        border: Border(bottom: BorderSide(color: Colors.black))
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 20, bottom: 10),
+                        child: Row(
+                          children:  const [
+                            Expanded(
+                              flex: 0, 
+                              child: Padding(
+                                padding: EdgeInsets.only(right: 8),
+                                child: Icon(Icons.exit_to_app),)),
+                            Expanded(
+                              flex: 1, 
+                              child: Text("Exit Table"))
+                          ],
+                        ),
                       ),
-                      child: const Text(
-                        "Exit Table",
-                        style: TextStyle(color: Colors.black),
+                    ),
+                    // INVITE FRIENDS
+                    InkWell(
+                      splashColor: Colors.black,
+                      onTap: () {
+                        //Navigator.pop(context);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 20, bottom: 10),
+                        child: Row(
+                          children: const [
+                            Expanded(
+                                flex: 0,
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 8),
+                                  child: Icon(Icons.group),
+                                )),
+                            Expanded(flex: 1, child: Text("Invite Friends"))
+                          ],
+                        ),
                       ),
-                    )
-                  ),
-                  
-                  GestureDetector(
-                    onTap: (){
-                      
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(3.0),
-                      decoration: const BoxDecoration(
-                        border:
-                            Border(bottom: BorderSide(color: Colors.black))),
-                      child: const Text(
-                        "Start Game",
-                        style: TextStyle(color: Colors.black),
                     ),
-                    ),
-                  )
-                ],
-              ),
+                    
+                  ],
+                ),
+                ),
             ),
-          )
-        ],
+          ),
+        )
+      ],
     );
   }
 }
