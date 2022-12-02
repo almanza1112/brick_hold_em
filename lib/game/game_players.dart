@@ -1,6 +1,6 @@
 
-
 import 'package:brick_hold_em/game/game_table.dart';
+//import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class GamePlayers extends StatefulWidget {
@@ -17,8 +17,10 @@ class GamePlayers extends StatefulWidget {
 class _GamePlayersState extends State<GamePlayers> {
 
   double imageRadius = 35;
-  TextStyle chipsText = const TextStyle(fontSize: 12, color: Colors.white);
-
+  TextStyle chipsText = const TextStyle(fontSize: 10, color: Colors.white);
+  TextStyle playerNameStyle = const TextStyle(fontSize: 12, color: Colors.deepOrangeAccent);
+  
+  //final database = FirebaseDatabase.instance.ref();
   @override
   Widget build(BuildContext context) {
 
@@ -49,6 +51,7 @@ class _GamePlayersState extends State<GamePlayers> {
                           ),
                         ],
                       ),
+                      Text("Player 2", style: playerNameStyle,),
                       Text("1,000", style: chipsText)
                     ],
                   ),
@@ -65,6 +68,7 @@ class _GamePlayersState extends State<GamePlayers> {
                             AssetImage('assets/images/TESTING.jpg'),
                         radius: imageRadius,
                       ),
+                      Text("Player 3", style: playerNameStyle,),
                       Text("1,000", style: chipsText,)
                     ],
                   ),
@@ -81,6 +85,11 @@ class _GamePlayersState extends State<GamePlayers> {
                             AssetImage('assets/images/TESTING.jpg'),
                         radius: imageRadius,
                       ),
+                      Text(
+                        "Player 4",
+                        style: playerNameStyle,
+                      ),
+
                       Text(
                         "1,000",
                         style: chipsText,
@@ -100,6 +109,11 @@ class _GamePlayersState extends State<GamePlayers> {
                             AssetImage('assets/images/TESTING.jpg'),
                         radius: imageRadius,
                       ),
+                      Text(
+                        "Player 5",
+                        style: playerNameStyle,
+                      ),
+
                       Text(
                         "1,000",
                         style: chipsText,
