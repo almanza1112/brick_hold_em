@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
                             /** TODO need to clean this up */
                               if (snapshot.hasData) {
                                 var data = snapshot.data;
-                                int chips = data!["chips"];
+                                var chips = data!["chips"];
                                 return Text(
                                   "$chips chips",
                                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),);
