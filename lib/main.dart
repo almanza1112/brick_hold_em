@@ -13,8 +13,7 @@ void main() async {
   await Firebase.initializeApp();
   
   SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight
+    DeviceOrientation.portraitUp
   ]).then((value) => runApp(MyApp()));
 }
 
