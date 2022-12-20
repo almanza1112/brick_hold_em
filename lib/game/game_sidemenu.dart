@@ -1,5 +1,7 @@
 import 'package:brick_hold_em/game/game_chat.dart';
 import 'package:brick_hold_em/game/game_table.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class GameSideMenu extends StatefulWidget {
@@ -38,6 +40,12 @@ class _GameSideMenuState extends State<GameSideMenu>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: controller2, curve: Curves.easeIn));
     
+  }
+
+  removePlayer() async {
+    var uid = FirebaseAuth.instance.currentUser!.uid;
+    DatabaseReference database = FirebaseDatabase.instance.ref('tables/1/players/$uid');
+    database.remove();
   }
 
   @override
@@ -94,6 +102,7 @@ class _GameSideMenuState extends State<GameSideMenu>
                     InkWell(
                       splashColor: Colors.black,
                       onTap: () {
+                        removePlayer();
                         Navigator.pop(context);
                       },
                       child: Padding(

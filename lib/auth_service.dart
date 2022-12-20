@@ -80,7 +80,11 @@ class AuthService {
         db
             .collection("users")
             .doc(uid)
-            .set({'chips': 1000})
+            .set({
+              'chips': 1000,
+              //'name': FirebaseAuth.instance.currentUser!.displayName,
+              //'photoURL': FirebaseAuth.instance.currentUser!.photoURL
+              })
             .then((value) => print("User Added"))
             .catchError((error) => print("Failed to add user: $error"));
       }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/input.dart';
@@ -24,7 +25,7 @@ class GameTable extends FlameGame with HasTappables {
   late Cards player1card4;
   late Cards player1card5;
 
-  SpriteComponent dealer = SpriteComponent();
+  Dealer dealer = Dealer();
   // User is Player 1, going counter clockwise players are numbered
   // Player 2
   // SpriteComponent player2Card1 = SpriteComponent();
@@ -69,20 +70,23 @@ class GameTable extends FlameGame with HasTappables {
   @override
   Future<void> onLoad() async {
     super.onLoad();
-      DatabaseReference database = FirebaseDatabase.instance.ref('tables');
+      var uid = FirebaseAuth.instance.currentUser!.uid;
+      DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
+      await database.update({
+        "players/$uid/name": FirebaseAuth.instance.currentUser!.displayName,
+        "players/$uid/photoURL": FirebaseAuth.instance.currentUser!.photoURL
+      });
       database.onValue.listen((event) {
         final data = event.snapshot.value;
         print(data);
       });
 
     http.Response response = await http
-        .get(Uri.parse('https://brick-hold-em-api.herokuapp.com/table'));
+        .get(Uri.parse('https://brick-hold-em-api.onrender.com/table'));
 
     Map data = jsonDecode(response.body);
 
     List startingHand = CardSetter().setCard(data);
-
-    
 
     final screenWidth = size[0] - notchPadding;
     final screenHeight = size[1];
@@ -294,7 +298,7 @@ class GameTable extends FlameGame with HasTappables {
         player1card3.isExpanded ||
         player1card4.isExpanded ||
         player1card5.isExpanded) {
-      if (player1card1.height < size[1] / 3) {
+      if (player1card1.height < 80) {
         player1card2.height += 1;
         player1card2.width += 1;
         player1card2.y = size[1] / 3;
@@ -479,14 +483,45 @@ class CheckButton extends SpriteComponent with Tappable {
   }
 }
 
+class Dealer extends SpriteComponent with Tappable {
+  static List deck = ([]);
+  @override
+  bool onTapDown(TapDownInfo info) {
+    print(deck[0]);
+    return true;
+  }
+}
+
 class CardSetter {
+  List restOfTheDeck = ([]);
+  List cardList = ([]);
+
+
   List setCard(Map map) {
-    List cardList = map['cards'];
+    cardList = map['cards'];
     List startingHand = ([]);
 
     for(var i = 0; i < 5; i++){
       startingHand.add(cardList[i]+'.png');
+      cardList.remove(i);
     }
+
+    setDeck(cardList);
+    print(cardList);
     return startingHand;
+  }
+
+  void setDeck(List restOfTheDeck){
+    Dealer.deck = restOfTheDeck;
+
+  }
+
+  drawCard(){
+            print(cardList);
+
+    var cardDrawn = cardList[0];
+    cardList.remove(0);
+
+    return cardDrawn;
   }
 }
