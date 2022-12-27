@@ -23,108 +23,89 @@ class _HomePageState extends State<HomePage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
 
     return Scaffold(
-      body: Container(
-        color: Colors.brown,
-        width: MediaQuery.of(context).size.width,
-        child: Column(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Expanded(
-                    child: Container(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => FriendsPage()));
-                      }, 
-                      icon: const Icon(Icons.group)),
-                )),
-                Expanded(
-                    child: Container(
-                        alignment: Alignment.center,
-                        child: FutureBuilder<Map<String, dynamic>?>(
-                          future: readUser(),
-                          builder: (context, snapshot) {
-                            /** TODO need to clean this up */
-                              if (snapshot.hasData) {
-                                var data = snapshot.data;
-                                var chips = data!["chips"];
-                                return Text(
-                                  "$chips chips",
-                                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),);
-                              } else {
-                                return const Text('i suck');
-                              }
-                          },
-                        ))),
-                Expanded(
-                    child: Container(
-                        alignment: Alignment.centerRight,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            IconButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              AdsPage()));
-                                },
-                                icon: const Icon(Icons.local_movies)),
-                            IconButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              SettingsPage()));
-                                },
-                                icon: const Icon(Icons.settings))
-                          ],
-                        ))),
-              ],
-            ),
-            MaterialButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => GameMain()));
-              },
-              padding: const EdgeInsets.all(16.0),
-              color: Colors.green,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5)),
-              child: const Text(
-                "Start Playing",
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            ),
-
-            /* TEST BUTTON TODO: remove this eventaully */
-            MaterialButton(
-              onPressed: () {
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: Material(
+              color: Colors.white,
+              child: Stack(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Image(image: AssetImage('assets/images/AlmanzaTechLogo.png')),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: leftMenu(),
+                  )
+                ],
                 
-              },
-              color: Colors.yellow,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: const Text(
-                "Test Button",
-                style: TextStyle(color: Colors.black),
               ),
             )
-          ],
+          )
+          
+        );
+  }
+
+  Widget leftMenu(){
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 10, bottom: 10),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black,
+                  blurRadius: 8,
+                  offset: Offset(0, 4)
+                )
+              ]
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 15),
+              child: IconButton(
+              onPressed: () {}, 
+              color: Colors.white,
+              icon: const Icon(Icons.local_movies_outlined)),)
+          )
         ),
-      ),
+        Padding(
+            padding: const EdgeInsets.only(top: 10, bottom: 10),
+            child: Container(
+                decoration: const BoxDecoration(color: Colors.teal, boxShadow: [
+                  BoxShadow(
+                      color: Colors.black, blurRadius: 8, offset: Offset(0, 4))
+                ]),
+                child: Padding(
+                  padding:const  EdgeInsets.only(left: 15),
+                  child: IconButton(
+                      onPressed: () {},
+                      color: Colors.white,
+                      icon: const Icon(Icons.shopping_bag)
+                      ),
+                ))),
+          Padding(
+            padding: const EdgeInsets.only(top: 10, bottom: 10),
+            child: Container(
+                decoration: const BoxDecoration(color: Colors.blue, boxShadow: [
+                  BoxShadow(
+                      color: Colors.black, blurRadius: 8, offset: Offset(0, 4))
+                ]),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 15),
+                  child: IconButton(
+                      onPressed: () {},
+                      color: Colors.white,
+                      icon: const Icon(Icons.group)),
+                )))
+        
+      ],
     );
   }
+
+  
 
   Future<Map<String , dynamic>?> readUser() async {
     final docUser = FirebaseFirestore.instance
