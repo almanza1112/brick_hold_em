@@ -26,20 +26,30 @@ class _HomePageState extends State<HomePage> {
         body: SafeArea(
             child: Material(
           color: Colors.orangeAccent,
-          child: Stack(
+          child: Column(
             children: [
               const Padding(
                 padding: EdgeInsets.all(20),
                 child: Image(
                     image: AssetImage('assets/images/AlmanzaTechLogo.png')),
               ),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: leftMenu(),
-              ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: rightMenu(),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: leftMenu(),
+                    )
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child:  Align(
+                      alignment: Alignment.bottomRight,
+                      child: rightMenu(),
+                    )
+                  )
+                ],
               )
             ],
           ),
@@ -48,7 +58,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget leftMenu() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Padding(
             padding: const EdgeInsets.only(top: 10, bottom: 10),
