@@ -29,27 +29,27 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             children: [
               const Padding(
-                padding: EdgeInsets.all(20),
+                padding: EdgeInsets.only(top: 100, bottom: 100),
                 child: Image(
                     image: AssetImage('assets/images/AlmanzaTechLogo.png')),
               ),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: Align(
-                      alignment: Alignment.bottomLeft,
-                      child: leftMenu(),
+              Expanded(
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: leftMenu(),
+                      )
+                    ),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: rightMenu(),
+                      )
                     )
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child:  Align(
-                      alignment: Alignment.bottomRight,
-                      child: rightMenu(),
-                    )
-                  )
-                ],
+                  ],
+                ) 
               )
             ],
           ),
@@ -111,12 +111,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget rightMenu() {
-    const double height = 90;
+    const double height = 100;
     const double width = 180;
-    const double fontSize = 16;
+    const double fontSize = 20;
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         InkWell(
             splashColor: Colors.black,
@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage> {
                 alignment: Alignment.center,
                 child: Text(
                   "COMPETITVE",
-                  style: TextStyle(fontSize: fontSize, color: Colors.white, fontStyle: FontStyle.italic),
+                  style: TextStyle(fontSize: fontSize, color: Colors.white),
                 ),
               ),
             )),
@@ -165,7 +165,7 @@ class _HomePageState extends State<HomePage> {
                 alignment: Alignment.center,
                 child: Text(
                   "FRIENDLY",
-                  style: TextStyle(fontSize: fontSize, color: Colors.white, fontStyle: FontStyle.italic),
+                  style: TextStyle(fontSize: fontSize, color: Colors.white),
                 ),
               ),
             )),
@@ -191,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                 alignment: Alignment.center,
                 child: Text(
                   "HOW TO PLAY",
-                  style: TextStyle(fontSize: fontSize, color: Colors.white, fontStyle: FontStyle.italic),
+                  style: TextStyle(fontSize: fontSize, color: Colors.white),
                 ),
               ),
             )),
@@ -220,7 +220,7 @@ class _HomePageState extends State<HomePage> {
                 alignment: Alignment.center,
                 child: Text(
                   "SETTINGS",
-                  style: TextStyle(fontSize: fontSize, color: Colors.white, fontStyle: FontStyle.italic),
+                  style: TextStyle(fontSize: fontSize, color: Colors.white),
                 ),
               ),
             )),
