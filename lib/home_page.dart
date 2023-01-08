@@ -5,8 +5,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:animations/animations.dart';
 
 import 'settings_page.dart';
+import 'howtoplay_page.dart';
+import 'friendly_page.dart';
+import 'competitive_page.dart';
 import 'game/game_table.dart';
 import 'friends_page.dart';
 import 'ads_page.dart';
@@ -115,38 +119,59 @@ class _HomePageState extends State<HomePage> {
     const double width = 180;
     const double fontSize = 20;
 
+    const Duration transitionDuration = Duration(milliseconds: 750);
+    const Color closedColor = Colors.transparent;
+    const double closedElevation = 0; 
+    const RoundedRectangleBorder closedShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(10),
+        bottomLeft: Radius.circular(10)
+      ),
+    );
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        InkWell(
-            splashColor: Colors.black,
-            onTap: () {},
-            child: Ink(
-              height: height,
-              width: width,
-              decoration: const BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      bottomLeft: Radius.circular(10)),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black,
-                        blurRadius: 8,
-                        offset: Offset(0, 4))
-                  ]),
-              child: const Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "COMPETITVE",
-                  style: TextStyle(fontSize: fontSize, color: Colors.white),
-                ),
-              ),
-            )),
+        OpenContainer(
+          closedBuilder: (context, openContainer) => InkWell(
+                splashColor: Colors.black,
+                onTap: () {
+                  openContainer();
+                },
+                child: Ink(
+                  height: height,
+                  width: width,
+                  decoration: const BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          bottomLeft: Radius.circular(10)),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black,
+                            blurRadius: 8,
+                            offset: Offset(0, 4))
+                      ]),
+                  child: const Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "COMPETITVE",
+                      style: TextStyle(fontSize: fontSize, color: Colors.white),
+                    ),
+                  ),
+                )), 
+          transitionDuration: transitionDuration,
+          closedShape: closedShape,
+          closedElevation: closedElevation,
+          closedColor: closedColor,
+          openBuilder: (context, closedBuilder) => CompetitivePage()),
         // FRIENDLY BUTTON
-        InkWell(
+        OpenContainer(
+          closedBuilder: ((context, openContainer) => InkWell(
             splashColor: Colors.black,
-            onTap: () {},
+            onTap: () {
+              openContainer();
+            },
             child: Ink(
               height: height,
               width: width,
@@ -168,11 +193,22 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(fontSize: fontSize, color: Colors.white),
                 ),
               ),
-            )),
+            )
+            )
+            ), 
+          transitionDuration: transitionDuration,
+          closedShape: closedShape,
+          closedElevation: closedElevation,
+          closedColor: closedColor,
+          openBuilder: (context, closedContainer) => FriendlyPage()),
         // HOW TO PLAY button
-        InkWell(
+        OpenContainer(
+          closedBuilder: (context, openContainer) {
+            return InkWell(
             splashColor: Colors.black,
-            onTap: () {},
+            onTap: () {
+              openContainer();
+            },
             child: Ink(
               height: height,
               width: width,
@@ -194,36 +230,57 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(fontSize: fontSize, color: Colors.white),
                 ),
               ),
-            )),
+            )
+          );
+          }, 
+          transitionDuration: transitionDuration,
+          closedShape: closedShape,
+          closedElevation: closedElevation,
+          closedColor: closedColor,
+          openBuilder: (context, closedContainer) => HowToPlayPage()
+        ),
         // SETTINGS button
-        InkWell(
-            splashColor: Colors.white,
-            onTap: () {},
-            child: Ink(
-              height: height,
-              width: width,
-              decoration: const BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      bottomLeft: Radius.circular(10)
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black,
-                        blurRadius: 8,
-                        offset: Offset(0, 4))
-                  ]
-
-              ),
-              child: const Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "SETTINGS",
-                  style: TextStyle(fontSize: fontSize, color: Colors.white),
+        OpenContainer(
+          openBuilder: (context, closedContainer) => SettingsPage(), 
+          transitionDuration: transitionDuration,
+          closedShape: closedShape,
+          closedElevation: closedElevation,
+          closedColor: closedColor,
+          closedBuilder: (context, openContainer) { 
+            return InkWell(
+              splashColor: Colors.white,
+              onTap: () {
+                openContainer();
+              },
+              child: Ink(
+                height: height,
+                width: width,
+                decoration: const BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        bottomLeft: Radius.circular(10)
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black,
+                          blurRadius: 8,
+                          offset: Offset(0, 4))
+                    ]
+        
                 ),
-              ),
-            )),
+                child: const Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    "SETTINGS",
+                    style: TextStyle(fontSize: fontSize, color: Colors.white),
+                  ),
+                ),
+              )
+            );
+           },
+
+        ),
       ],
     );
   }

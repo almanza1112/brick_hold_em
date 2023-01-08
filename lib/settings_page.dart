@@ -14,10 +14,10 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     
     return Scaffold(
-      backgroundColor: Colors.brown,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Settings'),
-        backgroundColor: Colors.brown,
+        title: const Text('SETTINGS'),
+        backgroundColor: Colors.black,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: (){
@@ -37,14 +37,14 @@ class _SettingsPageState extends State<SettingsPage> {
               alignment: Alignment.centerLeft,
               child: Text(
                 FirebaseAuth.instance.currentUser!.displayName!,
-                style: const TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 FirebaseAuth.instance.currentUser!.email!,
-                style: const TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
             Align(
@@ -56,7 +56,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 },
                 child: const Text(
                   "Log Out",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
             ),
