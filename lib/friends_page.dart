@@ -11,10 +11,10 @@ class _FriendsPageState extends State<FriendsPage> {
 @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.greenAccent,
+      backgroundColor: Colors.blue,
       appBar: AppBar(
-        title: const Text('Friends'),
-        backgroundColor: Colors.lightGreen,
+        title: const Text('FRIENDS'),
+        backgroundColor: Colors.blue,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {

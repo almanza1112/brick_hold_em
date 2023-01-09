@@ -26,10 +26,10 @@ class _HomePageState extends State<HomePage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
 
     return Scaffold(
-        backgroundColor: Colors.orangeAccent,
+        backgroundColor: Colors.brown.shade300,
         body: SafeArea(
             child: Material(
-          color: Colors.orangeAccent,
+          color: Colors.brown.shade300,
           child: Column(
             children: [
               const Padding(
@@ -38,31 +38,33 @@ class _HomePageState extends State<HomePage> {
                     image: AssetImage('assets/images/AlmanzaTechLogo.png')),
               ),
               Expanded(
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
+                  child: Row(
+                children: <Widget>[
+                  Expanded(
                       child: Align(
-                        alignment: Alignment.topLeft,
-                        child: leftMenu(),
-                      )
-                    ),
-                    Expanded(
+                    alignment: Alignment.topLeft,
+                    child: leftMenu(),
+                  )),
+                  Expanded(
                       child: Align(
-                        alignment: Alignment.topRight,
-                        child: rightMenu(),
-                      )
-                    )
-                  ],
-                ) 
-              )
+                    alignment: Alignment.topRight,
+                    child: rightMenu(),
+                  ))
+                ],
+              ))
             ],
           ),
         )));
   }
 
   Widget leftMenu() {
+    const Duration transitionDuration = Duration(milliseconds: 750);
+    const Color closedColor = Colors.transparent;
+    const double closedElevation = 0;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
             padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -77,10 +79,17 @@ class _HomePageState extends State<HomePage> {
                     ]),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 15),
-                  child: IconButton(
-                      onPressed: () {},
-                      color: Colors.white,
-                      icon: const Icon(Icons.local_movies_outlined)),
+                  child: OpenContainer(
+                      closedBuilder: (context, openContainer) => IconButton(
+                          onPressed: () {
+                            openContainer();
+                          },
+                          color: Colors.white,
+                          icon: const Icon(Icons.local_movies_outlined)),
+                      transitionDuration: transitionDuration,
+                      closedColor: closedColor,
+                      closedElevation: closedElevation,
+                      openBuilder: (context, closedContainer) => AdsPage()),
                 ))),
         Padding(
             padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -91,10 +100,18 @@ class _HomePageState extends State<HomePage> {
                 ]),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 15),
-                  child: IconButton(
-                      onPressed: () {},
-                      color: Colors.white,
-                      icon: const Icon(Icons.shopping_bag)),
+                  child: OpenContainer(
+                      closedBuilder: (context, openContainer) => IconButton(
+                          onPressed: () {
+                            openContainer();
+                          },
+                          color: Colors.white,
+                          icon: const Icon(Icons.shopping_bag)),
+                      transitionDuration: transitionDuration,
+                      closedColor: closedColor,
+                      closedElevation: closedElevation,
+                      openBuilder: (context, closedContainer) =>
+                          FriendlyPage()),
                 ))),
         Padding(
             padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -105,11 +122,25 @@ class _HomePageState extends State<HomePage> {
                 ]),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 15),
-                  child: IconButton(
-                      onPressed: () {},
-                      color: Colors.white,
-                      icon: const Icon(Icons.group)),
-                )))
+                  child: OpenContainer(
+                      closedBuilder: (context, openContainer) => IconButton(
+                          onPressed: () {
+                            openContainer();
+                          },
+                          color: Colors.white,
+                          icon: const Icon(Icons.group)),
+                      transitionDuration: transitionDuration,
+                      closedColor: closedColor,
+                      closedElevation: closedElevation,
+                      openBuilder: (context, closedContainer) => FriendsPage()),
+                ))),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              profileMenu()
+            ],
+          ))
       ],
     );
   }
@@ -121,19 +152,17 @@ class _HomePageState extends State<HomePage> {
 
     const Duration transitionDuration = Duration(milliseconds: 750);
     const Color closedColor = Colors.transparent;
-    const double closedElevation = 0; 
+    const double closedElevation = 0;
     const RoundedRectangleBorder closedShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(10),
-        bottomLeft: Radius.circular(10)
-      ),
+          topLeft: Radius.circular(10), bottomLeft: Radius.circular(10)),
     );
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         OpenContainer(
-          closedBuilder: (context, openContainer) => InkWell(
+            closedBuilder: (context, openContainer) => InkWell(
                 splashColor: Colors.black,
                 onTap: () {
                   openContainer();
@@ -159,129 +188,188 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(fontSize: fontSize, color: Colors.white),
                     ),
                   ),
-                )), 
-          transitionDuration: transitionDuration,
-          closedShape: closedShape,
-          closedElevation: closedElevation,
-          closedColor: closedColor,
-          openBuilder: (context, closedBuilder) => CompetitivePage()),
+                )),
+            transitionDuration: transitionDuration,
+            closedShape: closedShape,
+            closedElevation: closedElevation,
+            closedColor: closedColor,
+            openBuilder: (context, closedBuilder) => CompetitivePage()),
         // FRIENDLY BUTTON
         OpenContainer(
-          closedBuilder: ((context, openContainer) => InkWell(
-            splashColor: Colors.black,
-            onTap: () {
-              openContainer();
-            },
-            child: Ink(
-              height: height,
-              width: width,
-              decoration: const BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      bottomLeft: Radius.circular(10)),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black,
-                        blurRadius: 8,
-                        offset: Offset(0, 4))
-                  ]),
-              child: const Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "FRIENDLY",
-                  style: TextStyle(fontSize: fontSize, color: Colors.white),
-                ),
-              ),
-            )
-            )
-            ), 
-          transitionDuration: transitionDuration,
-          closedShape: closedShape,
-          closedElevation: closedElevation,
-          closedColor: closedColor,
-          openBuilder: (context, closedContainer) => FriendlyPage()),
+            closedBuilder: ((context, openContainer) => InkWell(
+                splashColor: Colors.black,
+                onTap: () {
+                  openContainer();
+                },
+                child: Ink(
+                  height: height,
+                  width: width,
+                  decoration: const BoxDecoration(
+                      color: Colors.teal,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          bottomLeft: Radius.circular(10)),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black,
+                            blurRadius: 8,
+                            offset: Offset(0, 4))
+                      ]),
+                  child: const Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "FRIENDLY",
+                      style: TextStyle(fontSize: fontSize, color: Colors.white),
+                    ),
+                  ),
+                ))),
+            transitionDuration: transitionDuration,
+            closedShape: closedShape,
+            closedElevation: closedElevation,
+            closedColor: closedColor,
+            openBuilder: (context, closedContainer) => FriendlyPage()),
         // HOW TO PLAY button
         OpenContainer(
-          closedBuilder: (context, openContainer) {
-            return InkWell(
-            splashColor: Colors.black,
-            onTap: () {
-              openContainer();
+            closedBuilder: (context, openContainer) {
+              return InkWell(
+                  splashColor: Colors.black,
+                  onTap: () {
+                    openContainer();
+                  },
+                  child: Ink(
+                    height: height,
+                    width: width,
+                    decoration: const BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            bottomLeft: Radius.circular(10)),
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black,
+                              blurRadius: 8,
+                              offset: Offset(0, 4))
+                        ]),
+                    child: const Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "HOW TO PLAY",
+                        style:
+                            TextStyle(fontSize: fontSize, color: Colors.white),
+                      ),
+                    ),
+                  ));
             },
-            child: Ink(
-              height: height,
-              width: width,
-              decoration: const BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      bottomLeft: Radius.circular(10)),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black,
-                        blurRadius: 8,
-                        offset: Offset(0, 4))
-                  ]),
-              child: const Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "HOW TO PLAY",
-                  style: TextStyle(fontSize: fontSize, color: Colors.white),
-                ),
-              ),
-            )
-          );
-          }, 
-          transitionDuration: transitionDuration,
-          closedShape: closedShape,
-          closedElevation: closedElevation,
-          closedColor: closedColor,
-          openBuilder: (context, closedContainer) => HowToPlayPage()
-        ),
+            transitionDuration: transitionDuration,
+            closedShape: closedShape,
+            closedElevation: closedElevation,
+            closedColor: closedColor,
+            openBuilder: (context, closedContainer) => HowToPlayPage()),
         // SETTINGS button
         OpenContainer(
-          openBuilder: (context, closedContainer) => SettingsPage(), 
+          openBuilder: (context, closedContainer) => SettingsPage(),
           transitionDuration: transitionDuration,
           closedShape: closedShape,
           closedElevation: closedElevation,
           closedColor: closedColor,
-          closedBuilder: (context, openContainer) { 
+          closedBuilder: (context, openContainer) {
             return InkWell(
-              splashColor: Colors.white,
-              onTap: () {
-                openContainer();
-              },
-              child: Ink(
-                height: height,
-                width: width,
-                decoration: const BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        bottomLeft: Radius.circular(10)
+                splashColor: Colors.white,
+                onTap: () {
+                  openContainer();
+                },
+                child: Ink(
+                  height: height,
+                  width: width,
+                  decoration: const BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          bottomLeft: Radius.circular(10)),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black,
+                            blurRadius: 8,
+                            offset: Offset(0, 4))
+                      ]),
+                  child: const Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "SETTINGS",
+                      style: TextStyle(fontSize: fontSize, color: Colors.white),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black,
-                          blurRadius: 8,
-                          offset: Offset(0, 4))
-                    ]
-        
-                ),
-                child: const Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    "SETTINGS",
-                    style: TextStyle(fontSize: fontSize, color: Colors.white),
                   ),
-                ),
-              )
-            );
-           },
-
+                ));
+          },
         ),
       ],
+    );
+  }
+
+  Widget profileMenu() {
+    const double columnPadding = 25;
+    return Container(
+      color: Colors.transparent,
+      width: 160,
+      child: Stack(
+        children: <Widget>[
+          Positioned.fill(
+              right: 20,
+              child: Container(
+                decoration: const BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(10),
+                        )),
+              )),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Column(
+              //crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.only(top: columnPadding, bottom: 10),
+                  child: SizedBox(
+                    width: 120,
+                    height: 120,
+                    child: Image(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(
+                            FirebaseAuth.instance.currentUser!.photoURL!)),
+                  ),
+                ),
+                // Text(
+                //   FirebaseAuth.instance.currentUser!.displayName!,
+                //   style: const TextStyle(fontSize: 18, color: Colors.white),
+                // ),
+                FutureBuilder<Map<String, dynamic>?>(
+                  future: readUser(),
+                  builder: (context, snapshot) {
+                    /** TODO need to clean this up */
+                    if (snapshot.hasData) {
+                      var data = snapshot.data;
+                      var chips = data!["chips"];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: columnPadding),
+                        child: Text(
+                          "$chips chips",
+                          style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                        ),
+                      );
+                    } else {
+                      return const Text('i suck');
+                    }
+                  },
+                )
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 

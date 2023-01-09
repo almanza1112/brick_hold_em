@@ -9,10 +9,10 @@ class _AdsPageState extends State<AdsPage> {
    @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.amberAccent,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Earn Chips'),
-        backgroundColor: Colors.amber,
+        title: const Text('EARN CHIPS'),
+        backgroundColor: Colors.black,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {
