@@ -11,6 +11,7 @@ import 'settings_page.dart';
 import 'howtoplay_page.dart';
 import 'friendly_page.dart';
 import 'competitive_page.dart';
+import 'profile_page.dart';
 import 'game/game_table.dart';
 import 'friends_page.dart';
 import 'ads_page.dart';
@@ -135,12 +136,10 @@ class _HomePageState extends State<HomePage> {
                       openBuilder: (context, closedContainer) => FriendsPage()),
                 ))),
         Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              profileMenu()
-            ],
-          ))
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [profileMenu()],
+        ))
       ],
     );
   }
@@ -148,7 +147,8 @@ class _HomePageState extends State<HomePage> {
   Widget rightMenu() {
     const double height = 100;
     const double width = 180;
-    const double fontSize = 20;
+    const double fontSize = 18;
+    const Color fontColor = Colors.white;
 
     const Duration transitionDuration = Duration(milliseconds: 750);
     const Color closedColor = Colors.transparent;
@@ -161,146 +161,135 @@ class _HomePageState extends State<HomePage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        OpenContainer(
-            closedBuilder: (context, openContainer) => InkWell(
-                splashColor: Colors.black,
-                onTap: () {
-                  openContainer();
-                },
-                child: Ink(
-                  height: height,
-                  width: width,
-                  decoration: const BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          bottomLeft: Radius.circular(10)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            blurRadius: 8,
-                            offset: Offset(0, 4))
-                      ]),
+        // COMPETITIVE button
+        // Wrapping OpenContainer widget (used for animation to new page) with Container
+        // widget to get use shadow on Container
+        Container(
+          height: height,
+          width: width,
+          decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  bottomLeft: Radius.circular(10)),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black, blurRadius: 8, offset: Offset(0, 4))
+              ]),
+          child: OpenContainer(
+            closedBuilder: (context, openContainer) => GestureDetector(
+              onTap: () => openContainer(),
+              child: Container(
+                  color: Colors.blue,
+                  height: double.infinity,
+                  width: double.infinity,
                   child: const Align(
                     alignment: Alignment.center,
-                    child: Text(
-                      "COMPETITVE",
-                      style: TextStyle(fontSize: fontSize, color: Colors.white),
-                    ),
-                  ),
-                )),
+                    child: Text("COMPETITIVE",
+                        style: TextStyle(fontSize: fontSize, color: fontColor)),
+                  )),
+            ),
             transitionDuration: transitionDuration,
             closedShape: closedShape,
             closedElevation: closedElevation,
             closedColor: closedColor,
-            openBuilder: (context, closedBuilder) => CompetitivePage()),
+            openBuilder: (context, action) => CompetitivePage(),
+          ),
+        ),
         // FRIENDLY BUTTON
-        OpenContainer(
-            closedBuilder: ((context, openContainer) => InkWell(
-                splashColor: Colors.black,
-                onTap: () {
-                  openContainer();
-                },
-                child: Ink(
-                  height: height,
-                  width: width,
-                  decoration: const BoxDecoration(
-                      color: Colors.teal,
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          bottomLeft: Radius.circular(10)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            blurRadius: 8,
-                            offset: Offset(0, 4))
-                      ]),
+        Container(
+          height: height,
+          width: width,
+          decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  bottomLeft: Radius.circular(10)),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black, blurRadius: 8, offset: Offset(0, 4))
+              ]),
+          child: OpenContainer(
+            closedBuilder: (context, openContainer) => GestureDetector(
+              onTap: () => openContainer(),
+              child: Container(
+                  color: Colors.teal,
+                  height: double.infinity,
+                  width: double.infinity,
                   child: const Align(
                     alignment: Alignment.center,
-                    child: Text(
-                      "FRIENDLY",
-                      style: TextStyle(fontSize: fontSize, color: Colors.white),
-                    ),
-                  ),
-                ))),
+                    child: Text("FRIENDLY",
+                        style: TextStyle(fontSize: fontSize, color: fontColor)),
+                  )),
+            ),
             transitionDuration: transitionDuration,
             closedShape: closedShape,
             closedElevation: closedElevation,
             closedColor: closedColor,
-            openBuilder: (context, closedContainer) => FriendlyPage()),
+            openBuilder: (context, action) => FriendlyPage(),
+          ),
+        ),
         // HOW TO PLAY button
-        OpenContainer(
-            closedBuilder: (context, openContainer) {
-              return InkWell(
-                  splashColor: Colors.black,
-                  onTap: () {
-                    openContainer();
-                  },
-                  child: Ink(
-                    height: height,
-                    width: width,
-                    decoration: const BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            bottomLeft: Radius.circular(10)),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black,
-                              blurRadius: 8,
-                              offset: Offset(0, 4))
-                        ]),
-                    child: const Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        "HOW TO PLAY",
-                        style:
-                            TextStyle(fontSize: fontSize, color: Colors.white),
-                      ),
-                    ),
-                  ));
-            },
+        Container(
+          height: height,
+          width: width,
+          decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  bottomLeft: Radius.circular(10)),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black, blurRadius: 8, offset: Offset(0, 4))
+              ]),
+          child: OpenContainer(
+            closedBuilder: (context, openContainer) => GestureDetector(
+              onTap: () => openContainer(),
+              child: Container(
+                  color: Colors.red,
+                  height: double.infinity,
+                  width: double.infinity,
+                  child: const Align(
+                    alignment: Alignment.center,
+                    child: Text("HOW TO PLAY",
+                        style: TextStyle(fontSize: fontSize, color: fontColor)),
+                  )),
+            ),
             transitionDuration: transitionDuration,
             closedShape: closedShape,
             closedElevation: closedElevation,
             closedColor: closedColor,
-            openBuilder: (context, closedContainer) => HowToPlayPage()),
+            openBuilder: (context, action) => HowToPlayPage(),
+          ),
+        ),
         // SETTINGS button
-        OpenContainer(
-          openBuilder: (context, closedContainer) => SettingsPage(),
-          transitionDuration: transitionDuration,
-          closedShape: closedShape,
-          closedElevation: closedElevation,
-          closedColor: closedColor,
-          closedBuilder: (context, openContainer) {
-            return InkWell(
-                splashColor: Colors.white,
-                onTap: () {
-                  openContainer();
-                },
-                child: Ink(
-                  height: height,
-                  width: width,
-                  decoration: const BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          bottomLeft: Radius.circular(10)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            blurRadius: 8,
-                            offset: Offset(0, 4))
-                      ]),
+        Container(
+          height: height,
+          width: width,
+          decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  bottomLeft: Radius.circular(10)),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black, blurRadius: 8, offset: Offset(0, 4))
+              ]),
+          child: OpenContainer(
+            closedBuilder: (context, openContainer) => GestureDetector(
+              onTap: () => openContainer(),
+              child: Container(
+                  color: Colors.black, 
+                  height: double.infinity,
+                  width: double.infinity,
                   child: const Align(
                     alignment: Alignment.center,
-                    child: Text(
-                      "SETTINGS",
-                      style: TextStyle(fontSize: fontSize, color: Colors.white),
-                    ),
-                  ),
-                ));
-          },
+                    child: Text("SETTINGS",
+                        style: TextStyle(fontSize: fontSize, color: fontColor)),
+                  )),
+            ),
+            transitionDuration: transitionDuration,
+            closedShape: closedShape,
+            closedElevation: closedElevation,
+            closedColor: closedColor,
+            openBuilder: (context, action) => SettingsPage(),
+          ),
         ),
       ],
     );
@@ -311,7 +300,10 @@ class _HomePageState extends State<HomePage> {
     return Container(
       color: Colors.transparent,
       width: 160,
-      child: Stack(
+      child: OpenContainer(
+        closedColor: Colors.brown.shade300,
+        closedElevation: 0,
+        closedBuilder: ((context, openContainer) =>  Stack(
         children: <Widget>[
           Positioned.fill(
               right: 20,
@@ -319,8 +311,8 @@ class _HomePageState extends State<HomePage> {
                 decoration: const BoxDecoration(
                     color: Colors.red,
                     borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(10),
-                        )),
+                      topRight: Radius.circular(10),
+                    )),
               )),
           Align(
             alignment: Alignment.centerRight,
@@ -330,9 +322,17 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding:
                       const EdgeInsets.only(top: columnPadding, bottom: 10),
-                  child: SizedBox(
+                  child: Container(
                     width: 120,
                     height: 120,
+                    decoration: const BoxDecoration(
+                        color: Colors.black,
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black,
+                              blurRadius: 8,
+                              offset: Offset(0, 4))
+                        ]),
                     child: Image(
                         fit: BoxFit.cover,
                         image: NetworkImage(
@@ -369,7 +369,8 @@ class _HomePageState extends State<HomePage> {
             ),
           )
         ],
-      ),
+      )), 
+        openBuilder: ((context, closedContainer) => ProfilePage()))
     );
   }
 
