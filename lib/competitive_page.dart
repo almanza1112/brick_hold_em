@@ -1,5 +1,8 @@
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'game/game_main.dart';
 
@@ -51,9 +54,12 @@ class _CompetitivePageState extends State<CompetitivePage> {
                 onChanged: (double value){
                   setState(() {
                     currentSliderValue = value;
-                    print(currentSliderValue.round());
                   });
                 }),
+              Text(
+                currentSliderValue.round().toString(),
+                style: const TextStyle(color: Colors.white, fontSize: 18),
+              ),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
