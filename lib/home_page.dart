@@ -9,7 +9,7 @@ import 'package:animations/animations.dart';
 
 import 'settings_page.dart';
 import 'howtoplay_page.dart';
-import 'friendly_page.dart';
+import 'tournament_page.dart';
 import 'competitive_page.dart';
 import 'profile_page.dart';
 import 'game/game_table.dart';
@@ -112,7 +112,7 @@ class _HomePageState extends State<HomePage> {
                       closedColor: closedColor,
                       closedElevation: closedElevation,
                       openBuilder: (context, closedContainer) =>
-                          FriendlyPage()),
+                          TournamentPage()),
                 ))),
         Padding(
             padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -216,7 +216,7 @@ class _HomePageState extends State<HomePage> {
                   width: double.infinity,
                   child: const Align(
                     alignment: Alignment.center,
-                    child: Text("FRIENDLY",
+                    child: Text("TOURNAMENT",
                         style: TextStyle(fontSize: fontSize, color: fontColor)),
                   )),
             ),
@@ -224,7 +224,7 @@ class _HomePageState extends State<HomePage> {
             closedShape: closedShape,
             closedElevation: closedElevation,
             closedColor: closedColor,
-            openBuilder: (context, action) => FriendlyPage(),
+            openBuilder: (context, action) => TournamentPage(),
           ),
         ),
         // HOW TO PLAY button
