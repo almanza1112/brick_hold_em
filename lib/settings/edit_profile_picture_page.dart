@@ -6,6 +6,7 @@ class EditProfilePicturePage extends StatefulWidget {
 }
 
 class _EditProfilePicturePageState extends State<EditProfilePicturePage> {
+  double imageSize = 170;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,25 +21,24 @@ class _EditProfilePicturePageState extends State<EditProfilePicturePage> {
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(60),
+      body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 140,
-              height: 140,
+            SizedBox(
+              width: imageSize,
+              height: imageSize,
                 child: Image(
                     fit: BoxFit.cover,
                     image: NetworkImage(
                         FirebaseAuth.instance.currentUser!.photoURL!))),
-            MaterialButton(
-              color: Colors.red,
-              onPressed: () {},
-              child: const Text(
-                "Change Profile Picture",
-                style: TextStyle(color: Colors.white),
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: TextButton(
+                onPressed: () {},
+                child: const Text(
+                  "UPDATE PICTURE",
+                ),
               ),
             ),
           ],

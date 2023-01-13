@@ -13,8 +13,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  EdgeInsets titlePadding =
-      const EdgeInsets.only(top: 30, bottom: 0, left: 10);
+  EdgeInsets titlePadding = const EdgeInsets.only(top: 30, bottom: 0, left: 10);
   EdgeInsets accountRowPadding =
       const EdgeInsets.only(left: 14, right: 14, bottom: 10, top: 15);
   bool backgroundSound = true;
@@ -22,7 +21,8 @@ class _SettingsPageState extends State<SettingsPage> {
   bool vibrateSound = true;
   bool liveChat = true;
   bool dailyNotifications = true;
-  TextStyle textStyle = const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.w200);
+  TextStyle textStyle = const TextStyle(
+      fontSize: 18, color: Colors.white, fontWeight: FontWeight.w200);
   TextStyle titleStyle = const TextStyle(
       fontSize: 14, color: Colors.white, fontWeight: FontWeight.w600);
   TextStyle accountTextStyle =
@@ -46,8 +46,8 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         body: Material(
           color: Colors.black,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: ListView(
+            //crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
                 padding: titlePadding,
@@ -58,7 +58,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               InkWell(
                 onTap: () {
-                   Navigator.push(context,
+                  Navigator.push(context,
                       MaterialPageRoute(builder: (context) => EditNamePage()));
                 },
                 child: Padding(
@@ -85,8 +85,10 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               InkWell(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => EditUsernamePage()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EditUsernamePage()));
                 },
                 child: Padding(
                   padding: accountRowPadding,
@@ -112,10 +114,8 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               InkWell(
                 onTap: () {
-                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => EditEmailPage()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => EditEmailPage()));
                 },
                 child: Padding(
                   padding: accountRowPadding,
@@ -141,8 +141,10 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               InkWell(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => EditProfilePicturePage()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EditProfilePicturePage()));
                 },
                 child: Padding(
                   padding: accountRowPadding,
@@ -154,15 +156,52 @@ class _SettingsPageState extends State<SettingsPage> {
                         style: textStyle,
                       )),
                       Image(
-                          width: 40,
-                          height: 40,
+                          width: 30,
+                          height: 30,
                           image: NetworkImage(
                               FirebaseAuth.instance.currentUser!.photoURL!)),
                       Icon(
                         Icons.arrow_forward_ios,
                         color: iconColor,
-                        size: iconSize,)
+                        size: iconSize,
+                      )
                     ],
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text("Log Out"),
+                          content:
+                              const Text("Are you sure you want to log out?"),
+                          actions: [
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text("CANCEL")),
+                            TextButton(
+                                onPressed: () {
+                                  /** TODO: need to clean this up, NOT the correct way of doing this */
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
+
+                                  AuthService().signOut();
+                                },
+                                child: const Text("LOG OUT"))
+                          ],
+                        );
+                      });
+                },
+                child: Padding(
+                  padding: accountRowPadding,
+                  child: Text(
+                    "Log Out",
+                    style: textStyle,
                   ),
                 ),
               ),

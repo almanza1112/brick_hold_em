@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class EditEmailPage extends StatefulWidget {
   _EditEmailPageState createState() => _EditEmailPageState();
@@ -30,28 +31,30 @@ class _EditEmailPageState extends State<EditEmailPage> {
               "Edit your email",
               style: TextStyle(color: Colors.white),
             ),
-            TextFormField(
-              initialValue: FirebaseAuth.instance.currentUser!.email!,
-              style: const TextStyle(color: Colors.white),
-              cursorColor: Colors.white,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
+            Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 20),
+              child: TextFormField(
+              
+                //inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[a-zA-Z0-9.!#\$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)"))],
+                initialValue: FirebaseAuth.instance.currentUser!.email!,
+                style: const TextStyle(color: Colors.white),
+                cursorColor: Colors.white,
+                keyboardType: TextInputType.emailAddress, /* TODO: using this as an emial validator is not optimal, need to find better solution */
+                decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue),
+                    ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue),
-                  ),
-                  //labelText: 'Edit your name',
-
-                  labelStyle: TextStyle(color: Colors.white)),
-            ),
-            MaterialButton(
-              child: Text(
-                "Submit",
-                style: TextStyle(color: Colors.white),
               ),
-              color: Colors.red,
+            ),
+            TextButton(
+              child: const Text(
+                "UPDATE",
+              ),
               onPressed: () {},
             ),
           ],
