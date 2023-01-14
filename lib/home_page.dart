@@ -1,5 +1,3 @@
-import 'package:brick_hold_em/game/game_main.dart';
-import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,7 +10,6 @@ import 'howtoplay_page.dart';
 import 'tournament_page.dart';
 import 'competitive_page.dart';
 import 'profile_page.dart';
-import 'game/game_table.dart';
 import 'friends_page.dart';
 import 'ads_page.dart';
 
@@ -184,7 +181,7 @@ class _HomePageState extends State<HomePage> {
                   width: double.infinity,
                   child: const Align(
                     alignment: Alignment.center,
-                    child: Text("COMPETITIVE",
+                   child: Text("NO LIMIT",
                         style: TextStyle(fontSize: fontSize, color: fontColor)),
                   )),
             ),
