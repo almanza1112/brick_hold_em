@@ -52,126 +52,145 @@ class _GameSideMenuState extends State<GameSideMenu>
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        Align(
-          alignment: Alignment.bottomLeft,
+        SafeArea(
           child: IconButton(
               onPressed: () {
-                controller2.forward();
+                controller.forward();
               },
               color: Colors.white,
-              icon: const Icon(Icons.chat_bubble)),
+              icon: const Icon(Icons.menu)),
         ),
-        IconButton(
-            onPressed: () {
-              controller.forward();
-            },
-            color: Colors.white,
-            icon: const Icon(Icons.menu)),
+        SafeArea(
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: IconButton(
+                onPressed: () {
+                  controller2.forward();
+                },
+                color: Colors.white,
+                icon: const Icon(Icons.chat_bubble)),
+          ),
+        ),
+        // MENU
         SlideTransition(
           position: offsetAnimation,
-          child: Container(
+          child: mainMenu(),
+        ),
+        SlideTransition(
+          position: offsetAnimation2,
+          child: chatSection(),
+        )
+      ],
+    );
+  }
+
+  Widget mainMenu() {
+    return Container(
             width: 250,
             color: Colors.amber,
             child: SafeArea(
                 child: Material(
                   color: Colors.amber,
-                  child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        const Expanded(
-                          flex: 1,
-                          child: Text(
-                            "MENU",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20),
+                    child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          const Expanded(
+                            flex: 1,
+                            child: Text(
+                              "MENU",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Expanded(
+                              flex: 0,
+                              child: IconButton(
+                                onPressed: () {
+                                  controller.reverse();
+                                },
+                                color: Colors.black,
+                                icon: const Icon(Icons.close),
+                              ))
+                        ],
+                      ),
+                      // EXIT TABLE
+                      InkWell(
+                        splashColor: Colors.black,
+                        onTap: () {
+                          removePlayer();
+                          Navigator.pop(context);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 20, bottom: 10),
+                          child: Row(
+                            children:  const [
+                              Expanded(
+                                flex: 0, 
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 8),
+                                  child: Icon(Icons.exit_to_app),)),
+                              Expanded(
+                                flex: 1, 
+                                child: Text("Exit Table"))
+                            ],
                           ),
                         ),
-                        Expanded(
-                            flex: 0,
-                            child: IconButton(
-                              onPressed: () {
-                                controller.reverse();
-                              },
-                              color: Colors.black,
-                              icon: const Icon(Icons.close),
-                            ))
-                      ],
-                    ),
-                    // EXIT TABLE
-                    InkWell(
-                      splashColor: Colors.black,
-                      onTap: () {
-                        removePlayer();
-                        Navigator.pop(context);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 20, bottom: 10),
-                        child: Row(
-                          children:  const [
-                            Expanded(
-                              flex: 0, 
-                              child: Padding(
-                                padding: EdgeInsets.only(right: 8),
-                                child: Icon(Icons.exit_to_app),)),
-                            Expanded(
-                              flex: 1, 
-                              child: Text("Exit Table"))
-                          ],
+                      ),
+                      // INVITE FRIENDS
+                      InkWell(
+                        splashColor: Colors.black,
+                        onTap: () {
+                          //Navigator.pop(context);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 20, bottom: 10),
+                          child: Row(
+                            children: const [
+                              Expanded(
+                                  flex: 0,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(right: 8),
+                                    child: Icon(Icons.group),
+                                  )),
+                              Expanded(flex: 1, child: Text("Invite Friends"))
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    // INVITE FRIENDS
-                    InkWell(
-                      splashColor: Colors.black,
-                      onTap: () {
-                        //Navigator.pop(context);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 20, bottom: 10),
-                        child: Row(
-                          children: const [
-                            Expanded(
-                                flex: 0,
-                                child: Padding(
-                                  padding: EdgeInsets.only(right: 8),
-                                  child: Icon(Icons.group),
-                                )),
-                            Expanded(flex: 1, child: Text("Invite Friends"))
-                          ],
+                      // BUY MORE CHIPS
+                      InkWell(
+                        splashColor: Colors.black,
+                        onTap: () {
+                          //Navigator.pop(context);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 20, bottom: 10),
+                          child: Row(
+                            children: const [
+                              Expanded(
+                                  flex: 0,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(right: 8),
+                                    child: Icon(Icons.money),
+                                  )),
+                              Expanded(flex: 1, child: Text("Buy Chips"))
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    // BUY MORE CHIPS
-                    InkWell(
-                      splashColor: Colors.black,
-                      onTap: () {
-                        //Navigator.pop(context);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 20, bottom: 10),
-                        child: Row(
-                          children: const [
-                            Expanded(
-                                flex: 0,
-                                child: Padding(
-                                  padding: EdgeInsets.only(right: 8),
-                                  child: Icon(Icons.money),
-                                )),
-                            Expanded(flex: 1, child: Text("Buy Chips"))
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
                 ),
+                  ),
                 ),
             ),
-          ),
-        ),
-        SlideTransition(
-          position: offsetAnimation2,
-          child: Container(
+          );
+  }
+
+  Widget chatSection() {
+    return Container(
             width: 300,
             color: Colors.blue,
             child: SafeArea(
@@ -179,24 +198,27 @@ class _GameSideMenuState extends State<GameSideMenu>
                 color: Colors.blue,
                 child: Column(
                   children: <Widget>[
-                    Row(
-                      children: [
-                        const Expanded(
-                          flex: 1,
-                          child: Text(
-                            "CHAT",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: Row(
+                        children: [
+                          const Expanded(
+                            flex: 1,
+                            child: Text(
+                              "CHAT",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
                           ),
-                        ),
-                        Expanded(
-                            flex: 0,
-                            child: IconButton(
-                                onPressed: () {
-                                  controller2.reverse();
-                                },
-                                icon: const Icon(Icons.close)))
-                      ],
+                          Expanded(
+                              flex: 0,
+                              child: IconButton(
+                                  onPressed: () {
+                                    controller2.reverse();
+                                  },
+                                  icon: const Icon(Icons.close)))
+                        ],
+                      ),
                     ),
                     Expanded(
                       flex: 1,
@@ -216,9 +238,7 @@ class _GameSideMenuState extends State<GameSideMenu>
                 ),
               ),
             ),
-          ),
-        )
-      ],
-    );
+          );
+
   }
 }

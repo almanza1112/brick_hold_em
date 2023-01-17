@@ -19,6 +19,7 @@ class _GameMainState extends State<GameMain> {
 
     var game = GameTable(notchPadding: leftPadding);
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Stack(
         fit: StackFit.expand,
         children: [

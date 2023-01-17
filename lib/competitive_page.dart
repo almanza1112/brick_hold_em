@@ -97,16 +97,32 @@ class _CompetitivePageState extends State<CompetitivePage> {
                 style: titleStyle,
               ),
             ),
-            CarouselSlider.builder(
-              options: CarouselOptions(),
-              itemCount: 15,
-              itemBuilder:
-                  (BuildContext context, int itemIndex, int pageViewIndex) {
-                    int itemIndexAdjusted = itemIndex +1;
-                return Container(
-                  child: Text(itemIndexAdjusted.toString()),
-                );
-              },
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: SizedBox(
+                  height: 150,
+                  child: CarouselSlider.builder(
+                    options: CarouselOptions(onPageChanged: (index, reason) {
+                      print(index);
+                    },
+                    enlargeCenterPage: true,
+                    enlargeFactor: 1),
+                    itemCount: 5,
+                    itemBuilder:
+                        (BuildContext context, int itemIndex, int pageViewIndex) {
+                          int itemIndexAdjusted = itemIndex +1;
+                          int tableValue = itemIndexAdjusted * 100;
+                      return Container(
+                        height: 150,
+                        width: 150,
+                        decoration: BoxDecoration(color: Colors.white,border: Border.all(color: Colors.white)),
+                        child: Center(child: Text(tableValue.toString(), style: const TextStyle(color: Colors.blue, fontSize: 24, fontWeight: FontWeight.w700),)),
+                      );
+                    },
+                  ),
+                ),
+              ),
             ),
             Expanded(
                 child: Column(

@@ -88,12 +88,13 @@ class GameTable extends FlameGame with HasTappables {
 
     List startingHand = CardSetter().setCard(data);
 
-    final screenWidth = size[0] - notchPadding;
-    final screenHeight = size[1];
+    final screenWidth = size[0];
+    final screenHeight = size[1] - notchPadding;
 
-    add(background
-      ..sprite = await loadSprite('background.webp')
-      ..size = size);
+    // add(background
+    //   ..sprite = await loadSprite('table.png')
+    //   ..y = screenHeight / 2.5
+    //   ..size = Vector2(size[0], 250));
 
     dealer
       ..sprite = await loadSprite('dealer.png')
