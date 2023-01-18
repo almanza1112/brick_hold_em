@@ -1,3 +1,4 @@
+import 'package:brick_hold_em/login/create_account_information_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -25,6 +26,7 @@ class _LoginPageState extends State<LoginPage> {
     EdgeInsets contentPadding = const EdgeInsets.only(left: 10, right: 10);
     TextStyle formFieldLabelStyle = const TextStyle(
         color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600);
+    EdgeInsets formFieldLabelPadding = EdgeInsets.only(bottom: 5);
 
     return Scaffold(
       backgroundColor: Colors.brown.shade300,
@@ -32,20 +34,26 @@ class _LoginPageState extends State<LoginPage> {
         child: ListView(
           padding: const EdgeInsets.only(left: 30, right: 30),
           children: [
-            const Center(
-                child: Text("Sign In",
-                    style: TextStyle(color: Colors.white, fontSize: 30))),
+            const Padding(
+              padding: EdgeInsets.only(top: 30, bottom: 30),
+              child: Center(
+                  child: Text("Sign In",
+                      style: TextStyle(color: Colors.white, fontSize: 30))),
+            ),
             Form(
               key: formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    "Email",
-                    style: formFieldLabelStyle,
+                  Padding(
+                    padding: formFieldLabelPadding,
+                    child: Text(
+                      "Email",
+                      style: formFieldLabelStyle,
+                    ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 5),
+                    padding: const EdgeInsets.only(bottom: 20),
                     child: TextField(
                       style: TextStyle(color: Colors.black),
                       cursorColor: Colors.black,
@@ -65,9 +73,12 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-                  Text(
-                    "Password",
-                    style: formFieldLabelStyle,
+                  Padding(
+                    padding: formFieldLabelPadding,
+                    child: Text(
+                      "Password",
+                      style: formFieldLabelStyle,
+                    ),
                   ),
                   TextField(
                     obscureText: obscureText,
@@ -112,33 +123,61 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
+            const Padding(
+              padding: EdgeInsets.only(top: 20, bottom: 20),
+              child: Center(
+                  child: Text("- OR -",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w200))),
+            ),
             const Center(
-                child: Text("- OR -",
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w200))),
-            const Center(child: Text("Sign in with", style: TextStyle(color: Colors.white),)),
-            ElevatedButton.icon(
-                onPressed: () {
-                  AuthService().signInWithGoogle();
-                },
-                icon: const Icon(Icons.abc, color: Colors.black),
-                label: const Text(
-                  "Login with Google",
-                  style: TextStyle(color: Colors.black),
-                ),
-                style: const ButtonStyle(
-                    alignment: Alignment.centerLeft,
-                    backgroundColor: MaterialStatePropertyAll(Colors.white),
-                    fixedSize: MaterialStatePropertyAll(Size(210, 30)))),
-            ElevatedButton.icon(
-                onPressed: () {
-                  AuthService().signInWithFacebook();
-                },
-                icon: const Icon(Icons.facebook),
-                label: const Text("Login with Facebook"),
-                style: const ButtonStyle(
-                    alignment: Alignment.centerLeft,
-                    fixedSize: MaterialStatePropertyAll(Size(210, 30))))
+                child: Text(
+              "Sign in with",
+              style: TextStyle(color: Colors.white),
+            )),
+            Padding(
+              padding: EdgeInsets.only(top: 30, bottom: 30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 20),
+                    child: IconButton(
+                        onPressed: () {
+                          AuthService().signInWithFacebook();
+                        },
+                        icon: Image.asset('assets/images/facebook.png')),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 10),
+                    child: IconButton(
+                        onPressed: () {
+                          AuthService().signInWithGoogle();
+                        },
+                        icon: Image.asset("assets/images/google.png")),
+                  )
+                ],
+              ),
+            ),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Row(
+                children: [
+                  const Text("Dont't have an account?", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w300),),
+                  TextButton(
+                      onPressed: () {
+                         Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CreateAccountInformationPage()));
+                      },
+                      child: const Text(
+                        "Sign Up",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.w600),
+                      ))
+                ],
+              ),
+            ])
           ],
         ),
       ),
