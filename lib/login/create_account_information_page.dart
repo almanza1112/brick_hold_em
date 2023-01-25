@@ -1,10 +1,14 @@
 import 'package:brick_hold_em/login/create_account%20_password_page.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class CreateAccountInformationPage extends StatefulWidget {
   _CreateAccountInformationPageState createState() =>
       _CreateAccountInformationPageState();
 }
+
+// TODO: email verificatoin
 
 class _CreateAccountInformationPageState
     extends State<CreateAccountInformationPage> {
@@ -14,6 +18,15 @@ class _CreateAccountInformationPageState
 
   TextStyle formFieldLabelStyle = const TextStyle(
       color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600);
+
+  final myController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up controller when widget is disposed
+    myController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +47,7 @@ class _CreateAccountInformationPageState
           const Padding(
             padding: EdgeInsets.only(top: 40, bottom: 40),
             child: Center(
-              child: Text("Name & Email",
+              child: Text("Personal Info",
                   style: TextStyle(color: Colors.white, fontSize: 30)),
             ),
           ),
@@ -42,10 +55,38 @@ class _CreateAccountInformationPageState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Padding(
+                //   padding: formFieldLabelPadding,
+                //   child: Text(
+                //     "First Name",
+                //     style: formFieldLabelStyle,
+                //   ),
+                // ),
+                // Padding(
+                //   padding: formFieldPadding,
+                //   child: TextField(
+                //     style: TextStyle(color: Colors.black),
+                //     cursorColor: Colors.black,
+                //     keyboardType: TextInputType.emailAddress,
+                //     decoration: InputDecoration(
+                //       contentPadding: contentPadding,
+                //       filled: true,
+                //       fillColor: Colors.white,
+                //       hintText: "Enter your First Name",
+                //       border: const OutlineInputBorder(),
+                //       enabledBorder: const OutlineInputBorder(
+                //         borderSide: BorderSide(color: Colors.white),
+                //       ),
+                //       focusedBorder: const OutlineInputBorder(
+                //         borderSide: BorderSide(color: Colors.blue),
+                //       ),
+                //     ),
+                //   ),
+                // ),
                 Padding(
                   padding: formFieldLabelPadding,
                   child: Text(
-                    "First Name",
+                    "Full Name",
                     style: formFieldLabelStyle,
                   ),
                 ),
@@ -59,35 +100,7 @@ class _CreateAccountInformationPageState
                       contentPadding: contentPadding,
                       filled: true,
                       fillColor: Colors.white,
-                      hintText: "Enter your First Name",
-                      border: const OutlineInputBorder(),
-                      enabledBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: formFieldLabelPadding,
-                  child: Text(
-                    "Last Name",
-                    style: formFieldLabelStyle,
-                  ),
-                ),
-                Padding(
-                  padding: formFieldPadding,
-                  child: TextField(
-                    style: TextStyle(color: Colors.black),
-                    cursorColor: Colors.black,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      contentPadding: contentPadding,
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: "Enter your Last Name",
+                      hintText: "Enter your Full Name",
                       border: const OutlineInputBorder(),
                       enabledBorder: const OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white),
@@ -106,6 +119,7 @@ class _CreateAccountInformationPageState
                   ),
                 ),
                 TextField(
+                  controller: myController,
                   style: TextStyle(color: Colors.black),
                   cursorColor: Colors.black,
                   keyboardType: TextInputType.emailAddress,
@@ -113,7 +127,7 @@ class _CreateAccountInformationPageState
                     contentPadding: contentPadding,
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: "Enter your Last Name",
+                    hintText: "Enter your Email",
                     border: const OutlineInputBorder(),
                     enabledBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.white),
@@ -130,10 +144,12 @@ class _CreateAccountInformationPageState
             padding: const EdgeInsets.all(20.0),
             child: TextButton(
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CreateAccountPasswordPage()));
+                  //print(myController.text);
+                  //isEmailUsed(myController.text);
+                   Navigator.push(
+                       context,
+                       MaterialPageRoute(
+                           builder: (context) => CreateAccountPasswordPage()));
                 },
                 child: const Text(
                   "NEXT",
@@ -143,5 +159,15 @@ class _CreateAccountInformationPageState
         ],
       ),
     );
+  }
+
+  Future<bool> isEmailUsed(String email) async {
+    http.Response response = await http
+        .get(Uri.parse('https://brick-hold-em-api.onrender.com/account/$email'));
+
+    Map data = jsonDecode(response.body);
+    print("THIS IS IT");
+    print(data);
+    return true;
   }
 }

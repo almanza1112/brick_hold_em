@@ -1,4 +1,3 @@
-
 import 'package:brick_hold_em/game/game_table.dart';
 //import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -9,21 +8,20 @@ class GamePlayers extends StatefulWidget {
     required this.game,
   }) : super(key: key);
 
-  final GameTable game; 
+  final GameTable game;
 
   _GamePlayersState createState() => _GamePlayersState();
 }
 
 class _GamePlayersState extends State<GamePlayers> {
-
   double imageRadius = 35;
   TextStyle chipsText = const TextStyle(fontSize: 10, color: Colors.white);
-  TextStyle playerNameStyle = const TextStyle(fontSize: 12, color: Colors.deepOrangeAccent);
-  
+  TextStyle playerNameStyle =
+      const TextStyle(fontSize: 12, color: Colors.deepOrangeAccent);
+
   //final database = FirebaseDatabase.instance.ref();
   @override
   Widget build(BuildContext context) {
-
     return Stack(
       children: [
         Align(
@@ -36,26 +34,7 @@ class _GamePlayersState extends State<GamePlayers> {
               children: [
                 // Player 1 is the user so going counter clockwise will be Player 2,3, etc
                 // Player 2
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Stack(
-                        children: <Widget>[
-                          CircleAvatar(
-                            backgroundImage:
-                                AssetImage('assets/images/TESTING.jpg'),
-                            radius: imageRadius,
-                          ),
-                        ],
-                      ),
-                      Text("Player 2", style: playerNameStyle,),
-                      Text("1,000", style: chipsText)
-                    ],
-                  ),
-                ),
+                Align(alignment: Alignment.bottomRight, child: player("Player BR", 1000)),
                 // Player 3
                 Align(
                   alignment: Alignment.topRight,
@@ -68,8 +47,14 @@ class _GamePlayersState extends State<GamePlayers> {
                             AssetImage('assets/images/TESTING.jpg'),
                         radius: imageRadius,
                       ),
-                      Text("Player 3", style: playerNameStyle,),
-                      Text("1,000", style: chipsText,)
+                      Text(
+                        "Player 3",
+                        style: playerNameStyle,
+                      ),
+                      Text(
+                        "1,000",
+                        style: chipsText,
+                      )
                     ],
                   ),
                 ),
@@ -89,7 +74,6 @@ class _GamePlayersState extends State<GamePlayers> {
                         "Player 4",
                         style: playerNameStyle,
                       ),
-
                       Text(
                         "1,000",
                         style: chipsText,
@@ -97,7 +81,7 @@ class _GamePlayersState extends State<GamePlayers> {
                     ],
                   ),
                 ),
-                 // Player 5
+                // Player 5
                 Align(
                   alignment: Alignment.topLeft,
                   child: Column(
@@ -113,7 +97,6 @@ class _GamePlayersState extends State<GamePlayers> {
                         "Player 5",
                         style: playerNameStyle,
                       ),
-
                       Text(
                         "1,000",
                         style: chipsText,
@@ -127,6 +110,27 @@ class _GamePlayersState extends State<GamePlayers> {
         )
       ],
     );
-    
+  }
+
+  Widget player(String playerUsername, int playerChips) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Stack(
+          children: <Widget>[
+            CircleAvatar(
+              backgroundImage: AssetImage('assets/images/TESTING.jpg'),
+              radius: imageRadius,
+            ),
+          ],
+        ),
+        Text(
+          playerUsername,
+          style: playerNameStyle,
+        ),
+        Text("$playerChips ch", style: chipsText)
+      ],
+    );
   }
 }
