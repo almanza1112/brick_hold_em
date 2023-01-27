@@ -13,6 +13,10 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
 
   TextStyle formFieldLabelStyle = const TextStyle(
       color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600);
+  TextStyle bulletTextStyle = const TextStyle(color: Colors.white);
+
+  String bullet = "\u2022";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,95 +30,155 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
           },
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(left: 30, right: 30),
+      body: Stack(
         children: [
-           const Padding(
-            padding: EdgeInsets.only(top: 40, bottom: 40),
-            child: Center(
-              child: Text("Password",
-                  style: TextStyle(color: Colors.white, fontSize: 30)),
-            ),
-          ),
-          Form(child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          ListView(
+            padding: const EdgeInsets.only(left: 30, right: 30),
             children: [
-               Padding(
-                padding: formFieldLabelPadding,
-                child: Text(
-                  "Password",
-                  style: formFieldLabelStyle,
+              const Padding(
+                padding: EdgeInsets.only(top: 20, bottom: 20),
+                child: Center(
+                  child: Text("Password",
+                      style: TextStyle(color: Colors.white, fontSize: 30)),
                 ),
               ),
               Padding(
-                padding: formFieldPadding,
-                child: TextField(
-                  style: TextStyle(color: Colors.black),
-                  cursorColor: Colors.black,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    contentPadding: contentPadding,
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "Enter Password",
-                    border: const OutlineInputBorder(),
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "$bullet Minimum of 6 characters",
+                        style: bulletTextStyle,
+                      ),
+                      Text(
+                        "$bullet Uppercase or lowercase letters A-Z",
+                        style: bulletTextStyle,
+                      ),
+                      Text(
+                        "$bullet Numbers 0-9",
+                        style: bulletTextStyle,
+                      ),
+                      Text(
+                        "$bullet Special characters .!@#\$%^&*()-_ allowed",
+                        style: bulletTextStyle,
+                      )
+                    ],
                   ),
                 ),
               ),
-              Padding(
-                padding: formFieldLabelPadding,
-                child: Text(
-                  "Reenter Password",
-                  style: formFieldLabelStyle,
-                ),
-              ),
-              Padding(
-                padding: formFieldPadding,
-                child: TextField(
-                  style: TextStyle(color: Colors.black),
-                  cursorColor: Colors.black,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    contentPadding: contentPadding,
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "Reenter Password",
-                    border: const OutlineInputBorder(),
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
+              Form(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: formFieldLabelPadding,
+                    child: Text(
+                      "Password",
+                      style: formFieldLabelStyle,
                     ),
                   ),
-                ),
-              ),
-              
+                  Padding(
+                    padding: formFieldPadding,
+                    child: TextFormField(
+                      validator: validatePassword,
+                      style: const TextStyle(color: Colors.black),
+                      cursorColor: Colors.black,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        contentPadding: contentPadding,
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Enter Password",
+                        border: const OutlineInputBorder(),
+                        enabledBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: formFieldLabelPadding,
+                    child: Text(
+                      "Reenter Password",
+                      style: formFieldLabelStyle,
+                    ),
+                  ),
+                  Padding(
+                    padding: formFieldPadding,
+                    child: TextFormField(
+                      style: TextStyle(color: Colors.black),
+                      cursorColor: Colors.black,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        contentPadding: contentPadding,
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Reenter Password",
+                        border: const OutlineInputBorder(),
+                        enabledBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )),
             ],
-            
-          )),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CreateAccountUsernamePage()));
-                },
-                child: const Text(
-                  "NEXT",
-                  style: TextStyle(color: Colors.white),
-                )),
-          )
+          ),
+          SafeArea(
+              child:
+                  Align(alignment: Alignment.bottomRight, child: nextButton()))
         ],
       ),
     );
   }
+
+  Widget nextButton() {
+    return Padding(
+      padding: const EdgeInsets.all(30.0),
+      child: TextButton(
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CreateAccountUsernamePage()));
+          },
+          style: ButtonStyle(
+              padding: MaterialStateProperty.all(const EdgeInsets.only(
+                  left: 15, right: 15, top: 5, bottom: 5)),
+              backgroundColor: MaterialStateProperty.all(Colors.red),
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                      side: BorderSide(color: Colors.red)))),
+          child: const Text(
+            "NEXT",
+            style: TextStyle(color: Colors.white),
+          )),
+    );
+  }
+
+String? validatePassword(String? value) {
+    const pattern = '[a-zA-Z0-9_.!@#\$%^&*()-]';
+    final regex = RegExp(pattern);
+
+    if (value!.isNotEmpty) {
+      if (!regex.hasMatch(value)) {
+        return "Password does not match";
+      } else {
+        return null;
+      }
+    } else {
+      return "Field can't be empty";
+    }
+  }
+
 }
