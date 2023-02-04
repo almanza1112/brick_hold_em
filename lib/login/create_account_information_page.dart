@@ -22,10 +22,11 @@ class _CreateAccountInformationPageState
 
   final nameController = TextEditingController();
   final emailController = TextEditingController();
-  bool validateName = false;
 
   double progressBarValue = 0;
   bool progressBarVisibile = false;
+
+  var formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -70,7 +71,7 @@ class _CreateAccountInformationPageState
                 ),
               ),
               Form(
-                autovalidateMode: AutovalidateMode.always,
+                key: formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -112,17 +113,16 @@ class _CreateAccountInformationPageState
                     Padding(
                       padding: formFieldPadding,
                       child: TextFormField(
+                        validator: validateName,
                         controller: nameController,
                         style: TextStyle(color: Colors.black),
                         cursorColor: Colors.black,
-                        keyboardType: TextInputType.emailAddress,
+                        keyboardType: TextInputType.name,
                         decoration: InputDecoration(
                           contentPadding: contentPadding,
                           filled: true,
                           fillColor: Colors.white,
                           hintText: "Enter your Full Name",
-                          errorText:
-                              validateName ? "Field can\'t be empty" : null,
                           border: const OutlineInputBorder(),
                           enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
@@ -181,13 +181,8 @@ class _CreateAccountInformationPageState
       padding: const EdgeInsets.all(30.0),
       child: ElevatedButton(
           onPressed: () async {
-            setState(() {
-              nameController.text.isEmpty
-                  ? validateName = true
-                  : validateName = false;
-            });
-            if (nameController.text.isNotEmpty &&
-                emailController.text.isNotEmpty) {
+           
+            if(formKey.currentState!.validate()){
               // Make progress bar visible
               setState(() {
                 progressBarVisibile = true;
@@ -218,6 +213,7 @@ class _CreateAccountInformationPageState
                 print("something is wrong");
               }
             }
+           
           },
           style: ButtonStyle(
               padding: MaterialStateProperty.all(const EdgeInsets.only(
@@ -243,6 +239,13 @@ class _CreateAccountInformationPageState
     return data;
   }
 
+  String? validateName(String? value){
+    if(value!.isEmpty) {
+      return "Field can't be empty";
+    } else {
+      return null;
+    }
+  }
   String? validateEmail(String? value) {
     const pattern = r"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'"
         r'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-'
@@ -253,19 +256,16 @@ class _CreateAccountInformationPageState
         r'x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])';
     final regex = RegExp(pattern);
 
-    if (value!.isNotEmpty) {
-      if (!regex.hasMatch(value)) {
-        return "Enter a valid email address";
-      } else {
+    if(value!.isNotEmpty) {
+      if(regex.hasMatch(value)){
         return null;
+      } else {
+        return "Enter valid email address";
       }
     } else {
       return "Field can't be empty";
     }
-    // Below is how it originally once. Above returns the addittion if field is empty
-    // return value!.isNotEmpty && !regex.hasMatch(value)
-    //     ? 'Enter a valid email address'
-    //     : null;
+  
   }
 
   void determinateIndicator() {

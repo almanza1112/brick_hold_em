@@ -15,6 +15,11 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
       color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600);
   TextStyle bulletTextStyle = const TextStyle(color: Colors.white);
 
+  final passwordController = TextEditingController();
+  final reenterPasswordController = TextEditingController();
+
+  var formKey = GlobalKey<FormState>();
+
   String bullet = "\u2022";
 
   @override
@@ -69,68 +74,72 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
                 ),
               ),
               Form(
+                  key: formKey,
                   child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: formFieldLabelPadding,
-                    child: Text(
-                      "Password",
-                      style: formFieldLabelStyle,
-                    ),
-                  ),
-                  Padding(
-                    padding: formFieldPadding,
-                    child: TextFormField(
-                      validator: validatePassword,
-                      style: const TextStyle(color: Colors.black),
-                      cursorColor: Colors.black,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        contentPadding: contentPadding,
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: "Enter Password",
-                        border: const OutlineInputBorder(),
-                        enabledBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blue),
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: formFieldLabelPadding,
+                        child: Text(
+                          "Password",
+                          style: formFieldLabelStyle,
                         ),
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: formFieldLabelPadding,
-                    child: Text(
-                      "Reenter Password",
-                      style: formFieldLabelStyle,
-                    ),
-                  ),
-                  Padding(
-                    padding: formFieldPadding,
-                    child: TextFormField(
-                      style: TextStyle(color: Colors.black),
-                      cursorColor: Colors.black,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        contentPadding: contentPadding,
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: "Reenter Password",
-                        border: const OutlineInputBorder(),
-                        enabledBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                        focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blue),
+                      Padding(
+                        padding: formFieldPadding,
+                        child: TextFormField(
+                          controller: passwordController,
+                          validator: validatePassword,
+                          style: const TextStyle(color: Colors.black),
+                          cursorColor: Colors.black,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            contentPadding: contentPadding,
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Enter Password",
+                            border: const OutlineInputBorder(),
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              )),
+                      Padding(
+                        padding: formFieldLabelPadding,
+                        child: Text(
+                          "Reenter Password",
+                          style: formFieldLabelStyle,
+                        ),
+                      ),
+                      Padding(
+                        padding: formFieldPadding,
+                        child: TextFormField(
+                          controller: reenterPasswordController,
+                          validator: validateReenterPassword,
+                          style: const TextStyle(color: Colors.black),
+                          cursorColor: Colors.black,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            contentPadding: contentPadding,
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Reenter Password",
+                            border: const OutlineInputBorder(),
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
             ],
           ),
           SafeArea(
@@ -146,10 +155,9 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
       padding: const EdgeInsets.all(30.0),
       child: TextButton(
           onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => CreateAccountUsernamePage()));
+            if (formKey.currentState!.validate()) {
+              print("YES");
+            }
           },
           style: ButtonStyle(
               padding: MaterialStateProperty.all(const EdgeInsets.only(
@@ -166,19 +174,40 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
     );
   }
 
-String? validatePassword(String? value) {
-    const pattern = '[a-zA-Z0-9_.!@#\$%^&*()-]';
+  String? validatePassword(String? value) {
+    const pattern = r'[a-zA-Z0-9_.!@#\$%^&*()-]';
     final regex = RegExp(pattern);
 
     if (value!.isNotEmpty) {
-      if (!regex.hasMatch(value)) {
-        return "Password does not match";
-      } else {
+      if (regex.hasMatch(value)) {
+                print("hmm");
+
         return null;
+      } else {
+                print("wrong");
+
+        return "Invalid password pattern";
+      }
+    } else {
+      return "Field can't be emptyy";
+    }
+  }
+
+  String? validateReenterPassword(String? value) {
+    String pwd = passwordController.text.trim();
+    if (value!.trim().isNotEmpty) {
+      if (pwd == value.trim()) {
+        return null;
+      } else {
+        return "Password doesn't match";
       }
     } else {
       return "Field can't be empty";
     }
   }
 
+  void navigateToUsername() {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => CreateAccountUsernamePage()));
+  }
 }
