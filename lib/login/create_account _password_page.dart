@@ -156,7 +156,7 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
       child: TextButton(
           onPressed: () {
             if (formKey.currentState!.validate()) {
-              print("YES");
+              navigateToUsername();
             }
           },
           style: ButtonStyle(
@@ -175,7 +175,7 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
   }
 
   String? validatePassword(String? value) {
-    const pattern = r'[a-zA-Z0-9_.!@#\$%^&*()-]';
+    const pattern = r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$';
     final regex = RegExp(pattern);
 
     if (value!.isNotEmpty) {

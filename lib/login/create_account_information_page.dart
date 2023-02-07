@@ -25,6 +25,7 @@ class _CreateAccountInformationPageState
 
   double progressBarValue = 0;
   bool progressBarVisibile = false;
+  String? emailIsAlreadyUsed;
 
   var formKey = GlobalKey<FormState>();
 
@@ -151,6 +152,7 @@ class _CreateAccountInformationPageState
                         filled: true,
                         fillColor: Colors.white,
                         hintText: "Enter your Email",
+                        errorText: emailIsAlreadyUsed,
                         border: const OutlineInputBorder(),
                         enabledBorder: const OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.white),
@@ -202,7 +204,10 @@ class _CreateAccountInformationPageState
                 navigateToCreatePassword();
               } else if (!result['emailAvailable']) {
                 // Email is not available
-
+                setState(() {
+                  emailIsAlreadyUsed = "An account with this email already exists";
+                });
+                
                 progressBarValue = 1; // Progress Bar complete
                 // Make Progress Bar invisible
                 setState(() {
