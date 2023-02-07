@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -10,19 +12,21 @@ class CreateAccountProfilePicturePage extends StatefulWidget {
 
 class _CreateAccountProfilePictureState
     extends State<CreateAccountProfilePicturePage> {
+  EdgeInsets contentPadding = const EdgeInsets.only(left: 10, right: 10);
+  EdgeInsets formFieldLabelPadding = const EdgeInsets.only(bottom: 5);
+  EdgeInsets formFieldPadding = const EdgeInsets.only(bottom: 20);
+
+  TextStyle formFieldLabelStyle = const TextStyle(
+      color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600);
+
+  TextStyle textButtonStyle = const TextStyle(color: Colors.white);
+
+  final ImagePicker imagePicker = ImagePicker();
+  CroppedFile? croppedFile;
+  bool isDeleteVisible = false;
+
   @override
   Widget build(BuildContext context) {
-    EdgeInsets contentPadding = const EdgeInsets.only(left: 10, right: 10);
-    EdgeInsets formFieldLabelPadding = const EdgeInsets.only(bottom: 5);
-    EdgeInsets formFieldPadding = const EdgeInsets.only(bottom: 20);
-
-    TextStyle formFieldLabelStyle = const TextStyle(
-        color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600);
-
-    TextStyle textButtonStyle = const TextStyle(color: Colors.white);
-
-    final ImagePicker imagePicker = ImagePicker();
-
     return Scaffold(
       backgroundColor: Colors.brown.shade300,
       appBar: AppBar(
@@ -45,15 +49,23 @@ class _CreateAccountProfilePictureState
                     style: TextStyle(color: Colors.white, fontSize: 30)),
               ),
             ),
-            const CircleAvatar(
-              backgroundImage: AssetImage('assets/images/poker_player.jpeg'),
-              radius: 120,
+            //   Center(
+            //     child: CircleAvatar(
+            //      backgroundImage: croppedFile != null ? FileImage(File(croppedFile!.path)) :  const AssetImage("assets/images/poker_player.jpeg") as ImageProvider,
+            //      radius: 120,
+            //  ),
+            //   ),
+            // Going with the ClipOval approach since for some reason the CircularAvatar does a transition animation where 
+            // you see the background color
+            Center(
+              child: ClipOval(child: croppedFile != null ? Image.file(File(croppedFile!.path), width: 240, height: 240, fit: BoxFit.cover,)
+                    : Image.asset("assets/images/poker_player.jpeg", width: 240, height: 240, fit: BoxFit.cover,),),
             ),
             TextButton(
                 onPressed: () async {
                   final XFile? pickedImage =
                       await imagePicker.pickImage(source: ImageSource.gallery);
-                  if(pickedImage != null){
+                  if (pickedImage != null) {
                     cropImage(pickedImage);
                   }
                 },
@@ -61,12 +73,16 @@ class _CreateAccountProfilePictureState
                   "UPLOAD IMAGE",
                   style: textButtonStyle,
                 )),
-            // TextButton(
-            //     onPressed: () {},
-            //     child: Text(
-            //       "CHOOSE FROM OUR GALLERY",
-            //       style: textButtonStyle,
-            //     )),
+            
+            Visibility(
+              visible: isDeleteVisible,
+              child: TextButton(
+                onPressed: (){
+                  deleteImage();
+                }, 
+                child: Text("DELETE", style: textButtonStyle,)),
+            )
+
           ],
         ),
         SafeArea(
@@ -97,7 +113,7 @@ class _CreateAccountProfilePictureState
   }
 
   void cropImage(XFile pickedImage) async {
-    CroppedFile? croppedFile = await ImageCropper().cropImage(
+    CroppedFile? _croppedFile = await ImageCropper().cropImage(
       sourcePath: pickedImage.path,
       cropStyle: CropStyle.circle,
       aspectRatioPresets: [
@@ -112,11 +128,42 @@ class _CreateAccountProfilePictureState
             lockAspectRatio: false),
         IOSUiSettings(
           title: 'Cropper',
-          
         ),
       ],
     );
 
-    
+    if (_croppedFile != null) {
+      setState(() {
+        croppedFile = _croppedFile;
+        isDeleteVisible = true;
+      });
+    }
+  }
+
+  void deleteImage() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Delete"),
+            content: const Text("Are you sure you want to delete image??"),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("CANCEL")),
+              TextButton(
+                  onPressed: () {
+                    setState(() {
+                      croppedFile = null;
+                      isDeleteVisible = false;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Text("DELETE"))
+            ],
+          );
+        });
   }
 }
