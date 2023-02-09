@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 
 
@@ -172,6 +173,14 @@ class _CreateAccountProfilePictureState
   }
 
   void addUserToDB(){
+
+    final imageFile = File(croppedFile!.path);
+    final path = 'images/${croppedFile!}';
+
+    final ref = FirebaseStorage.instance.ref().child(path);
+    ref.putFile(imageFile);
     
+
+
   }
 }
