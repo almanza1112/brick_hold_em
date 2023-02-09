@@ -1,5 +1,7 @@
 import 'package:brick_hold_em/login/create_account_profile_picture_page.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountUsernamePage extends StatefulWidget {
   _CreateAccountUsernamePageState createState() =>
@@ -51,12 +53,10 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    
                     Text(
                       "$bullet Only letters, numbers, and '-_' special characters allowed",
                       style: bulletTextStyle,
                     ),
-                    
                   ],
                 ),
               ),
@@ -112,6 +112,7 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
       child: TextButton(
           onPressed: () {
             if (formKey.currentState!.validate()) {
+              setSharedPrefs();
               navigateToProfilePic();
             }
           },
@@ -145,8 +146,15 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
     }
   }
 
+  void setSharedPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(globals.signUpUsername, usernameController.text.trim());
+  }
+
   void navigateToProfilePic() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => CreateAccountProfilePicturePage()));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CreateAccountProfilePicturePage()));
   }
 }

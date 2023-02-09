@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountInformationPage extends StatefulWidget {
   _CreateAccountInformationPageState createState() =>
@@ -183,8 +184,7 @@ class _CreateAccountInformationPageState
       padding: const EdgeInsets.all(30.0),
       child: ElevatedButton(
           onPressed: () async {
-           
-            if(formKey.currentState!.validate()){
+            if (formKey.currentState!.validate()) {
               // Make progress bar visible
               setState(() {
                 progressBarVisibile = true;
@@ -201,13 +201,15 @@ class _CreateAccountInformationPageState
                 setState(() {
                   progressBarVisibile = false;
                 });
+                setSharedPrefs();
                 navigateToCreatePassword();
               } else if (!result['emailAvailable']) {
                 // Email is not available
                 setState(() {
-                  emailIsAlreadyUsed = "An account with this email already exists";
+                  emailIsAlreadyUsed =
+                      "An account with this email already exists";
                 });
-                
+
                 progressBarValue = 1; // Progress Bar complete
                 // Make Progress Bar invisible
                 setState(() {
@@ -218,7 +220,6 @@ class _CreateAccountInformationPageState
                 print("something is wrong");
               }
             }
-           
           },
           style: ButtonStyle(
               padding: MaterialStateProperty.all(const EdgeInsets.only(
@@ -244,13 +245,14 @@ class _CreateAccountInformationPageState
     return data;
   }
 
-  String? validateName(String? value){
-    if(value!.isEmpty) {
+  String? validateName(String? value) {
+    if (value!.isEmpty) {
       return "Field can't be empty";
     } else {
       return null;
     }
   }
+
   String? validateEmail(String? value) {
     const pattern = r"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'"
         r'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-'
@@ -261,8 +263,8 @@ class _CreateAccountInformationPageState
         r'x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])';
     final regex = RegExp(pattern);
 
-    if(value!.isNotEmpty) {
-      if(regex.hasMatch(value)){
+    if (value!.isNotEmpty) {
+      if (regex.hasMatch(value)) {
         return null;
       } else {
         return "Enter valid email address";
@@ -270,7 +272,6 @@ class _CreateAccountInformationPageState
     } else {
       return "Field can't be empty";
     }
-  
   }
 
   void determinateIndicator() {
@@ -285,6 +286,12 @@ class _CreateAccountInformationPageState
         }
       });
     });
+  }
+
+  void setSharedPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(globals.signUpFullName, nameController.text.trim());
+    await prefs.setString(globals.signUpEmail, emailController.text.trim());
   }
 
   void navigateToCreatePassword() {

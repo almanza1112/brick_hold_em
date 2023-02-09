@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 
 class CreateAccountProfilePicturePage extends StatefulWidget {
@@ -96,7 +98,9 @@ class _CreateAccountProfilePictureState
     return Padding(
       padding: const EdgeInsets.all(30.0),
       child: TextButton(
-          onPressed: () {},
+          onPressed: () {
+            addUserToDB();
+          },
           style: ButtonStyle(
               padding: MaterialStateProperty.all(const EdgeInsets.only(
                   left: 15, right: 15, top: 5, bottom: 5)),
@@ -165,5 +169,9 @@ class _CreateAccountProfilePictureState
             ],
           );
         });
+  }
+
+  void addUserToDB(){
+    
   }
 }
