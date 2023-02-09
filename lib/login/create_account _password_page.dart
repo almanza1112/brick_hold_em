@@ -1,5 +1,7 @@
 import 'package:brick_hold_em/login/create_account_username_page.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountPasswordPage extends StatefulWidget {
   _CreateAccountPasswordPageState createState() =>
@@ -156,6 +158,7 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
       child: TextButton(
           onPressed: () {
             if (formKey.currentState!.validate()) {
+              setSharedPrefs();
               navigateToUsername();
             }
           },
@@ -180,12 +183,8 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
 
     if (value!.isNotEmpty) {
       if (regex.hasMatch(value)) {
-                print("hmm");
-
         return null;
       } else {
-                print("wrong");
-
         return "Invalid password pattern";
       }
     } else {
@@ -204,6 +203,14 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
     } else {
       return "Field can't be empty";
     }
+  }
+
+  void setSharedPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        globals.signUpPassword, passwordController.text.trim());
+    await prefs.setString(
+        globals.signUpReenterPassword, reenterPasswordController.text.trim());
   }
 
   void navigateToUsername() {
