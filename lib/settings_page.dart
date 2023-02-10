@@ -71,9 +71,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         style: textStyle,
                       )),
                       Text(
-                        FirebaseAuth.instance.currentUser!.displayName!,
-                        style: accountTextStyle,
-                      ),
+                         FirebaseAuth.instance.currentUser!.displayName!,
+                         style: accountTextStyle,
+                       ),
                       Icon(
                         Icons.arrow_forward_ios,
                         color: iconColor,

@@ -1,12 +1,16 @@
 import 'dart:io';
 
+import 'package:brick_hold_em/home_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-
+import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountProfilePicturePage extends StatefulWidget {
   _CreateAccountProfilePictureState createState() =>
@@ -27,6 +31,8 @@ class _CreateAccountProfilePictureState
   final ImagePicker imagePicker = ImagePicker();
   CroppedFile? croppedFile;
   bool isDeleteVisible = false;
+  UploadTask? uploadTask;
+  FirebaseFirestore db = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -58,11 +64,24 @@ class _CreateAccountProfilePictureState
             //      radius: 120,
             //  ),
             //   ),
-            // Going with the ClipOval approach since for some reason the CircularAvatar does a transition animation where 
+            // Going with the ClipOval approach since for some reason the CircularAvatar does a transition animation where
             // you see the background color
             Center(
-              child: ClipOval(child: croppedFile != null ? Image.file(File(croppedFile!.path), width: 240, height: 240, fit: BoxFit.cover,)
-                    : Image.asset("assets/images/poker_player.jpeg", width: 240, height: 240, fit: BoxFit.cover,),),
+              child: ClipOval(
+                child: croppedFile != null
+                    ? Image.file(
+                        File(croppedFile!.path),
+                        width: 240,
+                        height: 240,
+                        fit: BoxFit.cover,
+                      )
+                    : Image.asset(
+                        "assets/images/poker_player.jpeg",
+                        width: 240,
+                        height: 240,
+                        fit: BoxFit.cover,
+                      ),
+              ),
             ),
             TextButton(
                 onPressed: () async {
@@ -76,16 +95,18 @@ class _CreateAccountProfilePictureState
                   "UPLOAD IMAGE",
                   style: textButtonStyle,
                 )),
-            
+
             Visibility(
               visible: isDeleteVisible,
               child: TextButton(
-                onPressed: (){
-                  deleteImage();
-                }, 
-                child: Text("DELETE", style: textButtonStyle,)),
+                  onPressed: () {
+                    deleteImage();
+                  },
+                  child: Text(
+                    "DELETE",
+                    style: textButtonStyle,
+                  )),
             )
-
           ],
         ),
         SafeArea(
@@ -100,7 +121,7 @@ class _CreateAccountProfilePictureState
       padding: const EdgeInsets.all(30.0),
       child: TextButton(
           onPressed: () {
-            addUserToDB();
+            createUserAuth();
           },
           style: ButtonStyle(
               padding: MaterialStateProperty.all(const EdgeInsets.only(
@@ -172,15 +193,84 @@ class _CreateAccountProfilePictureState
         });
   }
 
-  void addUserToDB(){
+  void addUserToDB() async {}
 
+  void uploadUserProfilePic(String uid) async {
     final imageFile = File(croppedFile!.path);
-    final path = 'images/${croppedFile!}';
+    final path = 'images/$uid/profile_picture.png';
 
     final ref = FirebaseStorage.instance.ref().child(path);
     ref.putFile(imageFile);
-    
+    uploadTask = ref.putFile(imageFile);
 
+    final snapshot = await uploadTask!.whenComplete(() {});
 
+    final downloadURL = await snapshot.ref.getDownloadURL();
+
+    db
+        .collection("users")
+        .doc(uid)
+        .update({'photoURL': downloadURL}).then((value) {
+      // PhotoURL added
+      FirebaseAuth.instance.currentUser!
+          .updatePhotoURL(downloadURL)
+          .then((value) {
+        // Proceed to homepagee
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => HomePage()));
+      }).catchError((error) {
+        print(error);
+      });
+    });
+  }
+
+  void createUserAuth() async {
+    final prefs = await SharedPreferences.getInstance();
+    final signUpEmail = prefs.getString(globals.signUpEmail);
+    final signUpPassword = prefs.getString(globals.signUpPassword);
+    final signUpName = prefs.getString(globals.signUpFullName);
+    final signUpUsername = prefs.getString(globals.signUpUsername);
+
+    try {
+      final credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: signUpEmail!,
+        password: signUpPassword!,
+      );
+
+      // Check if user is signed in
+      if (credential.user!.email!.isNotEmpty) {
+        // Add user to Firestore Database
+        final uid = FirebaseAuth.instance.currentUser!.uid;
+        db.collection("users").doc(uid).set({
+          'fullName': signUpName,
+          'username': signUpUsername,
+          'chips': 1000,
+
+          //'photoURL': FirebaseAuth.instance.currentUser!.photoURL
+        }).then((value) {
+          // User has been added
+          // Proceeed to upload profile pic
+          FirebaseAuth.instance.currentUser!.updateDisplayName(signUpName).then((value) {
+            uploadUserProfilePic(uid);
+
+          }).catchError((error) {
+            print("ERROR ON UPDATING NAME: $error");
+          });
+        }).catchError((error) => print("Failed to add user: $error"));
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        print('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        print('The account already exists for that email.');
+      } else {
+        print("EXCEPTION: ${e.code}");
+      }
+    } catch (e) {
+      print("the error was here: $e");
+    }
   }
 }

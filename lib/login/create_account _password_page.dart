@@ -209,8 +209,6 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
         globals.signUpPassword, passwordController.text.trim());
-    await prefs.setString(
-        globals.signUpReenterPassword, reenterPasswordController.text.trim());
   }
 
   void navigateToUsername() {
