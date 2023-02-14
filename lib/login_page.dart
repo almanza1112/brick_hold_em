@@ -35,7 +35,12 @@ class _LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.only(left: 30, right: 30),
           children: [
             const Padding(
-              padding: EdgeInsets.only(top: 30, bottom: 30),
+              padding: EdgeInsets.only(top: 30, bottom: 0),
+              child:
+                  Image(image: AssetImage('assets/images/BrickHoldEmLogo.png')),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 60, bottom: 15),
               child: Center(
                   child: Text("Sign In",
                       style: TextStyle(color: Colors.white, fontSize: 30))),

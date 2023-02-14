@@ -4,7 +4,9 @@ import 'package:brick_hold_em/settings/edit_profile_picture_page.dart';
 import 'package:brick_hold_em/settings/edit_username_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:brick_hold_em/globals.dart' as globals;
 
 import 'auth_service.dart';
 
@@ -16,9 +18,10 @@ class _SettingsPageState extends State<SettingsPage> {
   EdgeInsets titlePadding = const EdgeInsets.only(top: 30, bottom: 0, left: 10);
   EdgeInsets accountRowPadding =
       const EdgeInsets.only(left: 14, right: 14, bottom: 10, top: 15);
+  String username = "";
   bool backgroundSound = true;
   bool fxSound = true;
-  bool vibrateSound = true;
+  bool vibrate = true;
   bool liveChat = true;
   bool dailyNotifications = true;
   TextStyle textStyle = const TextStyle(
@@ -29,6 +32,12 @@ class _SettingsPageState extends State<SettingsPage> {
       const TextStyle(fontSize: 14, color: Colors.grey);
   Color iconColor = Colors.white;
   double iconSize = 14;
+
+  @override
+  void initState() {
+    super.initState();
+    getSwitchValues();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,9 +80,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         style: textStyle,
                       )),
                       Text(
-                         FirebaseAuth.instance.currentUser!.displayName!,
-                         style: accountTextStyle,
-                       ),
+                        FirebaseAuth.instance.currentUser!.displayName!,
+                        style: accountTextStyle,
+                      ),
                       Icon(
                         Icons.arrow_forward_ios,
                         color: iconColor,
@@ -100,7 +109,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         style: textStyle,
                       )),
                       Text(
-                        "almanza1112",
+                        username,
                         style: accountTextStyle,
                       ),
                       Icon(
@@ -221,6 +230,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (bool value) {
                     setState(() {
                       backgroundSound = value;
+                      setSwitchState(globals.settingsBackgroundSound, value);
                     });
                   }),
               SwitchListTile(
@@ -232,6 +242,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (bool value) {
                     setState(() {
                       fxSound = value;
+                      setSwitchState(globals.settingsFXSound, value);
                     });
                   }),
               SwitchListTile(
@@ -239,10 +250,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     "Vibrate",
                     style: textStyle,
                   ),
-                  value: vibrateSound,
+                  value: vibrate,
                   onChanged: (bool value) {
                     setState(() {
-                      vibrateSound = value;
+                      vibrate = value;
+                      setSwitchState(globals.settingsVibrate, value);
                     });
                   }),
               Padding(
@@ -261,6 +273,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (bool value) {
                     setState(() {
                       liveChat = value;
+                      setSwitchState(globals.settingsGameLiveChat, value);
                     });
                   }),
               Padding(
@@ -284,5 +297,30 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
         ));
+  }
+
+  getSwitchValues() async {
+   
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? backgroundSoundSwitchState =
+        prefs.getBool(globals.settingsBackgroundSound);
+    bool? fxSoundSwitchState = prefs.getBool(globals.settingsFXSound);
+
+    bool? vibrateSwitchState = prefs.getBool(globals.settingsVibrate);
+    bool? chatSwitchState = prefs.getBool(globals.settingsGameLiveChat);
+    String? loggedInUserUsername = prefs.getString(globals.loggedInUserUsername);
+    print("THIS $loggedInUserUsername");
+    setState(() {
+      backgroundSound = backgroundSoundSwitchState!;
+      fxSound = fxSoundSwitchState!;
+      vibrate = vibrateSwitchState!;
+      liveChat = chatSwitchState!;
+      username = prefs.getString(globals.loggedInUserUsername)!;
+    });
+  }
+
+  setSwitchState(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool(key, value);
   }
 }

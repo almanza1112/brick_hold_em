@@ -59,7 +59,7 @@ class _EditUsernamePageState extends State<EditUsernamePage> {
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp("[a-zA-Z0-9_.-]"))
                 ],
-                initialValue: FirebaseAuth.instance.currentUser!.uid,
+                initialValue: FirebaseAuth.instance.currentUser!.displayName,
                 style: const TextStyle(color: Colors.white),
                 cursorColor: Colors.white,
                 decoration: const InputDecoration(

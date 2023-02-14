@@ -147,13 +147,13 @@ class _CreateAccountProfilePictureState
       ],
       uiSettings: [
         AndroidUiSettings(
-            toolbarTitle: 'Cropper',
-            toolbarColor: Colors.deepOrange,
+            toolbarTitle: 'Crop Image',
+            toolbarColor: Colors.teal,
             toolbarWidgetColor: Colors.white,
             initAspectRatio: CropAspectRatioPreset.original,
             lockAspectRatio: false),
         IOSUiSettings(
-          title: 'Cropper',
+          title: 'Crop Image',
         ),
       ],
     );

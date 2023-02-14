@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:animations/animations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:brick_hold_em/globals.dart' as globals;
 
 import 'settings_page.dart';
 import 'howtoplay_page.dart';
@@ -33,7 +36,7 @@ class _HomePageState extends State<HomePage> {
               const Padding(
                 padding: EdgeInsets.only(top: 100, bottom: 100),
                 child: Image(
-                    image: AssetImage('assets/images/AlmanzaTechLogo.png')),
+                    image: AssetImage('assets/images/BrickHoldEmLogo.png')),
               ),
               Expanded(
                   child: Row(
@@ -341,7 +344,7 @@ class _HomePageState extends State<HomePage> {
                 //   style: const TextStyle(fontSize: 18, color: Colors.white),
                 // ),
                 FutureBuilder<Map<String, dynamic>?>(
-                  future: readUser(),
+                  future: setUserData(),
                   builder: (context, snapshot) {
                     /** TODO need to clean this up */
                     if (snapshot.hasData) {
@@ -371,14 +374,18 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<Map<String, dynamic>?> readUser() async {
+  Future<Map<String, dynamic>?> setUserData() async {
     final docUser = FirebaseFirestore.instance
         .collection("users")
         .doc(FirebaseAuth.instance.currentUser!.uid);
     final snapshot = await docUser.get();
 
     if (snapshot.exists) {
-      return snapshot.data();
+      var data = snapshot.data();
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString(globals.loggedInUserUsername, data!["username"]); 
+      
+      return data;
     } else {
       /** TODO: need to clean this up */
       return {"chips": '20'};
