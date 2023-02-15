@@ -120,7 +120,7 @@ class _GamePlayersState extends State<GamePlayers> {
         Stack(
           children: <Widget>[
             CircleAvatar(
-              backgroundImage: AssetImage('assets/images/TESTING.jpg'),
+              backgroundImage: const AssetImage('assets/images/poker_player.jpeg'),
               radius: imageRadius,
             ),
           ],
