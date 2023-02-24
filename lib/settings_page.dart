@@ -300,7 +300,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   getSwitchValues() async {
-   
+   // Access SharedPreferences, get values
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? backgroundSoundSwitchState =
         prefs.getBool(globals.settingsBackgroundSound);
@@ -309,13 +309,14 @@ class _SettingsPageState extends State<SettingsPage> {
     bool? vibrateSwitchState = prefs.getBool(globals.settingsVibrate);
     bool? chatSwitchState = prefs.getBool(globals.settingsGameLiveChat);
     String? loggedInUserUsername = prefs.getString(globals.loggedInUserUsername);
-    print("THIS $loggedInUserUsername");
+
+    // Set values 
     setState(() {
       backgroundSound = backgroundSoundSwitchState!;
       fxSound = fxSoundSwitchState!;
       vibrate = vibrateSwitchState!;
       liveChat = chatSwitchState!;
-      username = prefs.getString(globals.loggedInUserUsername)!;
+      username = loggedInUserUsername!;
     });
   }
 

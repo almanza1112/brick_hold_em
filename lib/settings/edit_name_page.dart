@@ -9,6 +9,14 @@ class EditNamePage extends StatefulWidget {
 
 class _EditNamePageState extends State<EditNamePage> {
   bool visibleName = true;
+  final user = FirebaseAuth.instance.currentUser;
+  var nameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController(text: user!.displayName);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +32,47 @@ class _EditNamePageState extends State<EditNamePage> {
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+      body: ListView(
+        padding: const EdgeInsets.only(left: 40, right: 40),
+        children: [
+          Wrap(
+            direction: Axis.horizontal,
+            children: [
+               Container(
+                color: Colors.greenAccent[100],
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 20, bottom: 20),
+                  child: Row(
+                    children: const [
+                      Icon(
+                        Icons.check,
+                        color: Colors.green,
+                      ),
+                      Text(
+                        "Name changed succesuful!",
+                        style: TextStyle(color: Colors.green),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            color: Colors.greenAccent[100],
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 20),
+              child: Row(
+                children: const [
+                  Icon(Icons.check, color: Colors.green,),
+                  Text("Name changed succesuful!", style: TextStyle(color: Colors.green),)
+                ],
+              ),
+            ),
+          ),
+          Form(
+            child: Padding(
+              padding: const EdgeInsets.only(top:70, bottom: 20),
               child: SwitchListTile(
                   title: const Text(
                     "Visible on profile and search results",
@@ -45,36 +87,58 @@ class _EditNamePageState extends State<EditNamePage> {
                     });
                   }),
             ),
-            const Text(
+          ),
+          const Center(
+            child: Text(
               "Edit your name",
               style: TextStyle(color: Colors.white),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 20),
-              child: TextFormField(
-                initialValue: FirebaseAuth.instance.currentUser!.displayName!,
-                style: const TextStyle(color: Colors.white),
-                cursorColor: Colors.white,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue),
-                  ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 20, bottom: 20),
+            child: TextFormField(
+              validator: validateName,
+              controller: nameController,
+              style: const TextStyle(color: Colors.black),
+              cursorColor: Colors.black,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Colors.white,
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue),
                 ),
               ),
             ),
-            TextButton(
-              child: const Text(
-                "UPDATE",
-              ),
-              onPressed: () {},
+          ),
+          TextButton(
+            child: const Text(
+              "UPDATE",
             ),
-          ],
-        ),
+            onPressed: () {
+              updateName();
+            },
+          ),
+        ],
       ),
     );
+  }
+
+  String? validateName(String? value) {
+    if (value!.isEmpty) {
+      return "Field can't be empty";
+    } else {
+      return null;
+    }
+  }
+
+  updateName() {
+    user!
+        .updateDisplayName(nameController.text.trim())
+        .then((value) => print("I DID IT"))
+        .onError((error, stackTrace) => print("i did not do IT!!!!"));
   }
 }
