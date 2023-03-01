@@ -3,7 +3,6 @@ import 'package:brick_hold_em/settings/edit_name_page.dart';
 import 'package:brick_hold_em/settings/edit_profile_picture_page.dart';
 import 'package:brick_hold_em/settings/edit_username_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
