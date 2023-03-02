@@ -7,6 +7,7 @@ class EditNamePage extends StatefulWidget {
 
 class _EditNamePageState extends State<EditNamePage> {
   bool visibleName = true;
+  bool visibleStatus = false;
   final user = FirebaseAuth.instance.currentUser;
   var nameController = TextEditingController();
 
@@ -33,18 +34,20 @@ class _EditNamePageState extends State<EditNamePage> {
       body: ListView(
         padding: const EdgeInsets.only(left: 40, right: 40),
         children: [
-          Wrap(
-            direction: Axis.horizontal,
-            children: [
-               Container(
+          AnimatedOpacity(
+            opacity: visibleStatus ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 500),
+            child: Center(
+              child: Container(
                 color: Colors.greenAccent[100],
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 20, bottom: 20),
+                  padding: const EdgeInsets.all(15),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: const [
-                      Icon(
-                        Icons.check,
-                        color: Colors.green,
+                      Icon(Icons.check, color: Colors.green),
+                      SizedBox(
+                        width: 10,
                       ),
                       Text(
                         "Name changed succesuful!",
@@ -54,23 +57,11 @@ class _EditNamePageState extends State<EditNamePage> {
                   ),
                 ),
               ),
-            ],
-          ),
-          Container(
-            color: Colors.greenAccent[100],
-            child: Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 20),
-              child: Row(
-                children: const [
-                  Icon(Icons.check, color: Colors.green,),
-                  Text("Name changed succesuful!", style: TextStyle(color: Colors.green),)
-                ],
-              ),
             ),
           ),
           Form(
             child: Padding(
-              padding: const EdgeInsets.only(top:70, bottom: 20),
+              padding: const EdgeInsets.only(top: 50, bottom: 20),
               child: SwitchListTile(
                   title: const Text(
                     "Visible on profile and search results",
@@ -134,9 +125,15 @@ class _EditNamePageState extends State<EditNamePage> {
   }
 
   updateName() {
-    user!
-        .updateDisplayName(nameController.text.trim())
-        .then((value) => print("I DID IT"))
-        .onError((error, stackTrace) => print("i did not do IT!!!!"));
+    setState(() {
+      visibleStatus = false;
+    });
+    user!.updateDisplayName(nameController.text.trim()).then((value) {
+      setState(() {
+        visibleStatus = !visibleStatus;
+      });
+    }).onError((error, stackTrace) {
+      print(error);
+    });
   }
 }
