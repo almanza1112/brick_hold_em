@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class EditUsernamePage extends StatefulWidget {
+  const EditUsernamePage({required this.onChanged});
+
+  final ValueChanged<String> onChanged;
+
   _EditUsernamePageState createState() => _EditUsernamePageState();
 }
 
@@ -15,6 +20,8 @@ class _EditUsernamePageState extends State<EditUsernamePage> {
       const TextStyle(color: Colors.white, fontWeight: FontWeight.w200);
 
   var usernameController = TextEditingController();
+
+  //_EditUsernamePageState(this.onChanged);
 
   @override
   void initState() {
@@ -55,7 +62,7 @@ class _EditUsernamePageState extends State<EditUsernamePage> {
                         width: 10,
                       ),
                       Text(
-                        "Name changed succesuful!",
+                        "Username changed succesuful!",
                         style: TextStyle(color: Colors.green),
                       )
                     ],
@@ -64,29 +71,33 @@ class _EditUsernamePageState extends State<EditUsernamePage> {
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(top: 50, bottom: 10),
-            child: Text(
-              "Edit your username using only the following:",
-              style: TextStyle(color: Colors.white),
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 50, bottom: 10),
+              child: Text(
+                "Edit your username using only the following:",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "$bullet Any letter in the alphabet",
-                style: ulTextStyle,
-              ),
-              Text(
-                "$bullet Any number",
-                style: ulTextStyle,
-              ),
-              Text(
-                "$bullet Only '_' and '-' special characters",
-                style: ulTextStyle,
-              ),
-            ],
+          Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "$bullet Any letter in the alphabet",
+                  style: ulTextStyle,
+                ),
+                Text(
+                  "$bullet Any number",
+                  style: ulTextStyle,
+                ),
+                Text(
+                  "$bullet Only '_' and '-' special characters",
+                  style: ulTextStyle,
+                ),
+              ],
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 20, bottom: 20),
@@ -110,7 +121,14 @@ class _EditUsernamePageState extends State<EditUsernamePage> {
               ),
             ),
           ),
-          TextButton(onPressed: () {updateUsername();}, child: const Text("UPDATE")),
+          TextButton(
+              onPressed: () {
+                setState(() {
+                  visibleStatus = false;
+                });
+                updateUsername();
+              },
+              child: const Text("UPDATE")),
         ],
       ),
     );
@@ -125,7 +143,24 @@ class _EditUsernamePageState extends State<EditUsernamePage> {
     });
   }
 
-  updateUsername() {
-    
+  updateUsername() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var db = FirebaseFirestore.instance;
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+
+    final userRef = db.collection("users").doc(uid);
+
+    String updatedUsername = usernameController.text.trim();
+
+    var update = {"username": updatedUsername};
+    userRef.update(update).then((value) {
+      prefs.setString(globals.loggedInUserUsername, updatedUsername);
+      setState(() {
+        visibleStatus = !visibleStatus;
+      });
+      widget.onChanged(updatedUsername);
+    }).onError((error, stackTrace) {
+      print(error);
+    });
   }
 }
