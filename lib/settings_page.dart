@@ -17,7 +17,9 @@ class _SettingsPageState extends State<SettingsPage> {
   EdgeInsets titlePadding = const EdgeInsets.only(top: 30, bottom: 0, left: 10);
   EdgeInsets accountRowPadding =
       const EdgeInsets.only(left: 14, right: 14, bottom: 10, top: 15);
+  String fullName = FirebaseAuth.instance.currentUser!.displayName!;
   String username = "";
+  String email = FirebaseAuth.instance.currentUser!.email!;
   bool backgroundSound = true;
   bool fxSound = true;
   bool vibrate = true;
@@ -66,8 +68,16 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               InkWell(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => EditNamePage()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EditNamePage(
+                                onChanged: (value) {
+                                  setState(() {
+                                    fullName = value;
+                                  });
+                                },
+                              )));
                 },
                 child: Padding(
                   padding: accountRowPadding,
@@ -79,7 +89,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         style: textStyle,
                       )),
                       Text(
-                        FirebaseAuth.instance.currentUser!.displayName!,
+                        fullName,
                         style: accountTextStyle,
                       ),
                       Icon(
@@ -96,7 +106,13 @@ class _SettingsPageState extends State<SettingsPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => EditUsernamePage()));
+                          builder: (context) => EditUsernamePage(
+                                onChanged: (value) {
+                                  setState(() {
+                                    username = value;
+                                  });
+                                },
+                              )));
                 },
                 child: Padding(
                   padding: accountRowPadding,
@@ -123,7 +139,11 @@ class _SettingsPageState extends State<SettingsPage> {
               InkWell(
                 onTap: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => EditEmailPage()));
+                      MaterialPageRoute(builder: (context) => EditEmailPage(onChanged: (value) {
+                        setState(() {
+                          email = value;
+                        });
+                      },)));
                 },
                 child: Padding(
                   padding: accountRowPadding,
@@ -135,7 +155,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         style: textStyle,
                       )),
                       Text(
-                        FirebaseAuth.instance.currentUser!.email!,
+                        email,
                         style: accountTextStyle,
                       ),
                       Icon(
@@ -299,7 +319,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   getSwitchValues() async {
-   // Access SharedPreferences, get values
+    // Access SharedPreferences, get values
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? backgroundSoundSwitchState =
         prefs.getBool(globals.settingsBackgroundSound);
@@ -307,9 +327,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
     bool? vibrateSwitchState = prefs.getBool(globals.settingsVibrate);
     bool? chatSwitchState = prefs.getBool(globals.settingsGameLiveChat);
-    String? loggedInUserUsername = prefs.getString(globals.loggedInUserUsername);
+    String? loggedInUserUsername =
+        prefs.getString(globals.loggedInUserUsername);
 
-    // Set values 
+    // Set values
     setState(() {
       backgroundSound = backgroundSoundSwitchState!;
       fxSound = fxSoundSwitchState!;

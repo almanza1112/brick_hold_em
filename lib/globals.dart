@@ -13,3 +13,7 @@ String settingsGameLiveChat = "settingsGameLiveChat";
 
 // Logged-in user info
 String loggedInUserUsername = "loggedInUserUsername";
+
+// Firebase keys
+// (fsk = Firestore Key Name)
+String fskUsername = "username";

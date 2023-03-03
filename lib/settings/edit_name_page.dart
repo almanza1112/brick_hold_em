@@ -1,7 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:brick_hold_em/globals.dart' as globals;
 
 class EditNamePage extends StatefulWidget {
+  const EditNamePage({ required this.onChanged});
+
+  final ValueChanged<String> onChanged;
   _EditNamePageState createState() => _EditNamePageState();
 }
 
@@ -128,10 +134,13 @@ class _EditNamePageState extends State<EditNamePage> {
     setState(() {
       visibleStatus = false;
     });
-    user!.updateDisplayName(nameController.text.trim()).then((value) {
+    
+    String updatedName = nameController.text.trim();
+    user!.updateDisplayName(updatedName).then((value) {
       setState(() {
         visibleStatus = !visibleStatus;
       });
+      widget.onChanged(updatedName);
     }).onError((error, stackTrace) {
       print(error);
     });
