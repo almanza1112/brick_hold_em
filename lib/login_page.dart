@@ -8,12 +8,16 @@ class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
+
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   final formKey = GlobalKey<FormState>();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
   bool obscureText = true;
+  bool visibleStatus = false;
   void toggle() {
     setState(() {
       obscureText = !obscureText;
@@ -26,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
     EdgeInsets contentPadding = const EdgeInsets.only(left: 10, right: 10);
     TextStyle formFieldLabelStyle = const TextStyle(
         color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600);
-    EdgeInsets formFieldLabelPadding = EdgeInsets.only(bottom: 5);
+    EdgeInsets formFieldLabelPadding = const EdgeInsets.only(bottom: 5);
 
     return Scaffold(
       backgroundColor: Colors.brown.shade300,
@@ -45,6 +49,31 @@ class _LoginPageState extends State<LoginPage> {
                   child: Text("Sign In",
                       style: TextStyle(color: Colors.white, fontSize: 30))),
             ),
+            AnimatedOpacity(
+              opacity: visibleStatus ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 500),
+              child: Center(
+                child: Container(
+                  color: Colors.greenAccent[100],
+                  child: Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.check, color: Colors.green),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          "Name changed succesuful!",
+                          style: TextStyle(color: Colors.green),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
             Form(
               key: formKey,
               child: Column(
@@ -59,8 +88,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 20),
-                    child: TextField(
-                      style: TextStyle(color: Colors.black),
+                    child: TextFormField(
+                      controller: emailController,
+                      style: const TextStyle(color: Colors.black),
                       cursorColor: Colors.black,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
@@ -85,14 +115,17 @@ class _LoginPageState extends State<LoginPage> {
                       style: formFieldLabelStyle,
                     ),
                   ),
-                  TextField(
+                  TextFormField(
+                    controller: passwordController,
                     obscureText: obscureText,
                     enableSuggestions: false,
                     /* TODO: Look into removing this in the future - autocorrext and enabled suggestions*/
                     autocorrect: false,
                     style: const TextStyle(color: Colors.black),
                     cursorColor: Colors.black,
+                    
                     decoration: InputDecoration(
+                      
                         contentPadding: contentPadding,
                         filled: true,
                         fillColor: Colors.white,
@@ -120,11 +153,18 @@ class _LoginPageState extends State<LoginPage> {
                             style: TextStyle(color: Colors.white),
                           ))),
                   ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          visibleStatus = false;
+                        });
+                        var email = emailController.text.trim();
+                        var password = passwordController.text.trim();
+                        AuthService().signInWithEmailAndPassword(email, password);
+                      },
                       style: ElevatedButton.styleFrom(
                           //minimumSize: Size.fromWidth(double.infinity)
                           ),
-                      child: Text("LOGIN"))
+                      child: const Text("LOGIN"))
                 ],
               ),
             ),
@@ -141,7 +181,7 @@ class _LoginPageState extends State<LoginPage> {
               style: TextStyle(color: Colors.white),
             )),
             Padding(
-              padding: EdgeInsets.only(top: 30, bottom: 30),
+              padding: const EdgeInsets.only(top: 30, bottom: 30),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -187,5 +227,11 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+   showError() {
+    setState(() {
+      visibleStatus = !visibleStatus;
+    });
   }
 }

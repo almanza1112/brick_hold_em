@@ -12,15 +12,18 @@ class EditEmailPage extends StatefulWidget {
 class _EditEmailPageState extends State<EditEmailPage> {
   final user = FirebaseAuth.instance.currentUser;
   var emailController = TextEditingController();
+  String email = "";
   bool visibleStatus = false;
 
 
   @override
   void initState() {
     super.initState();
-
-    emailController = TextEditingController(text: user!.email);
+    // Assign to email variable so it can be used to reauthenticate user
+    email = user!.email!;
+    emailController = TextEditingController(text: email);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,6 +116,9 @@ class _EditEmailPageState extends State<EditEmailPage> {
     });
 
     String updatedEmail = emailController.text.trim();
+
+    //AuthCredential authCredential = EmailAuthProvider.credential(email: email, password: "sad");
+    //user!.reauthenticateWithCredential(authCredential);
     user!.updateEmail(updatedEmail).then((value) {
       setState(() {
         visibleStatus = !visibleStatus;

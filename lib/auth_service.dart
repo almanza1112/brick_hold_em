@@ -20,6 +20,23 @@ class AuthService {
         });
   }
 
+  signInWithEmailAndPassword(email, password) {
+    FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: password)
+        .then((value) {
+      print("it works");
+    }).onError((error, stackTrace) {
+      
+      var errorString = error.toString();
+      if(errorString.contains("wrong-password")) {
+        LoginPageState().showError();
+      }
+      print(error.toString().contains("firebase"));
+
+
+    });
+  }
+
   signInWithGoogle() async {
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser =
@@ -50,7 +67,8 @@ class AuthService {
         FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
     // Once signed in, return the UserCredential
-    var userCred = await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+    var userCred = await FirebaseAuth.instance
+        .signInWithCredential(facebookAuthCredential);
 
     return checkIfUserExists(userCred);
   }
@@ -84,7 +102,7 @@ class AuthService {
               'chips': 1000,
               //'name': FirebaseAuth.instance.currentUser!.displayName,
               //'photoURL': FirebaseAuth.instance.currentUser!.photoURL
-              })
+            })
             .then((value) => print("User Added"))
             .catchError((error) => print("Failed to add user: $error"));
       }
