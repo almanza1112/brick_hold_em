@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:brick_hold_em/login/create_account_information_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 import 'auth_service.dart';
 
@@ -9,7 +15,6 @@ class LoginPage extends StatefulWidget {
 
   @override
   LoginPageState createState() => LoginPageState();
-
 }
 
 class LoginPageState extends State<LoginPage> {
@@ -18,6 +23,7 @@ class LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
   bool obscureText = true;
   bool visibleStatus = false;
+  String errorText = "";
   void toggle() {
     setState(() {
       obscureText = !obscureText;
@@ -44,29 +50,32 @@ class LoginPageState extends State<LoginPage> {
                   Image(image: AssetImage('assets/images/BrickHoldEmLogo.png')),
             ),
             const Padding(
-              padding: EdgeInsets.only(top: 60, bottom: 15),
+              padding: EdgeInsets.only(top: 50),
               child: Center(
                   child: Text("Sign In",
                       style: TextStyle(color: Colors.white, fontSize: 30))),
             ),
-            AnimatedOpacity(
-              opacity: visibleStatus ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 500),
-              child: Center(
+            Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 10),
+              child: AnimatedOpacity(
+                opacity: visibleStatus ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 500),
                 child: Container(
-                  color: Colors.greenAccent[100],
+                  color: Colors.redAccent[100],
                   child: Padding(
-                    padding: const EdgeInsets.all(15),
+                    padding: const EdgeInsets.all(5),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.check, color: Colors.green),
-                        SizedBox(
+                      children: [
+                        const Icon(Icons.close, color: Colors.red),
+                        const SizedBox(
                           width: 10,
                         ),
-                        Text(
-                          "Name changed succesuful!",
-                          style: TextStyle(color: Colors.green),
+                        Flexible(
+                          child: Text(
+                            errorText,
+                            style: const TextStyle(color: Colors.red),
+                          ),
                         )
                       ],
                     ),
@@ -123,9 +132,7 @@ class LoginPageState extends State<LoginPage> {
                     autocorrect: false,
                     style: const TextStyle(color: Colors.black),
                     cursorColor: Colors.black,
-                    
                     decoration: InputDecoration(
-                      
                         contentPadding: contentPadding,
                         filled: true,
                         fillColor: Colors.white,
@@ -159,7 +166,7 @@ class LoginPageState extends State<LoginPage> {
                         });
                         var email = emailController.text.trim();
                         var password = passwordController.text.trim();
-                        AuthService().signInWithEmailAndPassword(email, password);
+                        signInWithEmailAndPassword(email, password);
                       },
                       style: ElevatedButton.styleFrom(
                           //minimumSize: Size.fromWidth(double.infinity)
@@ -181,7 +188,7 @@ class LoginPageState extends State<LoginPage> {
               style: TextStyle(color: Colors.white),
             )),
             Padding(
-              padding: const EdgeInsets.only(top: 30, bottom: 30),
+              padding: const EdgeInsets.only(top: 30, bottom: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -189,7 +196,7 @@ class LoginPageState extends State<LoginPage> {
                     padding: const EdgeInsets.only(left: 10, right: 20),
                     child: IconButton(
                         onPressed: () {
-                          AuthService().signInWithFacebook();
+                          signInWithFacebook();
                         },
                         icon: Image.asset('assets/images/facebook.png')),
                   ),
@@ -197,7 +204,7 @@ class LoginPageState extends State<LoginPage> {
                     padding: const EdgeInsets.only(left: 20, right: 10),
                     child: IconButton(
                         onPressed: () {
-                          AuthService().signInWithGoogle();
+                          signInWithGoogle();
                         },
                         icon: Image.asset("assets/images/google.png")),
                   )
@@ -207,13 +214,18 @@ class LoginPageState extends State<LoginPage> {
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               Row(
                 children: [
-                  const Text("Dont't have an account?", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w300),),
+                  const Text(
+                    "Dont't have an account?",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w300),
+                  ),
                   TextButton(
                       onPressed: () {
-                         Navigator.push(
+                        Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => CreateAccountInformationPage()));
+                                builder: (context) =>
+                                    CreateAccountInformationPage()));
                       },
                       child: const Text(
                         "Sign Up",
@@ -229,9 +241,104 @@ class LoginPageState extends State<LoginPage> {
     );
   }
 
-   showError() {
+  // TODO: This SHOULD be in auth_service.dart but could not get
+  // it to work since  I needed to setState for the error
+  // container to appear.
+  signInWithEmailAndPassword(email, password) {
     setState(() {
-      visibleStatus = !visibleStatus;
+      visibleStatus = false;
     });
+    FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: password)
+        .then((value) {})
+        .onError((error, stackTrace) {
+      var errorString = error.toString();
+
+      if (errorString.contains("too-many-requests")) {
+        setState(() {
+          errorText = "Too many failed attemps, try again later.";
+          visibleStatus = !visibleStatus;
+        });
+      } else {
+        setState(() {
+          errorText = "Incorrect email/password";
+          visibleStatus = !visibleStatus;
+        });
+      }
+    });
+  }
+
+  signInWithFacebook() async {
+    // Trigger the sign-in flow
+    final LoginResult loginResult = await FacebookAuth.instance.login();
+
+    // Create a credential from thex   access token
+    final OAuthCredential facebookAuthCredential =
+        FacebookAuthProvider.credential(loginResult.accessToken!.token);
+
+    // Once signed in, return the UserCredential
+    //var userCred = await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+    //return checkIfUserExists(userCred);
+
+    FirebaseAuth.instance
+        .signInWithCredential(facebookAuthCredential)
+        .then((value) {
+      // Sign in happens
+    }).onError((error, stackTrace) {
+      var errorString = error.toString();
+
+      if (errorString.contains("account-exists")) {
+        setState(() {
+          errorText = "An account with that email already exists.";
+          visibleStatus = !visibleStatus;
+        });
+      } else {
+        setState(() {
+          errorText = "An error has occured.";
+          visibleStatus = !visibleStatus;
+        });
+      }
+    });
+  }
+
+  signInWithGoogle() async {
+    // Trigger the authentication flow
+    final GoogleSignInAccount? googleUser =
+        await GoogleSignIn(scopes: <String>["email"]).signIn();
+
+    // Check if email is already being used
+    Map result = await isEmailUsed(googleUser!.email);
+
+    if (result['emailAvailable']) {
+      // Email is available
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser!.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Once signed in, return the UserCredential
+      //var userCred = await FirebaseAuth.instance.signInWithCredential(credential);
+
+      //return checkIfUserExists(userCred);
+    } else {
+      setState(() {
+        errorText = "An account with that email already exists.";
+        visibleStatus = !visibleStatus;
+      });
+    }
+  }
+
+  Future<Map> isEmailUsed(String email) async {
+    http.Response response = await http.get(
+        Uri.parse('https://brick-hold-em-api.onrender.com/account/$email'));
+
+    Map data = jsonDecode(response.body);
+
+    return data;
   }
 }
