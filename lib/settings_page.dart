@@ -19,7 +19,7 @@ class _SettingsPageState extends State<SettingsPage> {
       const EdgeInsets.only(left: 14, right: 14, bottom: 10, top: 15);
   String fullName = FirebaseAuth.instance.currentUser!.displayName!;
   String username = "";
-  String email = FirebaseAuth.instance.currentUser!.email!;
+  String email = "";//FirebaseAuth.instance.currentUser!.email!;
   bool backgroundSound = true;
   bool fxSound = true;
   bool vibrate = true;
@@ -42,6 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
@@ -138,12 +139,16 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               InkWell(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => EditEmailPage(onChanged: (value) {
-                        setState(() {
-                          email = value;
-                        });
-                      },)));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EditEmailPage(
+                                onChanged: (value) {
+                                  setState(() {
+                                    email = value;
+                                  });
+                                },
+                              )));
                 },
                 child: Padding(
                   padding: accountRowPadding,
@@ -332,11 +337,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
     // Set values
     setState(() {
+      username = loggedInUserUsername!;
+      // TODO: backgroundSound and below throws null when first 
+      //creating profile, need to fix
       backgroundSound = backgroundSoundSwitchState!;
       fxSound = fxSoundSwitchState!;
       vibrate = vibrateSwitchState!;
       liveChat = chatSwitchState!;
-      username = loggedInUserUsername!;
     });
   }
 

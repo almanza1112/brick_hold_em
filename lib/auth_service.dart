@@ -20,20 +20,16 @@ class AuthService {
         });
   }
 
-  signInWithEmailAndPassword(email, password) {
+  signInWithEmailAndPassword(email, password) async {
     FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
-        .then((value) {
-      print("it works");
-    }).onError((error, stackTrace) {
-      
+        .then((value) {})
+        .onError((error, stackTrace) {
       var errorString = error.toString();
-      if(errorString.contains("wrong-password")) {
-        LoginPageState().showError();
+      print(error);
+      if (errorString.contains("too-many-requests")) {
+        print("in the IF");
       }
-      print(error.toString().contains("firebase"));
-
-
     });
   }
 
@@ -41,6 +37,8 @@ class AuthService {
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser =
         await GoogleSignIn(scopes: <String>["email"]).signIn();
+
+    print(googleUser!.email);
 
     // Obtain the auth details from the request
     final GoogleSignInAuthentication googleAuth =
@@ -53,9 +51,9 @@ class AuthService {
     );
 
     // Once signed in, return the UserCredential
-    var userCred = await FirebaseAuth.instance.signInWithCredential(credential);
+    //var userCred = await FirebaseAuth.instance.signInWithCredential(credential);
 
-    return checkIfUserExists(userCred);
+    //return checkIfUserExists(userCred);
   }
 
   signInWithFacebook() async {
@@ -67,10 +65,16 @@ class AuthService {
         FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
     // Once signed in, return the UserCredential
-    var userCred = await FirebaseAuth.instance
-        .signInWithCredential(facebookAuthCredential);
+    //var userCred = await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+    //return checkIfUserExists(userCred);
 
-    return checkIfUserExists(userCred);
+    FirebaseAuth.instance
+        .signInWithCredential(facebookAuthCredential)
+        .then((value) {
+      print("success");
+    }).onError((error, stackTrace) {
+      print("ERROR!!!!! $error");
+    });
   }
 
   signOut() {

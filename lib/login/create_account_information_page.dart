@@ -39,143 +39,147 @@ class _CreateAccountInformationPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.brown.shade300,
-      appBar: AppBar(
-        backgroundColor: Colors.brown.shade300,
-        shadowColor: Colors.transparent,
-        leading: BackButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Stack(
-        children: [
-          Visibility(
-            visible: progressBarVisibile,
-            child: Align(
-                alignment: Alignment.topCenter,
-                child: LinearProgressIndicator(
-                  backgroundColor: Colors.grey,
-                  valueColor: const AlwaysStoppedAnimation(Colors.blue),
-                  value: progressBarValue,
-                )),
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: Colors.brown.shade300,
+          appBar: AppBar(
+            backgroundColor: Colors.brown.shade300,
+            shadowColor: Colors.transparent,
+            leading: BackButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
           ),
-          ListView(
-            padding: const EdgeInsets.only(left: 30, right: 30),
+          body: Stack(
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 40, bottom: 40),
-                child: Center(
-                  child: Text("Personal Info",
-                      style: TextStyle(color: Colors.white, fontSize: 30)),
-                ),
+              Visibility(
+                visible: progressBarVisibile,
+                child: Align(
+                    alignment: Alignment.topCenter,
+                    child: LinearProgressIndicator(
+                      backgroundColor: Colors.grey,
+                      valueColor: const AlwaysStoppedAnimation(Colors.blue),
+                      value: progressBarValue,
+                    )),
               ),
-              Form(
-                key: formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Padding(
-                    //   padding: formFieldLabelPadding,
-                    //   child: Text(
-                    //     "First Name",
-                    //     style: formFieldLabelStyle,
-                    //   ),
-                    // ),
-                    // Padding(
-                    //   padding: formFieldPadding,
-                    //   child: TextField(
-                    //     style: TextStyle(color: Colors.black),
-                    //     cursorColor: Colors.black,
-                    //     keyboardType: TextInputType.emailAddress,
-                    //     decoration: InputDecoration(
-                    //       contentPadding: contentPadding,
-                    //       filled: true,
-                    //       fillColor: Colors.white,
-                    //       hintText: "Enter your First Name",
-                    //       border: const OutlineInputBorder(),
-                    //       enabledBorder: const OutlineInputBorder(
-                    //         borderSide: BorderSide(color: Colors.white),
-                    //       ),
-                    //       focusedBorder: const OutlineInputBorder(
-                    //         borderSide: BorderSide(color: Colors.blue),
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
-                    Padding(
-                      padding: formFieldLabelPadding,
-                      child: Text(
-                        "Full Name",
-                        style: formFieldLabelStyle,
-                      ),
+              ListView(
+                padding: const EdgeInsets.only(left: 30, right: 30),
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(top: 40, bottom: 40),
+                    child: Center(
+                      child: Text("Personal Info",
+                          style: TextStyle(color: Colors.white, fontSize: 30)),
                     ),
-                    Padding(
-                      padding: formFieldPadding,
-                      child: TextFormField(
-                        validator: validateName,
-                        controller: nameController,
-                        style: TextStyle(color: Colors.black),
-                        cursorColor: Colors.black,
-                        keyboardType: TextInputType.name,
-                        decoration: InputDecoration(
-                          contentPadding: contentPadding,
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Enter your Full Name",
-                          border: const OutlineInputBorder(),
-                          enabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blue),
+                  ),
+                  Form(
+                    key: formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Padding(
+                        //   padding: formFieldLabelPadding,
+                        //   child: Text(
+                        //     "First Name",
+                        //     style: formFieldLabelStyle,
+                        //   ),
+                        // ),
+                        // Padding(
+                        //   padding: formFieldPadding,
+                        //   child: TextField(
+                        //     style: TextStyle(color: Colors.black),
+                        //     cursorColor: Colors.black,
+                        //     keyboardType: TextInputType.emailAddress,
+                        //     decoration: InputDecoration(
+                        //       contentPadding: contentPadding,
+                        //       filled: true,
+                        //       fillColor: Colors.white,
+                        //       hintText: "Enter your First Name",
+                        //       border: const OutlineInputBorder(),
+                        //       enabledBorder: const OutlineInputBorder(
+                        //         borderSide: BorderSide(color: Colors.white),
+                        //       ),
+                        //       focusedBorder: const OutlineInputBorder(
+                        //         borderSide: BorderSide(color: Colors.blue),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                        Padding(
+                          padding: formFieldLabelPadding,
+                          child: Text(
+                            "Full Name",
+                            style: formFieldLabelStyle,
                           ),
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: formFieldLabelPadding,
-                      child: Text(
-                        "Email",
-                        style: formFieldLabelStyle,
-                      ),
-                    ),
-                    TextFormField(
-                      validator: validateEmail,
-                      controller: emailController,
-                      style: const TextStyle(color: Colors.black),
-                      cursorColor: Colors.black,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        contentPadding: contentPadding,
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: "Enter your Email",
-                        errorText: emailIsAlreadyUsed,
-                        border: const OutlineInputBorder(),
-                        enabledBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
+                        Padding(
+                          padding: formFieldPadding,
+                          child: TextFormField(
+                            validator: validateName,
+                            controller: nameController,
+                            style: TextStyle(color: Colors.black),
+                            cursorColor: Colors.black,
+                            keyboardType: TextInputType.name,
+                            decoration: InputDecoration(
+                              contentPadding: contentPadding,
+                              filled: true,
+                              fillColor: Colors.white,
+                              hintText: "Enter your Full Name",
+                              border: const OutlineInputBorder(),
+                              enabledBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
+                              focusedBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.blue),
+                              ),
+                            ),
+                          ),
                         ),
-                        focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blue),
+                        Padding(
+                          padding: formFieldLabelPadding,
+                          child: Text(
+                            "Email",
+                            style: formFieldLabelStyle,
+                          ),
                         ),
-                      ),
+                        TextFormField(
+                          validator: validateEmail,
+                          controller: emailController,
+                          style: const TextStyle(color: Colors.black),
+                          cursorColor: Colors.black,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            contentPadding: contentPadding,
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Enter your Email",
+                            errorText: emailIsAlreadyUsed,
+                            border: const OutlineInputBorder(),
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),
-          SafeArea(
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: nextButton(),
-            ),
-          )
-        ],
-      ),
+        ),
+        SafeArea(
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: nextButton(),
+          ),
+        )
+      ],
     );
   }
 

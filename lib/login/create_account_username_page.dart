@@ -25,84 +25,87 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.brown.shade300,
-      appBar: AppBar(
+    return Stack(
+      children: [Scaffold(
         backgroundColor: Colors.brown.shade300,
-        shadowColor: Colors.transparent,
-        leading: BackButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        appBar: AppBar(
+          backgroundColor: Colors.brown.shade300,
+          shadowColor: Colors.transparent,
+          leading: BackButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
-      ),
-      body: Stack(children: [
-        ListView(
-          padding: const EdgeInsets.only(left: 30, right: 30),
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 40, bottom: 40),
-              child: Center(
-                child: Text("Username",
-                    style: TextStyle(color: Colors.white, fontSize: 30)),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "$bullet Only letters, numbers, and '-_' special characters allowed",
-                      style: bulletTextStyle,
-                    ),
-                  ],
+        body: Stack(children: [
+          ListView(
+            padding: const EdgeInsets.only(left: 30, right: 30),
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 40, bottom: 40),
+                child: Center(
+                  child: Text("Username",
+                      style: TextStyle(color: Colors.white, fontSize: 30)),
                 ),
               ),
-            ),
-            Form(
-                key: formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: formFieldLabelPadding,
-                      child: Text(
-                        "Username",
-                        style: formFieldLabelStyle,
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "$bullet Only letters, numbers, and '-_' special characters allowed",
+                        style: bulletTextStyle,
                       ),
-                    ),
-                    Padding(
-                      padding: formFieldPadding,
-                      child: TextFormField(
-                        validator: validateUsername,
-                        controller: usernameController,
-                        style: const TextStyle(color: Colors.black),
-                        cursorColor: Colors.black,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          contentPadding: contentPadding,
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Enter Username",
-                          border: const OutlineInputBorder(),
-                          enabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blue),
+                    ],
+                  ),
+                ),
+              ),
+              Form(
+                  key: formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: formFieldLabelPadding,
+                        child: Text(
+                          "Username",
+                          style: formFieldLabelStyle,
+                        ),
+                      ),
+                      Padding(
+                        padding: formFieldPadding,
+                        child: TextFormField(
+                          validator: validateUsername,
+                          controller: usernameController,
+                          style: const TextStyle(color: Colors.black),
+                          cursorColor: Colors.black,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            contentPadding: contentPadding,
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Enter Username",
+                            border: const OutlineInputBorder(),
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                )),
-          ],
-        ),
-        SafeArea(
-            child: Align(alignment: Alignment.bottomRight, child: nextButton()))
-      ]),
+                    ],
+                  )),
+            ],
+          )
+        ]),
+      ),
+      SafeArea(
+          child: Align(alignment: Alignment.bottomRight, child: nextButton()))
+      ]
     );
   }
 
