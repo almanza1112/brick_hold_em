@@ -170,7 +170,7 @@ class LoginPageState extends State<LoginPage> {
                       },
                       style: ElevatedButton.styleFrom(
                           //minimumSize: Size.fromWidth(double.infinity)
-                          ),
+                          ), 
                       child: const Text("LOGIN"))
                 ],
               ),
@@ -322,7 +322,7 @@ class LoginPageState extends State<LoginPage> {
       );
 
       // Once signed in, return the UserCredential
-      //var userCred = await FirebaseAuth.instance.signInWithCredential(credential);
+      var userCred = await FirebaseAuth.instance.signInWithCredential(credential);
 
       //return checkIfUserExists(userCred);
     } else {
