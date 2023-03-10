@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,13 +12,47 @@ class AuthService {
   handleAuthState() {
     return StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (BuildContext context, snapshot) {
+        builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return HomePage();
-          } else {
+            // Check if user has document in database
+            FirebaseFirestore db = FirebaseFirestore.instance;
+            final user = FirebaseAuth.instance.currentUser;
+            db.collection("users").doc(user!.uid).get().then(
+                (DocumentSnapshot doc) {
+              // If document gets returned, user completed profile
+              // proceed to HomePage
+              final data = doc.data() as Map<String, dynamic>;
+              print(data);
+              return HomePage();
+            }, onError: (e) {
+              print("Error getting document: $e");
+              return HomePage();
+            }).catchError(onError).onError((error, stackTrace) {
+              return HomePage();
+            });
+            doesUserHaveDocument(context);
+          } 
+          // else if (snapshot.hasError) {
+          //   return HomePage();
+          // } else if (snapshot.connectionState == ConnectionState.waiting) {
+          //   return HomePage();
+          // }
+          else {
+            print(3);
+
             return const LoginPage();
           }
         });
+  }
+
+  onError() {
+    return HomePage();
+  }
+
+  doesUserHaveDocument(context) async {
+    FirebaseFirestore db = FirebaseFirestore.instance;
+    final user = FirebaseAuth.instance.currentUser;
+    final us = await db.collection("users").doc(user!.uid).get();
   }
 
   signInWithEmailAndPassword(email, password) async {
@@ -30,50 +65,6 @@ class AuthService {
       if (errorString.contains("too-many-requests")) {
         print("in the IF");
       }
-    });
-  }
-
-  signInWithGoogle() async {
-    // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser =
-        await GoogleSignIn(scopes: <String>["email"]).signIn();
-
-    print(googleUser!.email);
-
-    // Obtain the auth details from the request
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser!.authentication;
-
-    // Create a new credential
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    // Once signed in, return the UserCredential
-    //var userCred = await FirebaseAuth.instance.signInWithCredential(credential);
-
-    //return checkIfUserExists(userCred);
-  }
-
-  signInWithFacebook() async {
-    // Trigger the sign-in flow
-    final LoginResult loginResult = await FacebookAuth.instance.login();
-
-    // Create a credential from thex   access token
-    final OAuthCredential facebookAuthCredential =
-        FacebookAuthProvider.credential(loginResult.accessToken!.token);
-
-    // Once signed in, return the UserCredential
-    //var userCred = await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
-    //return checkIfUserExists(userCred);
-
-    FirebaseAuth.instance
-        .signInWithCredential(facebookAuthCredential)
-        .then((value) {
-      print("success");
-    }).onError((error, stackTrace) {
-      print("ERROR!!!!! $error");
     });
   }
 
