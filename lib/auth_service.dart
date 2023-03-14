@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'home_page.dart';
@@ -14,32 +12,9 @@ class AuthService {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            // Check if user has document in database
-            FirebaseFirestore db = FirebaseFirestore.instance;
-            final user = FirebaseAuth.instance.currentUser;
-            db.collection("users").doc(user!.uid).get().then(
-                (DocumentSnapshot doc) {
-              // If document gets returned, user completed profile
-              // proceed to HomePage
-              final data = doc.data() as Map<String, dynamic>;
-              print(data);
-              return HomePage();
-            }, onError: (e) {
-              print("Error getting document: $e");
-              return HomePage();
-            }).catchError(onError).onError((error, stackTrace) {
-              return HomePage();
-            });
-            doesUserHaveDocument(context);
-          } 
-          // else if (snapshot.hasError) {
-          //   return HomePage();
-          // } else if (snapshot.connectionState == ConnectionState.waiting) {
-          //   return HomePage();
-          // }
+             return HomePage();
+          }
           else {
-            print(3);
-
             return const LoginPage();
           }
         });
@@ -53,19 +28,6 @@ class AuthService {
     FirebaseFirestore db = FirebaseFirestore.instance;
     final user = FirebaseAuth.instance.currentUser;
     final us = await db.collection("users").doc(user!.uid).get();
-  }
-
-  signInWithEmailAndPassword(email, password) async {
-    FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: email, password: password)
-        .then((value) {})
-        .onError((error, stackTrace) {
-      var errorString = error.toString();
-      print(error);
-      if (errorString.contains("too-many-requests")) {
-        print("in the IF");
-      }
-    });
   }
 
   signOut() {

@@ -269,6 +269,9 @@ class LoginPageState extends State<LoginPage> {
   }
 
   signInWithFacebook() async {
+    setState(() {
+      visibleStatus = false;
+    });
     // Trigger the sign-in flow
     final LoginResult loginResult = await FacebookAuth.instance.login();
 
@@ -302,18 +305,22 @@ class LoginPageState extends State<LoginPage> {
   }
 
   signInWithGoogle() async {
+    setState(() {
+      visibleStatus = false;
+    });
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser =
         await GoogleSignIn(scopes: <String>["email"]).signIn();
 
     // Check if email is already being used
-    Map result = await isEmailUsed(googleUser!.email);
+    Map result = await isEmailUsed(googleUser!.email, "google.com");
 
-    if (result['emailAvailable']) {
+
+    if (result['authMethodMatches']) {
       // Email is available
       // Obtain the auth details from the request
       final GoogleSignInAuthentication googleAuth =
-          await googleUser!.authentication;
+          await googleUser!.authentication; // TODO: PASS THIS TO create_account_username...AND THEN SIGN IN
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
@@ -325,17 +332,23 @@ class LoginPageState extends State<LoginPage> {
       var userCred = await FirebaseAuth.instance.signInWithCredential(credential);
 
       //return checkIfUserExists(userCred);
-    } else {
+    } else if (!result['authMethodMatches']) {
       setState(() {
         errorText = "An account with that email already exists.";
         visibleStatus = !visibleStatus;
       });
+    } else if (result['newUser']){
+      print("this is a new user");
+    } else {
+      // There is an error
+            print("this is a new user");
+
     }
   }
 
-  Future<Map> isEmailUsed(String email) async {
+  Future<Map> isEmailUsed(String email, String providerID) async {
     http.Response response = await http.get(
-        Uri.parse('https://brick-hold-em-api.onrender.com/account/$email'));
+        Uri.parse('https://brick-hold-em-api.onrender.com/sign_in/$email?providerID=$providerID'));
 
     Map data = jsonDecode(response.body);
 
