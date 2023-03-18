@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/effects.dart';
@@ -6,26 +8,33 @@ import 'package:flame/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:http/http.dart' as http;
+
 import 'dart:convert';
+
+// TODO: need to do this
+// Mario, one button to order/pair/color
+// Bryant, one button to  expand to multiple buttons
+// do both...
+
+// Help button should be available only for non competive games
+
+// Engine but do at end
 
 List<String> cardsSelected = [];
 
 class GameTable extends FlameGame with HasTappables {
-
   GameTable({required this.notchPadding});
-    
+
   num notchPadding;
 
   SpriteComponent background = SpriteComponent();
+  Deck deck = Deck();
   late Cards player1card1;
   late Cards player1card2;
   late Cards player1card3;
   late Cards player1card4;
   late Cards player1card5;
 
-  Dealer dealer = Dealer();
   // User is Player 1, going counter clockwise players are numbered
   // Player 2
   // SpriteComponent player2Card1 = SpriteComponent();
@@ -54,222 +63,93 @@ class GameTable extends FlameGame with HasTappables {
 
   final double cardHeight = 40.0;
   final double cardWidth = 25.0;
+  final cardDimensions = Vector2(25.0, 40.0);
 
   TextPaint sampleText = TextPaint(style: const TextStyle(fontSize: 18));
-
-  // void fetchCards() async {
-  //   http.Response response = await http
-  //       .get(Uri.parse('https://brick-hold-em-api.herokuapp.com/table'));
-
-  //   Map data = jsonDecode(response.body);
-
-  //   print(cardSetter.setCard(data));
-  // }
-
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
-      var uid = FirebaseAuth.instance.currentUser!.uid;
-      DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
-      await database.update({
-        "players/$uid/name": FirebaseAuth.instance.currentUser!.displayName,
-        "players/$uid/photoURL": FirebaseAuth.instance.currentUser!.photoURL
-      });
-      database.onValue.listen((event) {
-        final data = event.snapshot.value;
-        print(data);
-      });
-
-    http.Response response = await http
-        .get(Uri.parse('https://brick-hold-em-api.onrender.com/table'));
-
-    Map data = jsonDecode(response.body);
-
-    List startingHand = CardSetter().setCard(data);
-
     final screenWidth = size[0];
     final screenHeight = size[1] - notchPadding;
+    const cardYPosition = 650.0;
+
+    var uid = FirebaseAuth.instance.currentUser!.uid;
+    DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
+    DatabaseReference dealtCards =
+        FirebaseDatabase.instance.ref('tables/1/cards');
+
+    // adding user to table
+    await database.update({
+      "players/$uid/name": FirebaseAuth.instance.currentUser!.displayName,
+      "players/$uid/photoURL": FirebaseAuth.instance.currentUser!.photoURL
+    });
+
+    // Listening for any changes
+    database.onValue.listen((event) {
+      final data = event.snapshot.value;
+      //print(data);
+    });
+
+    final onceRef = FirebaseDatabase.instance.ref();
+    final snapshot = await onceRef.child('tables/1/cards').get();
+    if (snapshot.exists) {
+      final _map = Map<String, dynamic>.from(snapshot.value as Map);
+      var myCards = _map[uid];
+      var startingHand = myCards['startingHand'];
+      List<dynamic> data = _map["dealer"];
+      player1card1 = Cards()
+        ..sprite = await loadSprite(startingHand[0] + '.png')
+        ..size = cardDimensions
+        ..y = cardYPosition
+        ..x = screenWidth / 2.2;
+      add(player1card1);
+
+      player1card2 = Cards()
+        ..sprite = await loadSprite(startingHand[1] + '.png')
+        ..size = cardDimensions
+        ..y = cardYPosition
+        ..x = screenWidth / 2.1;
+      add(player1card2);
+
+      player1card3 = Cards()
+        ..sprite = await loadSprite(startingHand[2] + '.png')
+        ..size = cardDimensions
+        ..y = cardYPosition
+        ..x = screenWidth / 2;
+      add(player1card3);
+
+      player1card4 = Cards()
+        ..sprite = await loadSprite(startingHand[3] + '.png')
+        ..size = cardDimensions
+        ..y = cardYPosition
+        ..x = screenWidth / 1.9;
+      add(player1card4);
+
+      player1card5 = Cards()
+        ..sprite = await loadSprite(startingHand[4] + '.png')
+        ..size = cardDimensions
+        ..y = cardYPosition
+        ..x = screenWidth / 1.8;
+      add(player1card5);
+    }
+
+    dealtCards.onValue.listen((event) async {
+      final _map = Map<String, dynamic>.from(event.snapshot.value as Map);
+      List<dynamic> data = _map["dealer"];
+    });
 
     // add(background
     //   ..sprite = await loadSprite('table.png')
     //   ..y = screenHeight / 2.5
     //   ..size = Vector2(size[0], 250));
 
-    dealer
-      ..sprite = await loadSprite('dealer.png')
-      ..size = Vector2(60, 60)
+    deck
+      ..sprite = await loadSprite('backside.png')
+      ..size = Vector2(cardWidth, cardHeight)
       ..x = (screenWidth / 2)
-      ..y = 10;
-    add(dealer);
-
-    // PLAYER 1
-    player1card1 = Cards()
-      ..sprite = await loadSprite(startingHand[0])
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight - (cardHeight * 1.5)
-      ..x = screenWidth / 2.2;
-    add(player1card1);
-
-    player1card2 = Cards()
-      ..sprite = await loadSprite(startingHand[1])
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight - (cardHeight * 1.5)
-      ..x = screenWidth / 2.1;
-    add(player1card2);
-
-    player1card3 = Cards()
-      ..sprite = await loadSprite(startingHand[2])
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight - (cardHeight * 1.5)
-      ..x = screenWidth / 2;
-    add(player1card3);
-
-    player1card4 = Cards()
-      ..sprite = await loadSprite(startingHand[3])
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight - (cardHeight * 1.5)
-      ..x = screenWidth / 1.9;
-    add(player1card4);
-
-    player1card5 = Cards()
-      ..sprite = await loadSprite(startingHand[4])
-      ..size = Vector2(cardWidth, cardHeight)
-      ..y = screenHeight - (cardHeight * 1.5)
-      ..x = screenWidth / 1.8;
-    add(player1card5);
-
-    // PLAYER 2
-    // player2Card1
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight - 60
-    //   ..x = screenWidth - 200
-    //   ..angle = radians(315);
-    // add(player2Card1);
-
-    // player2Card2
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.1
-    //   ..x = cardWidth
-    //   ..angle = radians(315);
-    // add(player2Card2);
-
-    // player2Card3
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2
-    //   ..x = cardWidth
-    //   ..angle = radians(315);
-    // add(player2Card3);
-
-    // player2Card4
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 1.9
-    //   ..x = cardWidth
-    //   ..angle = radians(315);
-    // add(player2Card4);
-
-    // // Player 3
-    // player3Card1
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 1.8
-    //   ..x = cardWidth
-    //   ..angle = radians(270);
-    // add(player3Card1);
-
-    // player3Card2
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.5
-    //   ..x = screenWidth - cardWidth
-    //   ..angle = radians(90);
-    // add(player3Card2);
-
-    // player3Card3
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.4
-    //   ..x = screenWidth - cardWidth
-    //   ..angle = radians(90);
-    // add(player3Card3);
-
-    // player3Card4
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.3
-    //   ..x = screenWidth - cardWidth
-    //   ..angle = radians(90);
-    // add(player3Card4);
-
-    // // Player 4
-    // player4Card1
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.2
-    //   ..x = screenWidth - cardWidth
-    //   ..angle = radians(90);
-    // add(player4Card1);
-
-    // player4Card2
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.1
-    //   ..x = screenWidth - cardWidth
-    //   ..angle = radians(90);
-    // add(player4Card2);
-
-    // player4Card3
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.2
-    //   ..x = screenWidth - cardWidth
-    //   ..angle = radians(90);
-    // add(player4Card3);
-
-    // player4Card4
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.1
-    //   ..x = screenWidth - cardWidth
-    //   ..angle = radians(90);
-    // add(player4Card4);
-
-    // // Player 5
-    // player5Card1
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.2
-    //   ..x = screenWidth - cardWidth
-    //   ..angle = radians(90);
-    // add(player5Card1);
-
-    // player5Card2
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.1
-    //   ..x = screenWidth - cardWidth
-    //   ..angle = radians(90);
-    // add(player5Card2);
-
-    // player5Card3
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.2
-    //   ..x = screenWidth - cardWidth
-    //   ..angle = radians(90);
-    // add(player5Card3);
-
-    // player5Card4
-    //   ..sprite = await loadSprite('backside.png')
-    //   ..size = Vector2(cardWidth, cardHeight)
-    //   ..y = screenHeight / 2.1
-    //   ..x = screenWidth - cardWidth
-    //   ..angle = radians(90);
-    // add(player5Card4);
+      ..y = (screenHeight / 2);
+    add(deck);
 
     cancelButton
       ..sprite = await loadSprite("cancel.png")
@@ -290,10 +170,6 @@ class GameTable extends FlameGame with HasTappables {
   void update(double dt) {
     super.update(dt);
 
-    //if (twoClubs.y > size[1] / 3) {
-    //twoClubs.y -= 30 * dt;
-    //}
-    //print(aceDiamond.isExpanded);
     if (player1card1.isExpanded ||
         player1card2.isExpanded ||
         player1card3.isExpanded ||
@@ -407,7 +283,6 @@ class GameTable extends FlameGame with HasTappables {
   }
 }
 
-
 class Cards extends SpriteComponent with Tappable {
   bool isExpanded = false;
   bool isSelected = false;
@@ -419,45 +294,41 @@ class Cards extends SpriteComponent with Tappable {
 
   @override
   bool onTapDown(TapDownInfo info) {
-    
-      if (isBrickSelected) {
-        isBrickSelected = false;
-        cardsSelected.add("brick");
-      } else {
-        isBrickSelected = true;
-        cardsSelected.remove("brick");
-      }
-      if (isEightSelected) {
-        isEightSelected = false;
-        cardsSelected.add("8_hearts");
-      } else {
-        isEightSelected = true;
-        cardsSelected.remove("8_hearts");
-      }
-      if (isTwoSelected) {
-        isTwoSelected = false;
-        cardsSelected.add("2_clubs");
-        
-      } else {
-        isTwoSelected = true;
-        cardsSelected.remove("2_clubs");
-      }
-      if (isFourSelected) {
-        isFourSelected = false;
-        cardsSelected.add("4_spades");
-      } else {
-        isFourSelected = true;
-        cardsSelected.remove("4_spades");
-      }
-      if (isAceSelected) {
-        isAceSelected = false;
-         cardsSelected.add("a_diamonds");
-      } else {
-        isAceSelected = true;
-        cardsSelected.remove("a_diamonds");
-      }
-    
-    
+    if (isBrickSelected) {
+      isBrickSelected = false;
+      cardsSelected.add("brick");
+    } else {
+      isBrickSelected = true;
+      cardsSelected.remove("brick");
+    }
+    if (isEightSelected) {
+      isEightSelected = false;
+      cardsSelected.add("8_hearts");
+    } else {
+      isEightSelected = true;
+      cardsSelected.remove("8_hearts");
+    }
+    if (isTwoSelected) {
+      isTwoSelected = false;
+      cardsSelected.add("2_clubs");
+    } else {
+      isTwoSelected = true;
+      cardsSelected.remove("2_clubs");
+    }
+    if (isFourSelected) {
+      isFourSelected = false;
+      cardsSelected.add("4_spades");
+    } else {
+      isFourSelected = true;
+      cardsSelected.remove("4_spades");
+    }
+    if (isAceSelected) {
+      isAceSelected = false;
+      cardsSelected.add("a_diamonds");
+    } else {
+      isAceSelected = true;
+      cardsSelected.remove("a_diamonds");
+    }
 
     isExpanded = true;
     return true;
@@ -479,50 +350,25 @@ class CheckButton extends SpriteComponent with Tappable {
   bool onTapDown(TapDownInfo info) {
     print(cardsSelected);
     isPressed = true;
-    
+
     return true;
   }
 }
 
-class Dealer extends SpriteComponent with Tappable {
-  static List deck = ([]);
+class Deck extends SpriteComponent with Tappable {
   @override
   bool onTapDown(TapDownInfo info) {
-    print(deck[0]);
+    print("hitting");
+    doThis();
     return true;
   }
-}
 
-class CardSetter {
-  List restOfTheDeck = ([]);
-  List cardList = ([]);
+  doThis() async {
+    final dealerRef = FirebaseDatabase.instance.ref('tables/1/cards/dealer');
+    final event = await dealerRef.once();
 
+    final deck = List<String>.from(event.snapshot.value as List);
 
-  List setCard(Map map) {
-    cardList = map['cards'];
-    List startingHand = ([]);
-
-    for(var i = 0; i < 5; i++){
-      startingHand.add(cardList[i]+'.png');
-      cardList.remove(i);
-    }
-
-    setDeck(cardList);
-    print(cardList);
-    return startingHand;
-  }
-
-  void setDeck(List restOfTheDeck){
-    Dealer.deck = restOfTheDeck;
-
-  }
-
-  drawCard(){
-            print(cardList);
-
-    var cardDrawn = cardList[0];
-    cardList.remove(0);
-
-    return cardDrawn;
+    
   }
 }
