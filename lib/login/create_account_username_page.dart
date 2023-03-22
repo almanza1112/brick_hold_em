@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountUsernamePage extends StatefulWidget {
+  var credential;
+  CreateAccountUsernamePage({Key? key, this.credential}) :super(key: key);
   _CreateAccountUsernamePageState createState() =>
       _CreateAccountUsernamePageState();
 }
@@ -158,6 +160,6 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => CreateAccountProfilePicturePage()));
+            builder: (context) => CreateAccountProfilePicturePage(credential: widget.credential,)));
   }
 }

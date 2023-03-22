@@ -13,6 +13,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountProfilePicturePage extends StatefulWidget {
+  var credential;
+  CreateAccountProfilePicturePage({Key? key, this.credential}) : super(key: key);
   _CreateAccountProfilePictureState createState() =>
       _CreateAccountProfilePictureState();
 }

@@ -7,8 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:brick_hold_em/globals.dart' as globals;
+
 
 import 'auth_service.dart';
+import 'login/create_account_username_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -312,36 +316,40 @@ class LoginPageState extends State<LoginPage> {
     final GoogleSignInAccount? googleUser =
         await GoogleSignIn(scopes: <String>["email"]).signIn();
 
-    // Check if email is already being used
+    // Check if email is already being used with correct authentication method
     Map result = await isEmailUsed(googleUser!.email, "google.com");
 
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication; // TODO: PASS THIS TO create_account_username...AND THEN SIGN IN
 
-    if (result['authMethodMatches']) {
-      // Email is available
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser!.authentication; // TODO: PASS THIS TO create_account_username...AND THEN SIGN IN
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );    
 
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+    if (result['result'] == "Authentication method matches.") {
+      // Email was found and with the same authenitcaion method
 
       // Once signed in, return the UserCredential
       var userCred = await FirebaseAuth.instance.signInWithCredential(credential);
 
-      //return checkIfUserExists(userCred);
-    } else if (!result['authMethodMatches']) {
+    } else if (result['result'] == "Authentication method does not match.") {
+      // Email was found but with different authenticaion method
+
       setState(() {
         errorText = "An account with that email already exists.";
         visibleStatus = !visibleStatus;
       });
-    } else if (result['newUser']){
-      print("this is a new user");
+
+    } else if (result['result'] == "New user."){
+      // Email was not found, this is a new user
+      setSharedPrefs(googleUser.displayName, googleUser.email);
+      navigateToUsername(credential);
+
     } else {
       // There is an error
-            print("this is a new user");
+      print("this is a new user");
 
     }
   }
@@ -353,5 +361,16 @@ class LoginPageState extends State<LoginPage> {
     Map data = jsonDecode(response.body);
 
     return data;
+  }
+
+  void setSharedPrefs(String? name, String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(globals.signUpFullName, name!);
+    await prefs.setString(globals.signUpEmail, email);
+  }
+
+   void navigateToUsername(var credential) {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => CreateAccountUsernamePage(credential: credential)));
   }
 }
