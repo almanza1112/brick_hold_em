@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:brick_hold_em/home_page.dart';
 import 'package:brick_hold_em/login/create_account_information_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,7 +11,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
-
 
 import 'auth_service.dart';
 import 'login/create_account_username_page.dart';
@@ -174,7 +175,7 @@ class LoginPageState extends State<LoginPage> {
                       },
                       style: ElevatedButton.styleFrom(
                           //minimumSize: Size.fromWidth(double.infinity)
-                          ), 
+                          ),
                       child: const Text("LOGIN"))
                 ],
               ),
@@ -273,6 +274,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   signInWithFacebook() async {
+    // IMPORTANT: FacebookAuth already returns if user email already exists in FirebaseAuth
     setState(() {
       visibleStatus = false;
     });
@@ -285,12 +287,14 @@ class LoginPageState extends State<LoginPage> {
 
     // Once signed in, return the UserCredential
     //var userCred = await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
-    //return checkIfUserExists(userCred);
 
     FirebaseAuth.instance
         .signInWithCredential(facebookAuthCredential)
-        .then((value) {
+        .then((value) async {
       // Sign in happens
+      final userData = await FacebookAuth.instance.getUserData();
+      setSharedPrefs(userData["name"], userData["email"]);
+      checkIfUserExists(userData["email"]);
     }).onError((error, stackTrace) {
       var errorString = error.toString();
 
@@ -308,6 +312,29 @@ class LoginPageState extends State<LoginPage> {
     });
   }
 
+  // Used when logging in with Facebook, this method checks if user exists in
+  // Firestore Database. If they do then they are an existing user, if they
+  // don't then they are a new user. Proceed to creating username -> profile pic
+  checkIfUserExists(String email) {
+    print("I am getting here");
+    var uid = FirebaseAuth.instance.currentUser!.uid;
+    print(uid);
+    var db = FirebaseFirestore.instance;
+    final docRef =
+        db.collection("users").doc(uid);
+    docRef.get().then((DocumentSnapshot doc) {
+      if (doc.exists) {
+        // User exists
+        navigateToHomePage();
+      } else {
+        // User does not exist
+        navigateToUsername(null);
+      }
+    }, onError: (error) {
+      print(error);
+    });
+  }
+
   signInWithGoogle() async {
     setState(() {
       visibleStatus = false;
@@ -320,20 +347,21 @@ class LoginPageState extends State<LoginPage> {
     Map result = await isEmailUsed(googleUser!.email, "google.com");
 
     // Obtain the auth details from the request
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication; // TODO: PASS THIS TO create_account_username...AND THEN SIGN IN
+    final GoogleSignInAuthentication googleAuth = await googleUser
+        .authentication; // TODO: PASS THIS TO create_account_username...AND THEN SIGN IN
 
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
-    );    
+    );
 
     if (result['result'] == "Authentication method matches.") {
       // Email was found and with the same authenitcaion method
 
       // Once signed in, return the UserCredential
-      var userCred = await FirebaseAuth.instance.signInWithCredential(credential);
-
+      var userCred =
+          await FirebaseAuth.instance.signInWithCredential(credential);
     } else if (result['result'] == "Authentication method does not match.") {
       // Email was found but with different authenticaion method
 
@@ -341,22 +369,19 @@ class LoginPageState extends State<LoginPage> {
         errorText = "An account with that email already exists.";
         visibleStatus = !visibleStatus;
       });
-
-    } else if (result['result'] == "New user."){
+    } else if (result['result'] == "New user.") {
       // Email was not found, this is a new user
       setSharedPrefs(googleUser.displayName, googleUser.email);
       navigateToUsername(credential);
-
     } else {
       // There is an error
       print("this is a new user");
-
     }
   }
 
   Future<Map> isEmailUsed(String email, String providerID) async {
-    http.Response response = await http.get(
-        Uri.parse('https://brick-hold-em-api.onrender.com/sign_in/$email?providerID=$providerID'));
+    http.Response response = await http.get(Uri.parse(
+        'https://brick-hold-em-api.onrender.com/sign_in/$email?providerID=$providerID'));
 
     Map data = jsonDecode(response.body);
 
@@ -369,8 +394,19 @@ class LoginPageState extends State<LoginPage> {
     await prefs.setString(globals.signUpEmail, email);
   }
 
-   void navigateToUsername(var credential) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => CreateAccountUsernamePage(credential: credential)));
+  void navigateToUsername(var credential) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                CreateAccountUsernamePage(credential: credential)));
+  }
+
+  void navigateToHomePage() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                HomePage()));
   }
 }

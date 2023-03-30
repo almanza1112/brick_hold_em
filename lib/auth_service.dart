@@ -20,6 +20,15 @@ class AuthService {
         });
   }
 
+  handleAuthStateNew() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return const LoginPage();
+    } else {
+      return HomePage();
+    }
+  }
+
   onError() {
     return HomePage();
   }

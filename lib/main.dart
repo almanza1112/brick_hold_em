@@ -1,6 +1,4 @@
 
-import 'package:flame/components.dart';
-import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
@@ -17,8 +15,6 @@ void main() async {
   ]).then((value) => runApp(MyApp()));
 }
 
-
-
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -26,7 +22,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
-      home: AuthService().handleAuthState(),
+      home: AuthService().handleAuthStateNew(),
     );
   }
 }
