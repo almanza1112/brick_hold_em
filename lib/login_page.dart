@@ -294,10 +294,13 @@ class LoginPageState extends State<LoginPage> {
         .then((value) async {
       // Sign in happens
       final userData = await FacebookAuth.instance.getUserData();
-      print(userData["picture"]);
-      print(userData["picture"]["data"]["url"]);
 
-      checkIfUserExists(userData["email"]);
+      String fullName = userData["name"];
+      String email = userData["email"];
+      String photoURL = userData["picture"]["data"]["url"];
+
+      var userInfo = NewUserInfo(fullName: fullName, email: email, photoURL: photoURL);
+      checkIfUserExists(userInfo);
     }).onError((error, stackTrace) {
       
       var errorString = error.toString();
@@ -319,19 +322,17 @@ class LoginPageState extends State<LoginPage> {
   // Used when logging in with Facebook, this method checks if user exists in
   // Firestore Database. If they do then they are an existing user, if they
   // don't then they are a new user. Proceed to creating username -> profile pic
-  checkIfUserExists(String email) {
+  checkIfUserExists(NewUserInfo newUserInfo) {
     var uid = FirebaseAuth.instance.currentUser!.uid;
     var db = FirebaseFirestore.instance;
     final docRef = db.collection("users").doc(uid);
     docRef.get().then((DocumentSnapshot doc) {
       if (doc.exists) {
-        print("EXISTSSSSS!!!!!");
-        // User exists
+        // User exists, proceed to home page
         navigateToHomePage();
       } else {
-        print("DOES NOT EXISTSSSS!!!");
-        // User does not exist
-        //navigateToUsername(null);
+        // User does not exist, proceed to create new account
+        navigateToUsername(null, newUserInfo);
       }
     }, onError: (error) {
       print(error);
