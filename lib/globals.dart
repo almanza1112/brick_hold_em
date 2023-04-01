@@ -1,9 +1,7 @@
-
-// Sign Up Shared Prefences keys
-String signUpFullName = "signUpFullName";
-String signUpEmail = "signUpEmail";
-String signUpPassword = "signUpPassword";
-String signUpUsername = "signUpUsername";
+// Login type
+const String LOGIN_TYPE_FACEBOOK = "facebook";
+const String LOGIN_TYPE_GOOGLE = "google";
+const String LOGIN_TYPE_EMAIL = "email";
 
 // Settings Shared Prefences keys
 String settingsBackgroundSound = "settingsBackgroundSound";

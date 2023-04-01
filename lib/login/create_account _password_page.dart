@@ -1,9 +1,13 @@
 import 'package:brick_hold_em/login/create_account_username_page.dart';
+import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountPasswordPage extends StatefulWidget {
+  const CreateAccountPasswordPage({super.key, required this.newUserInfo});
+  final NewUserInfo newUserInfo;
+
   _CreateAccountPasswordPageState createState() =>
       _CreateAccountPasswordPageState();
 }
@@ -182,8 +186,8 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
       child: TextButton(
           onPressed: () {
             if (formKey.currentState!.validate()) {
-              setSharedPrefs();
-              navigateToUsername();
+              var newUserInfo = widget.newUserInfo.copyWith(password: passwordController.text.trim());
+              navigateToUsername(newUserInfo);
             }
           },
           style: ButtonStyle(
@@ -229,14 +233,8 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
     }
   }
 
-  void setSharedPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-        globals.signUpPassword, passwordController.text.trim());
-  }
-
-  void navigateToUsername() {
+  void navigateToUsername(NewUserInfo newUserInfo){
     Navigator.push(context,
-        MaterialPageRoute(builder: (context) => CreateAccountUsernamePage()));
+        MaterialPageRoute(builder: (context) => CreateAccountUsernamePage(newUserInfo: newUserInfo,)));
   }
 }

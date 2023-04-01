@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:brick_hold_em/home_page.dart';
 import 'package:brick_hold_em/login/create_account_information_page.dart';
+import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -293,9 +294,12 @@ class LoginPageState extends State<LoginPage> {
         .then((value) async {
       // Sign in happens
       final userData = await FacebookAuth.instance.getUserData();
-      setSharedPrefs(userData["name"], userData["email"]);
+      print(userData["picture"]);
+      print(userData["picture"]["data"]["url"]);
+
       checkIfUserExists(userData["email"]);
     }).onError((error, stackTrace) {
+      
       var errorString = error.toString();
 
       if (errorString.contains("account-exists")) {
@@ -316,19 +320,18 @@ class LoginPageState extends State<LoginPage> {
   // Firestore Database. If they do then they are an existing user, if they
   // don't then they are a new user. Proceed to creating username -> profile pic
   checkIfUserExists(String email) {
-    print("I am getting here");
     var uid = FirebaseAuth.instance.currentUser!.uid;
-    print(uid);
     var db = FirebaseFirestore.instance;
-    final docRef =
-        db.collection("users").doc(uid);
+    final docRef = db.collection("users").doc(uid);
     docRef.get().then((DocumentSnapshot doc) {
       if (doc.exists) {
+        print("EXISTSSSSS!!!!!");
         // User exists
         navigateToHomePage();
       } else {
+        print("DOES NOT EXISTSSSS!!!");
         // User does not exist
-        navigateToUsername(null);
+        //navigateToUsername(null);
       }
     }, onError: (error) {
       print(error);
@@ -340,15 +343,13 @@ class LoginPageState extends State<LoginPage> {
       visibleStatus = false;
     });
     // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser =
-        await GoogleSignIn(scopes: <String>["email"]).signIn();
+    final GoogleSignInAccount? googleUser = await GoogleSignIn(scopes: <String>["email"]).signIn();
 
     // Check if email is already being used with correct authentication method
     Map result = await isEmailUsed(googleUser!.email, "google.com");
 
     // Obtain the auth details from the request
-    final GoogleSignInAuthentication googleAuth = await googleUser
-        .authentication; // TODO: PASS THIS TO create_account_username...AND THEN SIGN IN
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
@@ -371,8 +372,13 @@ class LoginPageState extends State<LoginPage> {
       });
     } else if (result['result'] == "New user.") {
       // Email was not found, this is a new user
-      setSharedPrefs(googleUser.displayName, googleUser.email);
-      navigateToUsername(credential);
+      var newUserInfo = NewUserInfo(
+          fullName: googleUser.displayName,
+          email: googleUser.email,
+          photoURL: googleUser.photoUrl,
+          loginType: globals.LOGIN_TYPE_GOOGLE);
+
+      navigateToUsername(credential, newUserInfo);
     } else {
       // There is an error
       print("this is a new user");
@@ -388,25 +394,18 @@ class LoginPageState extends State<LoginPage> {
     return data;
   }
 
-  void setSharedPrefs(String? name, String email) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(globals.signUpFullName, name!);
-    await prefs.setString(globals.signUpEmail, email);
-  }
-
-  void navigateToUsername(var credential) {
+  void navigateToUsername(var credential, NewUserInfo newUserInfo) {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) =>
-                CreateAccountUsernamePage(credential: credential)));
+            builder: (context) => CreateAccountUsernamePage(
+                  credential: credential,
+                  newUserInfo: newUserInfo,
+                )));
   }
 
   void navigateToHomePage() {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                HomePage()));
+        context, MaterialPageRoute(builder: (context) => HomePage()));
   }
 }

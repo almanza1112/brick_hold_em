@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:brick_hold_em/login/create_account%20_password_page.dart';
+import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -205,8 +206,8 @@ class _CreateAccountInformationPageState
                 setState(() {
                   progressBarVisibile = false;
                 });
-                setSharedPrefs();
-                navigateToCreatePassword();
+                var newUserInfo = NewUserInfo(fullName: nameController.text.trim(), email: emailController.text.trim(), loginType: globals.LOGIN_TYPE_EMAIL);
+                navigateToCreatePassword(newUserInfo);
               } else if (!result['emailAvailable']) {
                 // Email is not available
                 setState(() {
@@ -292,14 +293,8 @@ class _CreateAccountInformationPageState
     });
   }
 
-  void setSharedPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(globals.signUpFullName, nameController.text.trim());
-    await prefs.setString(globals.signUpEmail, emailController.text.trim());
-  }
-
-  void navigateToCreatePassword() {
+  void navigateToCreatePassword(NewUserInfo newUserInfo){
     Navigator.push(context,
-        MaterialPageRoute(builder: (context) => CreateAccountPasswordPage()));
+        MaterialPageRoute(builder: (context) => CreateAccountPasswordPage(newUserInfo: newUserInfo,)));
   }
 }

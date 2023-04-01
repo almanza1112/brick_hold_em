@@ -1,11 +1,13 @@
 import 'package:brick_hold_em/login/create_account_profile_picture_page.dart';
+import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountUsernamePage extends StatefulWidget {
-  var credential;
-  CreateAccountUsernamePage({Key? key, this.credential}) :super(key: key);
+  final credential;
+  final NewUserInfo newUserInfo;
+  CreateAccountUsernamePage({Key? key, this.credential, required this.newUserInfo}) :super(key: key);
   _CreateAccountUsernamePageState createState() =>
       _CreateAccountUsernamePageState();
 }
@@ -117,8 +119,8 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
       child: TextButton(
           onPressed: () {
             if (formKey.currentState!.validate()) {
-              setSharedPrefs();
-              navigateToProfilePic();
+              var newUserInfo = widget.newUserInfo.copyWith(username: usernameController.text.trim());
+              navigateToProfilePic(newUserInfo);
             }
           },
           style: ButtonStyle(
@@ -151,15 +153,10 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
     }
   }
 
-  void setSharedPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(globals.signUpUsername, usernameController.text.trim());
-  }
-
-  void navigateToProfilePic() {
+  void navigateToProfilePic(NewUserInfo newUserInfo) {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => CreateAccountProfilePicturePage(credential: widget.credential,)));
+            builder: (context) => CreateAccountProfilePicturePage(credential: widget.credential, newUserInfo: newUserInfo)));
   }
 }

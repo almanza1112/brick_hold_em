@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:brick_hold_em/home_page.dart';
+import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,9 @@ import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountProfilePicturePage extends StatefulWidget {
   var credential;
-  CreateAccountProfilePicturePage({Key? key, this.credential})
+  final NewUserInfo newUserInfo;
+  CreateAccountProfilePicturePage(
+      {Key? key, this.credential, required this.newUserInfo})
       : super(key: key);
   _CreateAccountProfilePictureState createState() =>
       _CreateAccountProfilePictureState();
@@ -37,17 +40,22 @@ class _CreateAccountProfilePictureState
   UploadTask? uploadTask;
   FirebaseFirestore db = FirebaseFirestore.instance;
 
-   final prefs;
-    final signUpEmail ;
-    final signUpPassword ;
-    final signUpName ;
-    final signUpUsername ;
+  String? newUserEmail;
+  String? newUserPassword;
+  String? newUserFullName;
+  String? newUserUsername;
+  String? newUserPhotoURL;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    newUserEmail = widget.newUserInfo.email;
+    newUserPassword = widget.newUserInfo.password;
+    newUserFullName = widget.newUserInfo.username;
+    newUserUsername = widget.newUserInfo.username;
+    newUserPhotoURL = widget.newUserInfo.photoURL;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,12 +97,7 @@ class _CreateAccountProfilePictureState
                         height: 240,
                         fit: BoxFit.cover,
                       )
-                    : Image.asset(
-                        "assets/images/poker_player.jpeg",
-                        width: 240,
-                        height: 240,
-                        fit: BoxFit.cover,
-                      ),
+                    : setProfilePhotoFromURL(),
               ),
             ),
             TextButton(
@@ -128,6 +131,19 @@ class _CreateAccountProfilePictureState
                 alignment: Alignment.bottomRight, child: letsPlayButton()))
       ]),
     );
+  }
+
+  Image setProfilePhotoFromURL() {
+    if (newUserPhotoURL == null) {
+      return Image.asset(
+        "assets/images/poker_player.jpeg",
+        width: 240,
+        height: 240,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return Image.network(newUserPhotoURL!, width: 240, height: 240, fit: BoxFit.cover,);
+    }
   }
 
   Widget letsPlayButton() {
@@ -228,7 +244,8 @@ class _CreateAccountProfilePictureState
           .updatePhotoURL(downloadURL)
           .then((value) {
         // Proceed to homepagee
-       Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => HomePage()));
       }).catchError((error) {
         print(error);
       });
@@ -236,31 +253,21 @@ class _CreateAccountProfilePictureState
   }
 
   void createUserAuth() async {
-    final prefs = await SharedPreferences.getInstance();
-    final signUpEmail = prefs.getString(globals.signUpEmail);
-    final signUpPassword = prefs.getString(globals.signUpPassword);
-    final signUpName = prefs.getString(globals.signUpFullName);
-    final signUpUsername = prefs.getString(globals.signUpUsername);
-
     try {
       late UserCredential credential;
-      if (widget.credential == null) {
-                print("email");
-
+      if (widget.newUserInfo.loginType == globals.LOGIN_TYPE_EMAIL) {
         credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: signUpEmail!,
-          password: signUpPassword!,
+          email: newUserEmail!,
+          password: newUserPassword!,
         );
       } else {
-        print("credential");
         credential =
             await FirebaseAuth.instance.signInWithCredential(widget.credential);
       }
 
       // Check if user is signed in
       if (credential.user!.email!.isNotEmpty) {
-        // Add user to Firestore Database
-        
+        addUserToFirestore();
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -278,8 +285,8 @@ class _CreateAccountProfilePictureState
   void addUserToFirestore() {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     db.collection("users").doc(uid).set({
-      'fullName': signUpName,
-      'username': signUpUsername,
+      'fullName': newUserFullName,
+      'username': newUserUsername,
       'chips': 1000,
 
       //'photoURL': FirebaseAuth.instance.currentUser!.photoURL
@@ -287,7 +294,7 @@ class _CreateAccountProfilePictureState
       // User has been added
       // Proceeed to upload profile pic
       FirebaseAuth.instance.currentUser!
-          .updateDisplayName(signUpName)
+          .updateDisplayName(newUserFullName)
           .then((value) {
         uploadUserProfilePic(uid);
       }).catchError((error) {
@@ -295,5 +302,4 @@ class _CreateAccountProfilePictureState
       });
     }).catchError((error) => print("Failed to add user: $error"));
   }
-
 }
