@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:brick_hold_em/globals.dart' as globals;
 
+import 'login/create_account_username_page.dart';
+import 'login/new_user_info.dart';
 import 'settings_page.dart';
 import 'howtoplay_page.dart';
 import 'tournament_page.dart';
@@ -22,6 +24,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    checkIfUserExists();
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
@@ -184,7 +192,7 @@ class _HomePageState extends State<HomePage> {
                   width: double.infinity,
                   child: const Align(
                     alignment: Alignment.center,
-                   child: Text("NO LIMIT",
+                    child: Text("NO LIMIT",
                         style: TextStyle(fontSize: fontSize, color: fontColor)),
                   )),
             ),
@@ -275,7 +283,7 @@ class _HomePageState extends State<HomePage> {
             closedBuilder: (context, openContainer) => GestureDetector(
               onTap: () => openContainer(),
               child: Container(
-                  color: Colors.black, 
+                  color: Colors.black,
                   height: double.infinity,
                   width: double.infinity,
                   child: const Align(
@@ -298,80 +306,111 @@ class _HomePageState extends State<HomePage> {
   Widget profileMenu() {
     const double columnPadding = 25;
     return Container(
-      color: Colors.transparent,
-      width: 160,
-      child: OpenContainer(
-        closedColor: Colors.brown.shade300,
-        closedElevation: 0,
-        closedBuilder: ((context, openContainer) =>  Stack(
-        children: <Widget>[
-          Positioned.fill(
-              right: 20,
-              child: Container(
-                decoration: const BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(10),
-                    )),
-              )),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Column(
-              //crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.only(top: columnPadding, bottom: 10),
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: const BoxDecoration(
-                        color: Colors.black,
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black,
-                              blurRadius: 8,
-                              offset: Offset(0, 4))
-                        ]),
-                    child: Image(
-                        fit: BoxFit.cover,
-                        image: NetworkImage(
-                            FirebaseAuth.instance.currentUser!.photoURL!)),
-                  ),
-                ),
-                // Text(
-                //   FirebaseAuth.instance.currentUser!.displayName!,
-                //   style: const TextStyle(fontSize: 18, color: Colors.white),
-                // ),
-                FutureBuilder<Map<String, dynamic>?>(
-                  future: setUserData(),
-                  builder: (context, snapshot) {
-                    /** TODO need to clean this up */
-                    if (snapshot.hasData) {
-                      var data = snapshot.data;
-                      var chips = data!["chips"];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: columnPadding),
-                        child: Text(
-                          "$chips chips",
-                          style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
-                        ),
-                      );
-                    } else {
-                      return const Text('i suck');
-                    }
-                  },
-                )
-              ],
-            ),
-          )
-        ],
-      )), 
-        openBuilder: ((context, closedContainer) => ProfilePage()))
-    );
+        color: Colors.transparent,
+        width: 160,
+        child: OpenContainer(
+            closedColor: Colors.brown.shade300,
+            closedElevation: 0,
+            closedBuilder: ((context, openContainer) => Stack(
+                  children: <Widget>[
+                    Positioned.fill(
+                        right: 20,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(10),
+                              )),
+                        )),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Column(
+                        //crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                top: columnPadding, bottom: 10),
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              decoration: const BoxDecoration(
+                                  color: Colors.black,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black,
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4))
+                                  ]),
+                              child: Image(
+                                  fit: BoxFit.cover,
+                                  image: NetworkImage(FirebaseAuth
+                                      .instance.currentUser!.photoURL!)),
+                            ),
+                          ),
+                          // Text(
+                          //   FirebaseAuth.instance.currentUser!.displayName!,
+                          //   style: const TextStyle(fontSize: 18, color: Colors.white),
+                          // ),
+                          FutureBuilder<Map<String, dynamic>?>(
+                            future: setUserData(),
+                            builder: (context, snapshot) {
+                              /** TODO need to clean this up */
+                              if (snapshot.hasData) {
+                                var data = snapshot.data;
+                                var chips = data!["chips"];
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      bottom: columnPadding),
+                                  child: Text(
+                                    "$chips chips",
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
+                                  ),
+                                );
+                              } else {
+                                return const Text('i suck');
+                              }
+                            },
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                )),
+            openBuilder: ((context, closedContainer) => ProfilePage())));
+  }
+
+  // Basically here to confirm the facebook user finished the sign up process
+  checkIfUserExists() {
+    var uid = FirebaseAuth.instance.currentUser!.uid;
+    var db = FirebaseFirestore.instance;
+    final docRef = db.collection("users").doc(uid);
+    docRef.get().then((DocumentSnapshot doc) {
+      if (!doc.exists) {
+        // User does not exist, proceed to create new account
+        var newUserInfo = NewUserInfo(
+            fullName: FirebaseAuth.instance.currentUser!.displayName,
+            email: FirebaseAuth.instance.currentUser!.email,
+            photoURL: FirebaseAuth.instance.currentUser!.photoURL,
+            loginType: globals.LOGIN_TYPE_FACEBOOK);
+
+        navigateToUsername(null, newUserInfo);
+      }
+    }, onError: (error) {
+      print(error);
+    });
+  }
+
+  void navigateToUsername(var credential, NewUserInfo newUserInfo) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CreateAccountUsernamePage(
+                  credential: credential,
+                  newUserInfo: newUserInfo,
+                )));
   }
 
   Future<Map<String, dynamic>?> setUserData() async {
@@ -383,8 +422,8 @@ class _HomePageState extends State<HomePage> {
     if (snapshot.exists) {
       var data = snapshot.data();
       final prefs = await SharedPreferences.getInstance();
-      prefs.setString(globals.loggedInUserUsername, data!["username"]); 
-      
+      prefs.setString(globals.loggedInUserUsername, data!["username"]);
+
       return data;
     } else {
       /** TODO: need to clean this up */
