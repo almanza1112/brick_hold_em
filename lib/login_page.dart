@@ -252,9 +252,13 @@ class LoginPageState extends State<LoginPage> {
     });
     FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
-        .then((value) {})
+        .then((value) {
+          navigateToHomePage();
+        })
         .onError((error, stackTrace) {
       var errorString = error.toString();
+
+
 
       if (errorString.contains("too-many-requests")) {
         setErrorMessage("Too many failed attemps, try again later.");
