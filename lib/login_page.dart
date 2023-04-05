@@ -6,14 +6,11 @@ import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
-import 'auth_service.dart';
 import 'login/create_account_username_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -38,7 +35,6 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
     EdgeInsets contentPadding = const EdgeInsets.only(left: 10, right: 10);
     TextStyle formFieldLabelStyle = const TextStyle(
         color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600);
@@ -261,15 +257,9 @@ class LoginPageState extends State<LoginPage> {
       var errorString = error.toString();
 
       if (errorString.contains("too-many-requests")) {
-        setState(() {
-          errorText = "Too many failed attemps, try again later.";
-          visibleStatus = !visibleStatus;
-        });
+        setErrorMessage("Too many failed attemps, try again later.");
       } else {
-        setState(() {
-          errorText = "Incorrect email/password";
-          visibleStatus = !visibleStatus;
-        });
+        setErrorMessage("Incorrect email/password");
       }
     });
   }
@@ -299,22 +289,16 @@ class LoginPageState extends State<LoginPage> {
       String email = userData["email"];
       String photoURL = userData["picture"]["data"]["url"];
 
-      var userInfo = NewUserInfo(fullName: fullName, email: email, photoURL: photoURL);
+      var userInfo = NewUserInfo(fullName: fullName, email: email, photoURL: photoURL, loginType: globals.LOGIN_TYPE_FACEBOOK);
       checkIfUserExists(userInfo);
     }).onError((error, stackTrace) {
       
       var errorString = error.toString();
 
       if (errorString.contains("account-exists")) {
-        setState(() {
-          errorText = "An account with that email already exists.";
-          visibleStatus = !visibleStatus;
-        });
+        setErrorMessage("An account with that email already exists.");
       } else {
-        setState(() {
-          errorText = "An error has occured.";
-          visibleStatus = !visibleStatus;
-        });
+        setErrorMessage("An error has occured.");
       }
     });
   }
@@ -366,11 +350,8 @@ class LoginPageState extends State<LoginPage> {
           await FirebaseAuth.instance.signInWithCredential(credential);
     } else if (result['result'] == "Authentication method does not match.") {
       // Email was found but with different authenticaion method
+      setErrorMessage("An account with that email already exists.");
 
-      setState(() {
-        errorText = "An account with that email already exists.";
-        visibleStatus = !visibleStatus;
-      });
     } else if (result['result'] == "New user.") {
       // Email was not found, this is a new user
       var newUserInfo = NewUserInfo(
@@ -393,6 +374,13 @@ class LoginPageState extends State<LoginPage> {
     Map data = jsonDecode(response.body);
 
     return data;
+  }
+
+  void setErrorMessage(String message) {
+    setState(() {
+      errorText = message;
+      visibleStatus = true;
+    });
   }
 
   void navigateToUsername(var credential, NewUserInfo newUserInfo) {

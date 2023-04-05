@@ -1,7 +1,7 @@
+import 'package:brick_hold_em/auth_service.dart';
 import 'package:brick_hold_em/login/create_account_profile_picture_page.dart';
 import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountUsernamePage extends StatefulWidget {
@@ -37,6 +37,9 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
           shadowColor: Colors.transparent,
           leading: BackButton(
             onPressed: () {
+              if(widget.newUserInfo.loginType == globals.LOGIN_TYPE_FACEBOOK) {
+                AuthService().signOut();
+              }
               Navigator.pop(context);
             },
           ),

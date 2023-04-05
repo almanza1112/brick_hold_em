@@ -7,7 +7,7 @@ class NewUserInfo {
   final String? password;
   final String? username;
   final String? photoURL;
-  final String? loginType; // Only two login types "facebook", "google"
+  final String? loginType; // Only three login types "facebook", "google", "email"
 
   const NewUserInfo({
     this.fullName, 
