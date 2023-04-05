@@ -1,16 +1,18 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:brick_hold_em/home_page.dart';
 import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountProfilePicturePage extends StatefulWidget {
@@ -45,15 +47,18 @@ class _CreateAccountProfilePictureState
   String? newUserFullName;
   String? newUserUsername;
   String? newUserPhotoURL;
+  late File cachedImage;
 
   @override
   void initState() {
     super.initState();
     newUserEmail = widget.newUserInfo.email;
     newUserPassword = widget.newUserInfo.password;
-    newUserFullName = widget.newUserInfo.username;
+    newUserFullName = widget.newUserInfo.fullName;
     newUserUsername = widget.newUserInfo.username;
     newUserPhotoURL = widget.newUserInfo.photoURL;
+
+    getCachedImage();
   }
 
   @override
@@ -133,6 +138,36 @@ class _CreateAccountProfilePictureState
     );
   }
 
+  getCachedImage() async {
+    final cache = DefaultCacheManager();
+    File file;
+    if (newUserPhotoURL == null) {
+      file = await getImageFileFromAssets("assets/images/poker_player.jpeg");
+    } else {
+      file = await cache.getSingleFile(newUserPhotoURL!);
+    }
+    setState(() {
+      cachedImage = file;
+      print("PATHHHH");
+      print(file.path);
+    });
+  }
+
+  Future<File> getImageFileFromAssets(String path) async {
+          print("1");
+
+    final byteData = await rootBundle.load(path);
+
+    final file = File('${(await getTemporaryDirectory()).path}/$path');
+    await file.create(recursive: true);
+    await file.writeAsBytes(byteData.buffer
+        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+
+    print("2");
+
+    return file;
+  }
+
   Image setProfilePhotoFromURL() {
     if (newUserPhotoURL == null) {
       return Image.asset(
@@ -142,7 +177,12 @@ class _CreateAccountProfilePictureState
         fit: BoxFit.cover,
       );
     } else {
-      return Image.network(newUserPhotoURL!, width: 240, height: 240, fit: BoxFit.cover,);
+      return Image.network(
+        newUserPhotoURL!,
+        width: 240,
+        height: 240,
+        fit: BoxFit.cover,
+      );
     }
   }
 
@@ -224,11 +264,16 @@ class _CreateAccountProfilePictureState
   }
 
   void uploadUserProfilePic(String uid) async {
-    final imageFile = File(croppedFile!.path);
+    late File imageFile;
+    if (croppedFile == null) {
+      imageFile = File(cachedImage.path);
+
+    } else {
+      imageFile = File(croppedFile!.path);
+    }
     final path = 'images/$uid/profile_picture.png';
 
     final ref = FirebaseStorage.instance.ref().child(path);
-    ref.putFile(imageFile);
     uploadTask = ref.putFile(imageFile);
 
     final snapshot = await uploadTask!.whenComplete(() {});
@@ -260,13 +305,19 @@ class _CreateAccountProfilePictureState
           email: newUserEmail!,
           password: newUserPassword!,
         );
-      } else {
+      } else if (widget.newUserInfo.loginType == globals.LOGIN_TYPE_GOOGLE){
         credential =
             await FirebaseAuth.instance.signInWithCredential(widget.credential);
+      } else {
+        // They are already sign in with Facebook and are finishing the sign up proceess
       }
 
+      // TODO: need to implement error...see credential that is not used above.
+      // perhaps a .then().error()
+
+
       // Check if user is signed in
-      if (credential.user!.email!.isNotEmpty) {
+      if (FirebaseAuth.instance.currentUser!.email!.isNotEmpty) {
         addUserToFirestore();
       }
     } on FirebaseAuthException catch (e) {

@@ -41,11 +41,15 @@ class _HomePageState extends State<HomePage> {
           color: Colors.brown.shade300,
           child: Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 100, bottom: 100),
-                child: Image(
-                    image: AssetImage('assets/images/BrickHoldEmLogo.png')),
-              ),
+              // SIGN OUT BUTTON JUST IN CASE APP ACTS WEIRD
+              // ElevatedButton(onPressed: () {
+              //   FirebaseAuth.instance.signOut();
+              // }, child: Text("Sign out")),
+               const Padding(
+                 padding: EdgeInsets.only(top: 100, bottom: 100),
+                 child: Image(
+                     image: AssetImage('assets/images/BrickHoldEmLogo.png')),
+               ),
               Expanded(
                   child: Row(
                 children: <Widget>[
