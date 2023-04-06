@@ -10,6 +10,8 @@ import 'package:brick_hold_em/globals.dart' as globals;
 import 'auth_service.dart';
 
 class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
   _SettingsPageState createState() => _SettingsPageState();
 }
 
@@ -18,8 +20,8 @@ class _SettingsPageState extends State<SettingsPage> {
   EdgeInsets accountRowPadding =
       const EdgeInsets.only(left: 14, right: 14, bottom: 10, top: 15);
   String fullName = FirebaseAuth.instance.currentUser!.displayName!;
-  String username = "";
-  String email = "";//FirebaseAuth.instance.currentUser!.email!;
+  late String username;
+  String email = FirebaseAuth.instance.currentUser!.email!;
   bool backgroundSound = true;
   bool fxSound = true;
   bool vibrate = true;
@@ -67,6 +69,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: titleStyle,
                 ),
               ),
+              
+              // FULL NAME
               InkWell(
                 onTap: () {
                   Navigator.push(
@@ -102,6 +106,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
+              
+              // USERNAME
               InkWell(
                 onTap: () {
                   Navigator.push(
@@ -137,6 +143,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
+              
+              // EMAIL
               InkWell(
                 onTap: () {
                   Navigator.push(
@@ -172,6 +180,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
+              
+              // PROFILE PICTURE
               InkWell(
                 onTap: () {
                   Navigator.push(
@@ -202,6 +212,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
+              
+              // LOG OUT
               InkWell(
                 onTap: () {
                   showDialog(
@@ -238,6 +250,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
+              
               Padding(
                 padding: titlePadding,
                 child: Text(
@@ -245,6 +258,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: titleStyle,
                 ),
               ),
+              
+              // BACKGROUND 
               SwitchListTile(
                   title: Text(
                     "Background",
@@ -257,6 +272,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       setSwitchState(globals.settingsBackgroundSound, value);
                     });
                   }),
+              
+              // FX
               SwitchListTile(
                   title: Text(
                     "FX",
@@ -269,6 +286,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       setSwitchState(globals.settingsFXSound, value);
                     });
                   }),
+              
+              // VIBRATE
               SwitchListTile(
                   title: Text(
                     "Vibrate",
@@ -281,6 +300,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       setSwitchState(globals.settingsVibrate, value);
                     });
                   }),
+              
               Padding(
                 padding: titlePadding,
                 child: Text(
@@ -288,6 +308,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: titleStyle,
                 ),
               ),
+              
+              // LIVE CHAT
               SwitchListTile(
                   title: Text(
                     "Live Chat",
@@ -300,6 +322,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       setSwitchState(globals.settingsGameLiveChat, value);
                     });
                   }),
+              
               Padding(
                 padding: titlePadding,
                 child: Text(
@@ -307,6 +330,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: titleStyle,
                 ),
               ),
+              
+              // DAILY
               SwitchListTile(
                   title: Text(
                     "Daily",

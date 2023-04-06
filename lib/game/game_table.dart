@@ -1,5 +1,5 @@
 import 'dart:developer';
-
+import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/effects.dart';
@@ -21,6 +21,8 @@ import 'dart:convert';
 // Engine but do at end
 
 List<String> cardsSelected = [];
+var uid = FirebaseAuth.instance.currentUser!.uid;
+
 
 class GameTable extends FlameGame with HasTappables {
   GameTable({required this.notchPadding});
@@ -29,6 +31,7 @@ class GameTable extends FlameGame with HasTappables {
 
   SpriteComponent background = SpriteComponent();
   Deck deck = Deck();
+  SpriteComponent faceUpCard = SpriteComponent();
   late Cards player1card1;
   late Cards player1card2;
   late Cards player1card3;
@@ -61,9 +64,13 @@ class GameTable extends FlameGame with HasTappables {
   CheckButton checkButton = CheckButton();
   final Vector2 exitButtonSize = Vector2(50.0, 30.0);
 
-  final double cardHeight = 40.0;
-  final double cardWidth = 25.0;
-  final cardDimensions = Vector2(25.0, 40.0);
+  //final double pokerCardHeight = 3.5;
+  //final double pokerCardWidth = 2.5;
+  //final double multiplier = 17;
+  final double cardHeight = 3.5 * 17; //59.5
+  final double cardWidth = 2.5 * 17; //42.5
+  // Dimension of a poker card is 3.5 x 2.5 in, below the numebrs are multiplied by 17
+  final cardDimensions = Vector2(42.5, 59.5);
 
   TextPaint sampleText = TextPaint(style: const TextStyle(fontSize: 18));
 
@@ -72,9 +79,16 @@ class GameTable extends FlameGame with HasTappables {
     super.onLoad();
     final screenWidth = size[0];
     final screenHeight = size[1] - notchPadding;
+
+    var card1X = (screenWidth / 2) - ((cardWidth * 2.5) + 10); // 10 added at the end for padding
+    var card2X = (screenWidth / 2) - ((cardWidth * 1.5) + 5); // 5 added at the end for padding
+    var card3X = (screenWidth / 2) - (cardWidth / 2);
+    var card4X = (screenWidth / 2) + ((cardWidth / 2) + 5);  // 5 added at the end for padding
+    var card5X = (screenWidth / 2) + ((cardWidth * 1.5) + 10); // 10 added at the end for padding
+
     const cardYPosition = 650.0;
 
-    var uid = FirebaseAuth.instance.currentUser!.uid;
+
     DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
     DatabaseReference dealtCards =
         FirebaseDatabase.instance.ref('tables/1/cards');
@@ -95,42 +109,56 @@ class GameTable extends FlameGame with HasTappables {
     final snapshot = await onceRef.child('tables/1/cards').get();
     if (snapshot.exists) {
       final _map = Map<String, dynamic>.from(snapshot.value as Map);
+
+      // Get user's cards
       var myCards = _map[uid];
       var startingHand = myCards['startingHand'];
+
+      // Get face up card
+      var faceUpCardList = _map['faceUpCard'];
+
       List<dynamic> data = _map["dealer"];
+
+      faceUpCard = SpriteComponent()
+        ..sprite = await loadSprite(faceUpCardList[0] + '.png')
+        ..size = cardDimensions
+        ..y = (screenHeight / 2) - 100
+        ..x = (screenWidth / 2) - (cardWidth + 5);
+      add(faceUpCard);
+
       player1card1 = Cards()
         ..sprite = await loadSprite(startingHand[0] + '.png')
         ..size = cardDimensions
         ..y = cardYPosition
-        ..x = screenWidth / 2.2;
+        ..x = card1X;
       add(player1card1);
 
       player1card2 = Cards()
         ..sprite = await loadSprite(startingHand[1] + '.png')
         ..size = cardDimensions
         ..y = cardYPosition
-        ..x = screenWidth / 2.1;
+        ..x = card2X;
       add(player1card2);
 
       player1card3 = Cards()
         ..sprite = await loadSprite(startingHand[2] + '.png')
         ..size = cardDimensions
         ..y = cardYPosition
-        ..x = screenWidth / 2;
+        ..x = card3X;
       add(player1card3);
 
       player1card4 = Cards()
         ..sprite = await loadSprite(startingHand[3] + '.png')
         ..size = cardDimensions
         ..y = cardYPosition
-        ..x = screenWidth / 1.9;
+        ..x = card4X;
       add(player1card4);
 
       player1card5 = Cards()
         ..sprite = await loadSprite(startingHand[4] + '.png')
         ..size = cardDimensions
         ..y = cardYPosition
-        ..x = screenWidth / 1.8;
+        ..x = card5X;
       add(player1card5);
     }
 
@@ -147,9 +175,11 @@ class GameTable extends FlameGame with HasTappables {
     deck
       ..sprite = await loadSprite('backside.png')
       ..size = Vector2(cardWidth, cardHeight)
-      ..x = (screenWidth / 2)
-      ..y = (screenHeight / 2);
+      ..x = (screenWidth / 2) + 5
+      ..y = (screenHeight / 2) - 100;
     add(deck);
+
+    
 
     cancelButton
       ..sprite = await loadSprite("cancel.png")
@@ -251,27 +281,27 @@ class GameTable extends FlameGame with HasTappables {
 
       player1card2.y = size[1] - (cardHeight * 1.5);
       player1card2.x = size[0] / 2.2;
-      player1card2.size = Vector2(cardWidth, cardHeight);
+      //player1card2.size = Vector2(cardWidth, cardHeight);
       //brickCard.isExpanded = false;
 
       player1card3.y = size[1] - (cardHeight * 1.5);
       player1card3.x = size[0] / 2.1;
-      player1card3.size = Vector2(cardWidth, cardHeight);
+      //player1card3.size = Vector2(cardWidth, cardHeight);
       //eightHearts.isExpanded = false;
 
       player1card4.y = size[1] - (cardHeight * 1.5);
       player1card4.x = size[0] / 2;
-      player1card4.size = Vector2(cardWidth, cardHeight);
+      //player1card4.size = Vector2(cardWidth, cardHeight);
       //twoClubs.isExpanded = false;
 
       player1card5.y = size[1] - (cardHeight * 1.5);
       player1card5.x = size[0] / 1.9;
-      player1card5.size = Vector2(cardWidth, cardHeight);
+      //player1card5.size = Vector2(cardWidth, cardHeight);
       //fourSpade.isExpanded = false;
 
       player1card1.y = size[1] - (cardHeight * 1.5);
       player1card1.x = size[0] / 1.8;
-      player1card1.size = Vector2(cardWidth, cardHeight);
+      //player1card1.size = Vector2(cardWidth, cardHeight);
       //aceDiamond.isExpanded = false;
     }
   }
@@ -365,10 +395,29 @@ class Deck extends SpriteComponent with Tappable {
 
   doThis() async {
     final dealerRef = FirebaseDatabase.instance.ref('tables/1/cards/dealer');
+    final playersCardsRef = FirebaseDatabase.instance.ref('tables/1/cards/$uid/startingHand');
+    final cardsRef = FirebaseDatabase.instance.ref('tables/1/cards');
     final event = await dealerRef.once();
+    final playerEvent = await playersCardsRef.once();
 
-    final deck = List<String>.from(event.snapshot.value as List);
+    var deck = List<String>.from(event.snapshot.value as List);
+    var playersCards = List<String>.from(playerEvent.snapshot.value as List);
 
+    var cardBeingAdded = deck[deck.length -1];
+    playersCards.add(cardBeingAdded);
+    deck.removeLast();
+
+    await cardsRef.update({
+      "dealer" : deck,
+      "$uid/startingHand" : playersCards
+    });
+
+    Image newCard = Image.asset(cardBeingAdded + ".png");
+    final sprite = await Sprite.load(cardBeingAdded + ".png");
+    final card = SpriteComponent(sprite: sprite, size:Vector2(42.5, 59.5) );
+
+    card.position = Vector2(100, 100);
+    add(card);
     
   }
 }

@@ -17,7 +17,7 @@ class GamePlayers extends StatefulWidget {
 }
 
 class _GamePlayersState extends State<GamePlayers> {
-  double imageRadius = 30;
+  double imageRadius = 30 ;
   TextStyle chipsText = const TextStyle(fontSize: 10, color: Colors.white);
   TextStyle playerNameStyle =
       const TextStyle(fontSize: 12, color: Colors.deepOrangeAccent);
@@ -39,6 +39,14 @@ class _GamePlayersState extends State<GamePlayers> {
 
   DatabaseReference players = FirebaseDatabase.instance.ref('tables/1/players');
   var uid = FirebaseAuth.instance.currentUser!.uid;
+
+// TODO need to check on this logic
+@override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void initState() {
@@ -77,7 +85,7 @@ class _GamePlayersState extends State<GamePlayers> {
             child: Container(
               width: 650,
               height: 415,
-              color: Colors.green,
+              //color: Colors.green,
               child: Stack(
                 children: [
                   // Player 1 is the user so going counter clockwise will be Player 2,3, etc
