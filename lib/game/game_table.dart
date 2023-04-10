@@ -1,15 +1,12 @@
-import 'dart:developer';
-import 'dart:ui';
+
+import 'package:brick_hold_em/game/cards_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flame/effects.dart';
 import 'package:flame/input.dart';
-import 'package:flame/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 
-import 'dart:convert';
 
 // TODO: need to do this
 // Mario, one button to order/pair/color
@@ -21,22 +18,45 @@ import 'dart:convert';
 // Engine but do at end
 
 List<String> cardsSelected = [];
+List<String> cardsList = [];
+List<Cards> cardsIntances = [];
+List startingHand = [];
+List<String> faceUpCardList = [];
+
 var uid = FirebaseAuth.instance.currentUser!.uid;
 
+SpriteComponent background = SpriteComponent();
+Deck deck = Deck();
+SpriteComponent faceUpCard = SpriteComponent();
+SpriteComponent displayCard1 = SpriteComponent();
+SpriteComponent displayCard2 = SpriteComponent();
+SpriteComponent displayCard3 = SpriteComponent();
+SpriteComponent displayCard4 = SpriteComponent();
+List<SpriteComponent> displayCardsList =[];
+SpriteComponent cardToPile = SpriteComponent();
+late Cards player1card1;
+late Cards player1card2;
+late Cards player1card3;
+late Cards player1card4;
+late Cards player1card5;
+late Cards player1card6;
+late Cards player1card7;
+late Cards player1card8;
+late Cards player1card9;
+late Cards player1card10;
+
+PlayButton playButton = PlayButton();
+const cardYPositionRow1 = 575.0;
+const cardYPositionRow2 = 525.0;
+late var sWidth;
+late var sHeight;
 
 class GameTable extends FlameGame with HasTappables {
-  GameTable({required this.notchPadding});
+    num? notchPadding;
 
-  num notchPadding;
+  // TODO Need to redo on samsung devices.
+  GameTable({this.notchPadding});
 
-  SpriteComponent background = SpriteComponent();
-  Deck deck = Deck();
-  SpriteComponent faceUpCard = SpriteComponent();
-  late Cards player1card1;
-  late Cards player1card2;
-  late Cards player1card3;
-  late Cards player1card4;
-  late Cards player1card5;
 
   // User is Player 1, going counter clockwise players are numbered
   // Player 2
@@ -60,33 +80,36 @@ class GameTable extends FlameGame with HasTappables {
   // SpriteComponent player5Card3 = SpriteComponent();
   // SpriteComponent player5Card4 = SpriteComponent();
 
-  CancelButton cancelButton = CancelButton();
-  CheckButton checkButton = CheckButton();
-  final Vector2 exitButtonSize = Vector2(50.0, 30.0);
-
   //final double pokerCardHeight = 3.5;
   //final double pokerCardWidth = 2.5;
   //final double multiplier = 17;
-  final double cardHeight = 3.5 * 17; //59.5
-  final double cardWidth = 2.5 * 17; //42.5
+  final double cardHeight = 3.5 * 20; //59.5
+  final double cardWidth = 2.5 * 20; //42.5
   // Dimension of a poker card is 3.5 x 2.5 in, below the numebrs are multiplied by 17
-  final cardDimensions = Vector2(42.5, 59.5);
 
   TextPaint sampleText = TextPaint(style: const TextStyle(fontSize: 18));
+
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
+    displayCardsList.add(displayCard1);
+        displayCardsList.add(displayCard2);
+    displayCardsList.add(displayCard3);
+    displayCardsList.add(displayCard4);
+
     final screenWidth = size[0];
-    final screenHeight = size[1] - notchPadding;
+    final screenHeight = size[1] - notchPadding!;
+
+    sWidth = screenWidth;
+    sHeight = screenHeight;
+    final cardDimensions = Vector2(cardWidth, cardHeight);
 
     var card1X = (screenWidth / 2) - ((cardWidth * 2.5) + 10); // 10 added at the end for padding
     var card2X = (screenWidth / 2) - ((cardWidth * 1.5) + 5); // 5 added at the end for padding
     var card3X = (screenWidth / 2) - (cardWidth / 2);
     var card4X = (screenWidth / 2) + ((cardWidth / 2) + 5);  // 5 added at the end for padding
     var card5X = (screenWidth / 2) + ((cardWidth * 1.5) + 10); // 10 added at the end for padding
-
-    const cardYPosition = 650.0;
 
 
     DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
@@ -107,59 +130,65 @@ class GameTable extends FlameGame with HasTappables {
 
     final onceRef = FirebaseDatabase.instance.ref();
     final snapshot = await onceRef.child('tables/1/cards').get();
+    getFaceUpCard(screenHeight, screenWidth);
     if (snapshot.exists) {
       final _map = Map<String, dynamic>.from(snapshot.value as Map);
 
       // Get user's cards
       var myCards = _map[uid];
-      var startingHand = myCards['startingHand'];
+      startingHand = myCards['startingHand'];
 
       // Get face up card
-      var faceUpCardList = _map['faceUpCard'];
+      //var faceUpCardList = _map['faceUpCard'];
 
       List<dynamic> data = _map["dealer"];
 
-      faceUpCard = SpriteComponent()
-        ..sprite = await loadSprite(faceUpCardList[0] + '.png')
-        ..size = cardDimensions
-        ..y = (screenHeight / 2) - 100
-        ..x = (screenWidth / 2) - (cardWidth + 5);
-      add(faceUpCard);
-
-      player1card1 = Cards()
+      player1card1 = Cards(0)
         ..sprite = await loadSprite(startingHand[0] + '.png')
         ..size = cardDimensions
-        ..y = cardYPosition
+        ..y = cardYPositionRow1
         ..x = card1X;
       add(player1card1);
 
-      player1card2 = Cards()
+      player1card2 = Cards(1)
         ..sprite = await loadSprite(startingHand[1] + '.png')
         ..size = cardDimensions
-        ..y = cardYPosition
+        ..y = cardYPositionRow1
         ..x = card2X;
       add(player1card2);
 
-      player1card3 = Cards()
+      player1card3 = Cards(2)
         ..sprite = await loadSprite(startingHand[2] + '.png')
         ..size = cardDimensions
-        ..y = cardYPosition
+        ..y = cardYPositionRow1
         ..x = card3X;
       add(player1card3);
 
-      player1card4 = Cards()
+      player1card4 = Cards(3)
         ..sprite = await loadSprite(startingHand[3] + '.png')
         ..size = cardDimensions
-        ..y = cardYPosition
+        ..y = cardYPositionRow1
         ..x = card4X;
       add(player1card4);
 
-      player1card5 = Cards()
+      player1card5 = Cards(4)
         ..sprite = await loadSprite(startingHand[4] + '.png')
         ..size = cardDimensions
-        ..y = cardYPosition
+        ..y = cardYPositionRow1
         ..x = card5X;
       add(player1card5);
+
+      cardsList.add(startingHand[0]);
+      cardsList.add(startingHand[1]);
+      cardsList.add(startingHand[2]);
+      cardsList.add(startingHand[3]);
+      cardsList.add(startingHand[4]);
+
+      cardsIntances.add(player1card1);
+      cardsIntances.add(player1card2);
+      cardsIntances.add(player1card3);
+      cardsIntances.add(player1card4);
+      cardsIntances.add(player1card5);
     }
 
     dealtCards.onValue.listen((event) async {
@@ -179,130 +208,24 @@ class GameTable extends FlameGame with HasTappables {
       ..y = (screenHeight / 2) - 100;
     add(deck);
 
-    
+    playButton
+      ..sprite = await loadSprite('check.png')
+      ..size = Vector2(40 , 40)
+      ..x = (screenWidth / 2) - 20
+      ..y = (screenHeight - 70);
+    add(playButton);
 
-    cancelButton
-      ..sprite = await loadSprite("cancel.png")
-      ..size = Vector2(50, 50)
-      ..y = screenHeight
-      ..x = screenWidth;
-    add(cancelButton);
-
-    checkButton
-      ..sprite = await loadSprite("check.png")
-      ..size = Vector2(50, 50)
-      ..y = screenHeight
-      ..x = screenWidth;
-    add(checkButton);
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-
-    if (player1card1.isExpanded ||
-        player1card2.isExpanded ||
-        player1card3.isExpanded ||
-        player1card4.isExpanded ||
-        player1card5.isExpanded) {
-      if (player1card1.height < 80) {
-        player1card2.height += 1;
-        player1card2.width += 1;
-        player1card2.y = size[1] / 3;
-        player1card2.x = size[0] / 5;
-
-        player1card3.height += 1;
-        player1card3.width += 1;
-        player1card3.y = size[1] / 3;
-        player1card3.x = size[0] / 3;
-
-        player1card4.height += 1;
-        player1card4.width += 1;
-        player1card4.y = size[1] / 3;
-        player1card4.x = size[0] / 2.15;
-
-        player1card5.height += 1;
-        player1card5.width += 1;
-        player1card5.y = size[1] / 3;
-        player1card5.x = size[0] / 1.67;
-
-        player1card1.height += 1;
-        player1card1.width += 1;
-        player1card1.y = size[1] / 3;
-        player1card1.x = size[0] / 1.36;
-
-        cancelButton.y = size[1] - (cancelButton.height * 2);
-        cancelButton.x = size[0] / 3;
-
-        checkButton.y = size[1] - (checkButton.height * 2);
-        checkButton.x = size[0] / 1.5;
-      }
-
-      if (player1card2.isBrickSelected) {
-        player1card2.y = size[1] / 7;
-      } else {
-        player1card2.y = size[1] / 3;
-      }
-
-      if (player1card3.isEightSelected) {
-        player1card3.y = size[1] / 7;
-      } else {
-        player1card3.y = size[1] / 3;
-      }
-
-      if (player1card4.isTwoSelected) {
-        player1card4.y = size[1] / 7;
-      } else {
-        player1card4.y = size[1] / 3;
-      }
-
-      if (player1card5.isFourSelected) {
-        player1card5.y = size[1] / 7;
-      } else {
-        player1card5.y = size[1] / 3;
-      }
-
-      if (player1card1.isAceSelected) {
-        player1card1.y = size[1] / 7;
-      } else {
-        player1card1.y = size[1] / 3;
-      }
-    }
-
-    if (checkButton.isPressed) {
-      //print(cardsSelected);
-    }
-
-    if (cancelButton.isPressed) {
-      cancelButton.y = size[1];
-      cancelButton.x = size[0];
-      checkButton.y = size[1];
-      checkButton.x = size[0];
-
-      player1card2.y = size[1] - (cardHeight * 1.5);
-      player1card2.x = size[0] / 2.2;
-      //player1card2.size = Vector2(cardWidth, cardHeight);
-      //brickCard.isExpanded = false;
-
-      player1card3.y = size[1] - (cardHeight * 1.5);
-      player1card3.x = size[0] / 2.1;
-      //player1card3.size = Vector2(cardWidth, cardHeight);
-      //eightHearts.isExpanded = false;
-
-      player1card4.y = size[1] - (cardHeight * 1.5);
-      player1card4.x = size[0] / 2;
-      //player1card4.size = Vector2(cardWidth, cardHeight);
-      //twoClubs.isExpanded = false;
-
-      player1card5.y = size[1] - (cardHeight * 1.5);
-      player1card5.x = size[0] / 1.9;
-      //player1card5.size = Vector2(cardWidth, cardHeight);
-      //fourSpade.isExpanded = false;
-
-      player1card1.y = size[1] - (cardHeight * 1.5);
-      player1card1.x = size[0] / 1.8;
-      //player1card1.size = Vector2(cardWidth, cardHeight);
-      //aceDiamond.isExpanded = false;
+    //var stop = ((size[1] - notchPadding!) / 2) - 100;
+    var stop = -450;
+    if(cardToPile.y > stop) {
+      cardToPile.y -= 300 * dt;
+    } else {
+      cardToPile.removeFromParent();
     }
   }
 
@@ -311,84 +234,51 @@ class GameTable extends FlameGame with HasTappables {
     super.render(canvas);
     //sampleText.render(canvas, "Table 1", Vector2(size[0] / 2, 10));
   }
+
+  getFaceUpCard(double screenHeight, double screenWidth) async {
+      DatabaseReference faceUpCardRef = FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
+      faceUpCardRef.onValue.listen((event) async { 
+        var _faceUpCardList = List<String>.from(event.snapshot.value as List);
+        faceUpCardList = _faceUpCardList;
+        faceUpCard = SpriteComponent()
+        ..sprite = await loadSprite('${_faceUpCardList[_faceUpCardList.length - 1]}.png')
+        ..size = Vector2(cardWidth, cardHeight)
+        ..y = (screenHeight / 2) - 100
+        ..x = (screenWidth / 2) - (cardWidth + 5);
+      add(faceUpCard);
+      });
+      
+  }
+
 }
 
 class Cards extends SpriteComponent with Tappable {
-  bool isExpanded = false;
-  bool isSelected = false;
-  bool isBrickSelected = false;
-  bool isEightSelected = false;
-  bool isTwoSelected = false;
-  bool isFourSelected = false;
-  bool isAceSelected = false;
+  
+  final int id;
+  Cards(this.id);
 
   @override
   bool onTapDown(TapDownInfo info) {
-    if (isBrickSelected) {
-      isBrickSelected = false;
-      cardsSelected.add("brick");
-    } else {
-      isBrickSelected = true;
-      cardsSelected.remove("brick");
-    }
-    if (isEightSelected) {
-      isEightSelected = false;
-      cardsSelected.add("8_hearts");
-    } else {
-      isEightSelected = true;
-      cardsSelected.remove("8_hearts");
-    }
-    if (isTwoSelected) {
-      isTwoSelected = false;
-      cardsSelected.add("2_clubs");
-    } else {
-      isTwoSelected = true;
-      cardsSelected.remove("2_clubs");
-    }
-    if (isFourSelected) {
-      isFourSelected = false;
-      cardsSelected.add("4_spades");
-    } else {
-      isFourSelected = true;
-      cardsSelected.remove("4_spades");
-    }
-    if (isAceSelected) {
-      isAceSelected = false;
-      cardsSelected.add("a_diamonds");
-    } else {
-      isAceSelected = true;
-      cardsSelected.remove("a_diamonds");
-    }
+    // Applying seleceting and unselecting of cards
 
-    isExpanded = true;
+    // unselecting cards
+    if (cardsSelected.contains(cardsList[id])) {
+      var index = cardsSelected.indexOf(cardsList[id]);
+      cardsSelected.removeAt(index);
+    } else {
+      // selecting
+      cardsSelected.add(cardsList[id]);
+    }
     return true;
   }
+
 }
 
-class CancelButton extends SpriteComponent with Tappable {
-  bool isPressed = false;
-  @override
-  bool onTapDown(TapDownInfo info) {
-    isPressed = true;
-    return true;
-  }
-}
-
-class CheckButton extends SpriteComponent with Tappable {
-  bool isPressed = false;
-  @override
-  bool onTapDown(TapDownInfo info) {
-    print(cardsSelected);
-    isPressed = true;
-
-    return true;
-  }
-}
-
+// Hit Send and Check button
 class Deck extends SpriteComponent with Tappable {
+  
   @override
   bool onTapDown(TapDownInfo info) {
-    print("hitting");
     doThis();
     return true;
   }
@@ -412,12 +302,61 @@ class Deck extends SpriteComponent with Tappable {
       "$uid/startingHand" : playersCards
     });
 
-    Image newCard = Image.asset(cardBeingAdded + ".png");
-    final sprite = await Sprite.load(cardBeingAdded + ".png");
-    final card = SpriteComponent(sprite: sprite, size:Vector2(42.5, 59.5) );
+    // TODO: this is TEMP, need to optimize logic
+    final sprite = await Sprite.load("$cardBeingAdded.png");
+    final card = SpriteComponent(sprite: sprite, size:Vector2(2.5 * 20, 3.5 * 20) );
 
-    card.position = Vector2(100, 100);
+    card.position = Vector2(-140, 300);
     add(card);
+  }
+}
+
+class PlayButton extends SpriteComponent with Tappable, HasGameRef<GameTable> {
+
+   @override
+  bool onTapDown(TapDownInfo info) {
+    animateCard();
+    play();
+    return true;
+  }
+
+  animateCard() async {
+    final sprite = await Sprite.load("backside.png");
+     cardToPile = SpriteComponent(sprite: sprite, size: Vector2(2.5 * 20, 3.5 * 20));
+
+    cardToPile.position = Vector2(0, -300);
+    add(cardToPile);
+  }
+
+  play() async {
+    final cardsRef = FirebaseDatabase.instance.ref('tables/1/cards');
+
+    final faceUpCardListUpdate = [...faceUpCardList, ...cardsSelected];
     
+    await cardsRef.update({
+      "faceUpCard": faceUpCardListUpdate
+    }).then((value) {
+        addDisplayCards();
+        //player1card1.removeFromParent();
+        // Remove card sprites from game
+        for (int i =0; i < cardsSelected.length; i++) {
+          
+        }
+    }).onError((error, stackTrace) {
+      print(error);
+    });
+  }
+
+  addDisplayCards() async {
+    var cardsSelectedReversed =  List.from(cardsSelected.reversed);
+    cardsSelectedReversed.removeAt(0);
+    for (int i = 0; i < cardsSelectedReversed.length; i++) {
+          final sprite = await Sprite.load("${cardsSelectedReversed[i]}.png");
+          displayCardsList[i] = SpriteComponent(sprite: sprite, size: Vector2(2.5 * 20, 3.5 * 20));
+          double x = (i * -50) -60;
+          displayCardsList[i].position = Vector2(x, -477);
+          add(displayCardsList[i]);
+
+    }
   }
 }
