@@ -83,8 +83,8 @@ class GameTable extends FlameGame with HasTappables {
   //final double pokerCardHeight = 3.5;
   //final double pokerCardWidth = 2.5;
   //final double multiplier = 17;
-  final double cardHeight = 3.5 * 20; //59.5
-  final double cardWidth = 2.5 * 20; //42.5
+  final double cardHeight = 3.5 * 20; //70
+  final double cardWidth = 2.5 * 20; //50
   // Dimension of a poker card is 3.5 x 2.5 in, below the numebrs are multiplied by 17
 
   TextPaint sampleText = TextPaint(style: const TextStyle(fontSize: 18));
@@ -204,8 +204,8 @@ class GameTable extends FlameGame with HasTappables {
     deck
       ..sprite = await loadSprite('backside.png')
       ..size = Vector2(cardWidth, cardHeight)
-      ..x = (screenWidth / 2) + 5
-      ..y = (screenHeight / 2) - 100;
+      ..x = (screenWidth / 2) - (cardWidth / 2)
+      ..y = (screenHeight / 2);
     add(deck);
 
     playButton
@@ -312,6 +312,8 @@ class Deck extends SpriteComponent with Tappable {
 }
 
 class PlayButton extends SpriteComponent with Tappable, HasGameRef<GameTable> {
+  double get x => gameRef.size[0]; // width
+  double get y => gameRef.size[1]; // height
 
    @override
   bool onTapDown(TapDownInfo info) {
@@ -358,5 +360,19 @@ class PlayButton extends SpriteComponent with Tappable, HasGameRef<GameTable> {
           add(displayCardsList[i]);
 
     }
+  }
+}
+
+class MyScrollableRow extends StatelessWidget {
+  const MyScrollableRow({super.key});
+
+   @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.blue,
+      width: 150,
+      height: 100,
+      child: Text("data"),
+    );
   }
 }
