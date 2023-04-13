@@ -79,11 +79,11 @@ class _GamePlayersState extends State<GamePlayers> {
       
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 100),
+          padding: const EdgeInsets.only(top: 0),
           child: Align(
-            alignment: Alignment.topCenter,
+            alignment: Alignment.center,
             child: Container(
-              width: 650,
+              //width: auto,
               height: 450,
               //color: Colors.green,
               child: Stack(
@@ -96,12 +96,12 @@ class _GamePlayersState extends State<GamePlayers> {
                       child: player(player1Name, player1PhotoURL, 1000)),
                   // Player 3
                   Positioned(
-                      top: 100,
+                      top: 130,
                       right: 0,
                       child: player(player2Name, player2PhotoURL, 1000)),
                   // Player 4
                   Positioned(
-                      top: 100,
+                      top: 130,
                       left: 0,
                       child: player(player3Name, player3PhotoURL, 1000)),
                   // Player 5
