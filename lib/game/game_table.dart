@@ -110,7 +110,7 @@ class GameTable extends FlameGame with HasTappables {
     var card3X = (screenWidth / 2) - (cardWidth / 2);
     var card4X = (screenWidth / 2) + ((cardWidth / 2) + 5);  // 5 added at the end for padding
     var card5X = (screenWidth / 2) + ((cardWidth * 1.5) + 10); // 10 added at the end for padding
-
+    var cardsY = screenHeight - 200; 
 
     DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
     DatabaseReference dealtCards =
@@ -146,35 +146,35 @@ class GameTable extends FlameGame with HasTappables {
       player1card1 = Cards(0)
         ..sprite = await loadSprite(startingHand[0] + '.png')
         ..size = cardDimensions
-        ..y = cardYPositionRow1
+        ..y = cardsY
         ..x = card1X;
       add(player1card1);
 
       player1card2 = Cards(1)
         ..sprite = await loadSprite(startingHand[1] + '.png')
         ..size = cardDimensions
-        ..y = cardYPositionRow1
+        ..y = cardsY
         ..x = card2X;
       add(player1card2);
 
       player1card3 = Cards(2)
         ..sprite = await loadSprite(startingHand[2] + '.png')
         ..size = cardDimensions
-        ..y = cardYPositionRow1
+        ..y = cardsY
         ..x = card3X;
       add(player1card3);
 
       player1card4 = Cards(3)
         ..sprite = await loadSprite(startingHand[3] + '.png')
         ..size = cardDimensions
-        ..y = cardYPositionRow1
+        ..y = cardsY
         ..x = card4X;
       add(player1card4);
 
       player1card5 = Cards(4)
         ..sprite = await loadSprite(startingHand[4] + '.png')
         ..size = cardDimensions
-        ..y = cardYPositionRow1
+        ..y = cardsY
         ..x = card5X;
       add(player1card5);
 
@@ -205,7 +205,7 @@ class GameTable extends FlameGame with HasTappables {
       ..sprite = await loadSprite('backside.png')
       ..size = Vector2(cardWidth, cardHeight)
       ..x = (screenWidth / 2) - (cardWidth / 2)
-      ..y = (screenHeight / 2);
+      ..y = (screenHeight / 2) - 80;
     add(deck);
 
     playButton
@@ -243,35 +243,59 @@ class GameTable extends FlameGame with HasTappables {
         faceUpCard = SpriteComponent()
         ..sprite = await loadSprite('${_faceUpCardList[_faceUpCardList.length - 1]}.png')
         ..size = Vector2(cardWidth, cardHeight)
-        ..y = (screenHeight / 2) - 100
-        ..x = (screenWidth / 2) - (cardWidth + 5);
+        ..y = (screenHeight / 2) + 10
+        ..x = (screenWidth / 2) - ((cardWidth * 2.5) + 10);
       add(faceUpCard);
       });
-      
   }
-
 }
 
 class Cards extends SpriteComponent with Tappable {
+  bool isPressed = false;
   
   final int id;
   Cards(this.id);
 
+        final direction = Vector2(1, 1);
+              final stop = (sHeight / 2) + 10;
+
+
+
   @override
   bool onTapDown(TapDownInfo info) {
+    isPressed = true;
     // Applying seleceting and unselecting of cards
-
-    // unselecting cards
+    // Unselecting cards
     if (cardsSelected.contains(cardsList[id])) {
       var index = cardsSelected.indexOf(cardsList[id]);
       cardsSelected.removeAt(index);
     } else {
-      // selecting
+      // Selecting
       cardsSelected.add(cardsList[id]);
     }
     return true;
   }
 
+  @override
+  void update(double dt) {
+    if (isPressed) {
+      player1card1.position -= direction * 100 * dt;
+      // Change direction if the sprite goes out of bounds
+      if (player1card1.position.x < 0 || player1card1.position.x > size.x) {
+        direction.x *= -1;
+      }
+      if (player1card1.position.y < 0 || player1card1.position.y > size.y) {
+        direction.y *= -1;
+      }
+      // if(player1card1.y > stop) {
+      //   player1card1.position -= Vector2(-100 *dt, 300 *dt);
+      
+      // } else {
+      //   isPressed = true;
+      // }
+    }
+
+  }
 }
 
 // Hit Send and Check button
@@ -363,16 +387,3 @@ class PlayButton extends SpriteComponent with Tappable, HasGameRef<GameTable> {
   }
 }
 
-class MyScrollableRow extends StatelessWidget {
-  const MyScrollableRow({super.key});
-
-   @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.blue,
-      width: 150,
-      height: 100,
-      child: Text("data"),
-    );
-  }
-}
