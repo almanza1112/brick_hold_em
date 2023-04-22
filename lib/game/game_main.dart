@@ -1,3 +1,4 @@
+import 'package:brick_hold_em/game/game_cards.dart';
 import 'package:brick_hold_em/game/game_players.dart';
 import 'package:brick_hold_em/game/game_sidemenu.dart';
 import 'package:brick_hold_em/game/game_table.dart';
@@ -26,6 +27,7 @@ class _GameMainState extends State<GameMain> {
           GameWidget(game: game),
           GamePlayers(game: game),
           GameSideMenu(game: game),
+          GameCards()
 
         ],
       )
