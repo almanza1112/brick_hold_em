@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:brick_hold_em/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -132,7 +133,7 @@ class _CompetitivePageState extends State<CompetitivePage> {
                 TextButton(
                   onPressed: () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => GameMain()));
+                        MaterialPageRoute(builder: (context) => GamePage()));
                   },
                   child: Text("START", style: TextStyle(color: Colors.white)),
                 )

@@ -6,12 +6,13 @@ import 'package:flutter/material.dart';
 
 // TODO: when clicking on player, information or profile shows up...apply logic
 class GamePlayers extends StatefulWidget {
-  const GamePlayers({
+   GameTable? game;
+
+   GamePlayers({
     Key? key,
-    required this.game,
+     this.game,
   }) : super(key: key);
 
-  final GameTable game;
 
   _GamePlayersState createState() => _GamePlayersState();
 }
@@ -160,7 +161,7 @@ class _GamePlayersState extends State<GamePlayers> {
             visible: waitingVisibile,
             child: const Text(
               "Waiting..",
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.white, fontSize: 12),
             ))
       ],
     );
