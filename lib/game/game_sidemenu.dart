@@ -5,13 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class GameSideMenu extends StatefulWidget {
-  const GameSideMenu({
-    Key? key,
-    required this.game,
-  }) : super(key: key);
-
-  final GameTable game;
-
+ 
   _GameSideMenuState createState() => _GameSideMenuState();
 }
 

@@ -26,7 +26,7 @@ class _GameMainState extends State<GameMain> {
         children: [
           GameWidget(game: game),
           GamePlayers(game: game),
-          GameSideMenu(game: game),
+          GameSideMenu(),
           GameCards()
 
         ],
