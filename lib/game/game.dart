@@ -4,7 +4,6 @@ import 'package:brick_hold_em/game/game_players.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-
 import 'game_sidemenu.dart';
 
 class GamePage extends StatefulWidget {
@@ -18,15 +17,18 @@ class GamePageState extends State<GamePage> {
   final onceRef = FirebaseDatabase.instance.ref();
   final uid = FirebaseAuth.instance.currentUser!.uid;
   late String faceUpCardName;
-  Matrix4 playersCardsTransform = Matrix4.translationValues(0, 0, 0);
+  Matrix4 playersCardsTransform = Matrix4.translationValues(0, 0, 2);
 
   late Future<List<String>> _cardsSnapshot;
+  late Future<String> _getFaceUpCard;
 
   @override
   void initState() {
     _cardsSnapshot = cardsSnapshot();
+    _getFaceUpCard = getFaceUpCard();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,20 +58,20 @@ class GamePageState extends State<GamePage> {
           right: 0,
           bottom: 50,
           left: 0,
-          child: FutureBuilder(
+          child: FutureBuilder<List<String>>(
               future: _cardsSnapshot,
               builder: ((context, snapshot) {
                 if (snapshot.hasData) {
                   var cardsList = List<String>.from(snapshot.data as List);
 
                   // Not having the line below was causing an infinite loop
-                  // cardWidgets has to be cleared 
+                  // cardWidgets has to be cleared
                   cardWidgets.clear();
 
                   for (var cards in cardsList) {
                     cardWidgets.add(card(cards, "hi"));
                   }
-                    print("ob");
+                  print("ob");
                   return Container(
                     height: 70,
                     child: Center(
@@ -93,8 +95,6 @@ class GamePageState extends State<GamePage> {
     );
   }
 
-
-
   Matrix4 testMatrix = Matrix4.translationValues(0, 0, 0);
   void moveBox() {
     setState(() {
@@ -104,9 +104,6 @@ class GamePageState extends State<GamePage> {
 
   Widget card(var card, String index) {
     return AnimatedContainer(
-      key: Key(index),
-      //color: Colors.black,
-      //alignment: Alignment(100, 0),
       transform: playersCardsTransform,
       width: cardWidth,
       height: cardHeight,
@@ -127,19 +124,18 @@ class GamePageState extends State<GamePage> {
 
   _moveCard() {
     setState(() {
-      playersCardsTransform = Matrix4.translationValues(0, -100, 0);
+      playersCardsTransform = Matrix4.translationValues(0, -100, 10);
     });
   }
 
   Future<List<String>> cardsSnapshot() async {
-    final snapshot =
-        await onceRef.child('tables/1/cards/$uid/startingHand').get();
-    if (snapshot.exists) {
-      var cardsList = List<String>.from(snapshot.value as List);
-      return cardsList;
-    } else {
-      return [];
-    }
+     final snapshot = await onceRef.child('tables/1/cards/$uid/startingHand').get();
+     if (snapshot.exists) {
+       var cardsList = List<String>.from(snapshot.value as List);
+       return cardsList;
+     } else {
+       return [];
+     }
   }
 
   Widget deck() {
@@ -162,7 +158,7 @@ class GamePageState extends State<GamePage> {
               left:
                   (constraints.constrainWidth() / 2) - ((cardWidth * 2.5) + 10),
               child: FutureBuilder(
-                future: getFaceUpCard(),
+                future: _getFaceUpCard,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     faceUpCardName = snapshot.data.toString();
@@ -182,7 +178,7 @@ class GamePageState extends State<GamePage> {
     })));
   }
 
-  getFaceUpCard() async {
+  Future<String> getFaceUpCard() async {
     DatabaseReference faceUpCardRef =
         FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
     Completer<String> completer = Completer();
