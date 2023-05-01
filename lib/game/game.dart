@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 
-import 'package:brick_hold_em/game/game_players.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+
+import 'package:brick_hold_em/game/game_players.dart';
+
 import 'game_sidemenu.dart';
 
 class GamePage extends StatefulWidget {
@@ -26,7 +29,21 @@ class GamePageState extends State<GamePage> {
   void initState() {
     _cardsSnapshot = cardsSnapshot();
     _getFaceUpCard = getFaceUpCard();
+    addUserToTable();
     super.initState();
+  }
+
+  addUserToTable() async {
+    DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
+
+    await database.update({
+      "players/$uid/name": FirebaseAuth.instance.currentUser!.displayName,
+      "players/$uid/photoURL": FirebaseAuth.instance.currentUser!.photoURL
+    }).then((value) {
+      print("much success");
+    }).onError((error, stackTrace) {
+      print("I am a failure");
+    });
   }
 
   @override
@@ -68,17 +85,23 @@ class GamePageState extends State<GamePage> {
                   // cardWidgets has to be cleared
                   cardWidgets.clear();
 
-                  for (var cards in cardsList) {
-                    cardWidgets.add(card(cards, "hi"));
+                  for (int i = 0; i < cardsList.length; i++) {
+                    CardKey cardKey = CardKey(
+                        position: i,
+                        cardName: cardsList[i],
+                        cardXY: playersCardsTransform);
+                    cardWidgets.add(card(cardKey));
                   }
-                  print("ob");
-                  return Container(
+
+                  print("infinite loop check");
+                  return SizedBox(
                     height: 70,
                     child: Center(
                       child: ListView.builder(
+                        clipBehavior: Clip.none,
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
-                        itemCount: cardsList.length,
+                        itemCount: cardWidgets.length,
                         itemBuilder: (context, index) {
                           return cardWidgets[index];
                         },
@@ -95,25 +118,25 @@ class GamePageState extends State<GamePage> {
     );
   }
 
-  Matrix4 testMatrix = Matrix4.translationValues(0, 0, 0);
-  void moveBox() {
-    setState(() {
-      testMatrix = Matrix4.translationValues(100, -100, 0);
-    });
-  }
-
-  Widget card(var card, String index) {
+  Widget card(CardKey cardKey) {
+    String cardName = cardKey.cardName!;
     return AnimatedContainer(
-      transform: playersCardsTransform,
+      key: ValueKey(cardKey),
+      transform: Matrix4.translationValues(0, 0, 0),
       width: cardWidth,
       height: cardHeight,
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 200),
       child: GestureDetector(
         onTap: () {
-          _moveCard();
+          setState(() {
+            cardKey.cardXY = Matrix4.translationValues(0, -200, 0);
+          });
+          //print(cardKey.toString());
+          //testSet(cardKey.position, cardKey);
+          //_moveCard();
         },
         child: Image.asset(
-          "assets/images/$card.png",
+          "assets/images/$cardName.png",
           fit: BoxFit.cover,
           width: cardWidth,
           height: cardHeight,
@@ -122,20 +145,31 @@ class GamePageState extends State<GamePage> {
     );
   }
 
+  testSet(int position, CardKey cardKey) {
+    setState(() {
+      print("hellooooo");
+      Matrix4 newPos = Matrix4.translationValues(0, -200, 0);
+      CardKey _cardKey = cardKey.copyWith(cardXY: newPos);
+
+      cardWidgets[position] = card(_cardKey);
+    });
+  }
+
   _moveCard() {
     setState(() {
-      playersCardsTransform = Matrix4.translationValues(0, -100, 10);
+      playersCardsTransform = Matrix4.translationValues(0, -100, 0);
     });
   }
 
   Future<List<String>> cardsSnapshot() async {
-     final snapshot = await onceRef.child('tables/1/cards/$uid/startingHand').get();
-     if (snapshot.exists) {
-       var cardsList = List<String>.from(snapshot.value as List);
-       return cardsList;
-     } else {
-       return [];
-     }
+    final snapshot =
+        await onceRef.child('tables/1/cards/$uid/startingHand').get();
+    if (snapshot.exists) {
+      var cardsList = List<String>.from(snapshot.value as List);
+      return cardsList;
+    } else {
+      return [];
+    }
   }
 
   Widget deck() {
@@ -232,7 +266,27 @@ class GamePageState extends State<GamePage> {
     await cardsRef.update({"dealer": deck, "$uid/startingHand": playersCards});
 
     setState(() {
-      //cardWidgets.add(card(cardBeingAdded));
+      cardWidgets.add(card(CardKey(position: cardWidgets.length, cardName: cardBeingAdded, cardXY: playersCardsTransform)));
     });
   }
+}
+
+class CardKey {
+  int? position;
+  String? cardName;
+  Matrix4? cardXY;
+
+  CardKey(
+      {required this.position, required this.cardName, required this.cardXY});
+
+  CardKey copyWith({int? position, String? cardName, Matrix4? cardXY}) {
+    return CardKey(
+        position: position ?? this.position,
+        cardName: cardName ?? this.cardName,
+        cardXY: cardXY ?? this.cardXY);
+  }
+
+  @override
+  String toString() =>
+      'CardKeys(position: $position, cardName: $cardName, cardXY: $cardXY)';
 }
