@@ -25,6 +25,13 @@ class GamePageState extends State<GamePage> {
   late Future<List<String>> _cardsSnapshot;
   late Future<String> _getFaceUpCard;
 
+  double cardWidth = 50;
+  double cardHeight = 70;
+  //var cardWidgets = <Widget>[];
+  var cardWidgetsBuilderList = <Widget>[];
+
+  bool isStateChanged = false;
+
   @override
   void initState() {
     _cardsSnapshot = cardsSnapshot();
@@ -64,10 +71,6 @@ class GamePageState extends State<GamePage> {
     );
   }
 
-  double cardWidth = 50;
-  double cardHeight = 70;
-  var cardWidgets = <Widget>[];
-
   Widget playerCards() {
     return SafeArea(
       child: Stack(children: [
@@ -83,7 +86,8 @@ class GamePageState extends State<GamePage> {
 
                   // Not having the line below was causing an infinite loop
                   // cardWidgets has to be cleared
-                  cardWidgets.clear();
+                  var cardWidgets = <Widget>[];
+                  //cardWidgets.clear(); //uncomment this line if you are declaring cardWidgets globally
 
                   for (int i = 0; i < cardsList.length; i++) {
                     CardKey cardKey = CardKey(
@@ -93,7 +97,12 @@ class GamePageState extends State<GamePage> {
                     cardWidgets.add(card(cardKey));
                   }
 
+                  if (!isStateChanged) {
+                    cardWidgetsBuilderList = cardWidgets;
+                  }
+
                   print("infinite loop check");
+                
                   return SizedBox(
                     height: 70,
                     child: Center(
@@ -101,9 +110,9 @@ class GamePageState extends State<GamePage> {
                         clipBehavior: Clip.none,
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
-                        itemCount: cardWidgets.length,
+                        itemCount: cardWidgetsBuilderList.length,
                         itemBuilder: (context, index) {
-                          return cardWidgets[index];
+                          return cardWidgetsBuilderList[index];
                         },
                       ),
                     ),
@@ -116,6 +125,13 @@ class GamePageState extends State<GamePage> {
         ),
       ]),
     );
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
   }
 
   Widget card(CardKey cardKey) {
@@ -143,16 +159,6 @@ class GamePageState extends State<GamePage> {
         ),
       ),
     );
-  }
-
-  testSet(int position, CardKey cardKey) {
-    setState(() {
-      print("hellooooo");
-      Matrix4 newPos = Matrix4.translationValues(0, -200, 0);
-      CardKey _cardKey = cardKey.copyWith(cardXY: newPos);
-
-      cardWidgets[position] = card(_cardKey);
-    });
   }
 
   _moveCard() {
@@ -213,22 +219,39 @@ class GamePageState extends State<GamePage> {
   }
 
   Future<String> getFaceUpCard() async {
+    /**
+     // The following code kept throwing Bad State errors
+        DatabaseReference faceUpCardRef =
+        FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
+        Completer<String> completer = Completer();
+
+        faceUpCardRef.onValue.listen((event) async {
+          var faceUpCardList = List<String>.from(event.snapshot.value as List);
+          //faceUpCardList = _faceUpCardList;
+          setState(() {
+            faceUpCardName = faceUpCardList[0];
+          });
+          completer.complete(faceUpCardList[0]);
+        }).onError((error) {
+          completer.completeError(error);
+        });
+
+        return completer.future;
+     */
+
     DatabaseReference faceUpCardRef =
         FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
-    Completer<String> completer = Completer();
 
-    faceUpCardRef.onValue.listen((event) async {
+    try {
+      var event = await faceUpCardRef.once();
       var faceUpCardList = List<String>.from(event.snapshot.value as List);
-      //faceUpCardList = _faceUpCardList;
       setState(() {
         faceUpCardName = faceUpCardList[0];
       });
-      completer.complete(faceUpCardList[0]);
-    }).onError((error) {
-      completer.completeError(error);
-    });
-
-    return completer.future;
+      return faceUpCardList[0];
+    } catch (error) {
+      throw error;
+    }
   }
 
   Widget buttons() {
@@ -266,7 +289,11 @@ class GamePageState extends State<GamePage> {
     await cardsRef.update({"dealer": deck, "$uid/startingHand": playersCards});
 
     setState(() {
-      cardWidgets.add(card(CardKey(position: cardWidgets.length, cardName: cardBeingAdded, cardXY: playersCardsTransform)));
+      isStateChanged = true;
+      cardWidgetsBuilderList.add(card(CardKey(
+          position: cardWidgetsBuilderList.length,
+          cardName: cardBeingAdded,
+          cardXY: playersCardsTransform)));
     });
   }
 }
