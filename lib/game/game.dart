@@ -152,9 +152,10 @@ class GamePageState extends State<GamePage> {
   List<Widget> tappedCards = <Widget>[];
   Widget card(CardKey cardKey) {
     String cardName = cardKey.cardName!;
+    var _cardKey = ValueKey(cardKey);
 
     return AnimatedContainer(
-      key: ValueKey(cardKey),
+      key: _cardKey,
       transform: playersCardsTransform,
       width: cardWidth,
       height: cardHeight,
@@ -162,11 +163,16 @@ class GamePageState extends State<GamePage> {
       curve: Curves.fastOutSlowIn,
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            isStateChanged = true;
-            cardWidgetsBuilderList.removeWhere((element) => element.key == ValueKey(cardKey));
-          });
-
+          if (tappedCards.length < 4) {
+            var result = cardWidgetsBuilderList
+                .indexWhere((element) => element.key == _cardKey);
+            setState(() {
+              isStateChanged = true;
+              tappedCards.add(cardWidgetsBuilderList[result]);
+              cardWidgetsBuilderList
+                  .removeWhere((element) => element.key == _cardKey);
+            });
+          }
           // THIS CODE BELOW IS FOR ANIMATING THE CARDS ONTO THE TABLE
           // ALSO THE ANIMTED CONTAINER HAD STATEFULL BUILDER WRAPPED AROUND IT!!!
           //print("before: ${context.globalPaintBounds}");
@@ -191,7 +197,6 @@ class GamePageState extends State<GamePage> {
       ),
     );
   }
-
 
   _moveCard() {
     setState(() {
@@ -230,7 +235,12 @@ class GamePageState extends State<GamePage> {
               top: (constraints.constrainHeight() / 2) + 50,
               left:
                   (constraints.constrainWidth() / 2) - ((cardWidth * 2.5) + 10),
-              child: tableCardPos1()),
+              child: Container(
+                height: 70,
+                width: 50,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.yellowAccent)),
+              )),
 
           // Card position #2
           Positioned(
@@ -243,6 +253,7 @@ class GamePageState extends State<GamePage> {
                 width: 50,
                 decoration: BoxDecoration(
                     border: Border.all(color: Colors.yellowAccent)),
+                child: tableCard(0),
               )),
 
           // Card position #3
@@ -255,6 +266,7 @@ class GamePageState extends State<GamePage> {
                 width: 50,
                 decoration: BoxDecoration(
                     border: Border.all(color: Colors.yellowAccent)),
+                child: tableCard(1),
               )),
 
           // Card position #4
@@ -267,6 +279,7 @@ class GamePageState extends State<GamePage> {
                 width: 50,
                 decoration: BoxDecoration(
                     border: Border.all(color: Colors.yellowAccent)),
+                child: tableCard(2),
               )),
 
           //Card position #5
@@ -280,19 +293,31 @@ class GamePageState extends State<GamePage> {
                 width: 50,
                 decoration: BoxDecoration(
                     border: Border.all(color: Colors.yellowAccent)),
+                child: tableCard(3),
               )),
         ],
       );
     })));
   }
 
-  Widget tableCardPos1() {
-    return Container(
-      height: 70,
-      width: 50,
-      decoration: BoxDecoration(border: Border.all(color: Colors.yellowAccent)),
-      child: tappedCards[0] != null ? Text("data") : Text("data"),
-    );
+  Widget? tableCard(int pos) {
+    if (tappedCards.asMap().containsKey(pos)) {
+      return Stack(
+        children: [
+          tappedCards[pos],
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                cardWidgetsBuilderList.add(tappedCards[pos]);
+                tappedCards.removeAt(pos);
+              });
+            },
+          )
+        ],
+      );
+    } else {
+      return null;
+    }
   }
 
   Widget faceUpCard() {
