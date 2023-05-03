@@ -16,6 +16,19 @@ class GamePage extends StatefulWidget {
   GamePageState createState() => GamePageState();
 }
 
+extension GlobalPaintBounds on BuildContext {
+  Rect? get globalPaintBounds {
+    final renderObject = findRenderObject();
+    final translation = renderObject?.getTransformTo(null).getTranslation();
+    if (translation != null && renderObject?.paintBounds != null) {
+      final offset = Offset(translation.x, translation.y);
+      return renderObject!.paintBounds.shift(offset);
+    } else {
+      return null;
+    }
+  }
+}
+
 class GamePageState extends State<GamePage> {
   final onceRef = FirebaseDatabase.instance.ref();
   final uid = FirebaseAuth.instance.currentUser!.uid;
@@ -28,6 +41,7 @@ class GamePageState extends State<GamePage> {
   double cardWidth = 50;
   double cardHeight = 70;
   //var cardWidgets = <Widget>[];
+  late double constrainHeight, constrainWidth;
   var cardWidgetsBuilderList = <Widget>[];
 
   bool isStateChanged = false;
@@ -65,6 +79,7 @@ class GamePageState extends State<GamePage> {
           playerCards(),
           deck(),
           faceUpCard(),
+          fiveCardBorders(),
           buttons()
         ],
       ),
@@ -102,7 +117,7 @@ class GamePageState extends State<GamePage> {
                   }
 
                   print("infinite loop check");
-                
+
                   return SizedBox(
                     height: 70,
                     child: Center(
@@ -134,21 +149,37 @@ class GamePageState extends State<GamePage> {
     }
   }
 
+  List<Widget> tappedCards = <Widget>[];
   Widget card(CardKey cardKey) {
     String cardName = cardKey.cardName!;
+
     return AnimatedContainer(
       key: ValueKey(cardKey),
-      transform: Matrix4.translationValues(0, 0, 0),
+      transform: playersCardsTransform,
       width: cardWidth,
       height: cardHeight,
       duration: const Duration(milliseconds: 200),
+      curve: Curves.fastOutSlowIn,
       child: GestureDetector(
         onTap: () {
           setState(() {
-            cardKey.cardXY = Matrix4.translationValues(0, -200, 0);
+            isStateChanged = true;
+            cardWidgetsBuilderList.removeWhere((element) => element.key == ValueKey(cardKey));
           });
-          //print(cardKey.toString());
-          //testSet(cardKey.position, cardKey);
+
+          // THIS CODE BELOW IS FOR ANIMATING THE CARDS ONTO THE TABLE
+          // ALSO THE ANIMTED CONTAINER HAD STATEFULL BUILDER WRAPPED AROUND IT!!!
+          //print("before: ${context.globalPaintBounds}");
+          // 170 because of the 50 bottom paddding (from Positioned of playerCards) and
+          // 50 for faceUpcard, and 70 for cardHeight
+          // double y = -(constrainHeight / 2) + 170;
+          // double x = 100;
+          // setState(() {
+          //
+          //   playersCardsTransform = Matrix4.translationValues(x, y, 0);
+          // });
+          // print("after: ${context.globalPaintBounds}");
+
           //_moveCard();
         },
         child: Image.asset(
@@ -160,6 +191,7 @@ class GamePageState extends State<GamePage> {
       ),
     );
   }
+
 
   _moveCard() {
     setState(() {
@@ -188,9 +220,86 @@ class GamePageState extends State<GamePage> {
     ));
   }
 
+  Widget fiveCardBorders() {
+    return SafeArea(child: LayoutBuilder(
+        builder: ((BuildContext context, BoxConstraints constraints) {
+      return Stack(
+        children: [
+          // Card position #1 (faceUpCard)
+          Positioned(
+              top: (constraints.constrainHeight() / 2) + 50,
+              left:
+                  (constraints.constrainWidth() / 2) - ((cardWidth * 2.5) + 10),
+              child: tableCardPos1()),
+
+          // Card position #2
+          Positioned(
+              top: (constraints.constrainHeight() / 2) + 50,
+              left:
+                  (constraints.constrainWidth() / 2) - ((cardWidth * 1.5) + 5),
+              child: Container(
+                //margin: const EdgeInsets.all(15.0),
+                height: 70,
+                width: 50,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.yellowAccent)),
+              )),
+
+          // Card position #3
+          Positioned(
+              top: (constraints.constrainHeight() / 2) + 50,
+              left: (constraints.constrainWidth() / 2) - (cardWidth / 2),
+              child: Container(
+                //margin: const EdgeInsets.all(15.0),
+                height: 70,
+                width: 50,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.yellowAccent)),
+              )),
+
+          // Card position #4
+          Positioned(
+              top: (constraints.constrainHeight() / 2) + 50,
+              left: (constraints.constrainWidth() / 2) + ((cardWidth / 2) + 5),
+              child: Container(
+                //margin: const EdgeInsets.all(15.0),
+                height: 70,
+                width: 50,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.yellowAccent)),
+              )),
+
+          //Card position #5
+          Positioned(
+              top: (constraints.constrainHeight() / 2) + 50,
+              left:
+                  (constraints.constrainWidth() / 2) + ((cardWidth * 1.5) + 10),
+              child: Container(
+                //margin: const EdgeInsets.all(15.0),
+                height: 70,
+                width: 50,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.yellowAccent)),
+              )),
+        ],
+      );
+    })));
+  }
+
+  Widget tableCardPos1() {
+    return Container(
+      height: 70,
+      width: 50,
+      decoration: BoxDecoration(border: Border.all(color: Colors.yellowAccent)),
+      child: tappedCards[0] != null ? Text("data") : Text("data"),
+    );
+  }
+
   Widget faceUpCard() {
     return SafeArea(child: LayoutBuilder(
         builder: ((BuildContext context, BoxConstraints constraints) {
+      constrainWidth = constraints.constrainWidth();
+      constrainHeight = constraints.constrainHeight();
       return Stack(
         children: [
           Positioned(
