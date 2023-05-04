@@ -46,6 +46,9 @@ class GamePageState extends State<GamePage> {
 
   bool isStateChanged = false;
 
+  Duration tableCardAnimationDuration = const Duration(milliseconds: 500);
+  bool playButtonSelected = false;
+
   @override
   void initState() {
     _cardsSnapshot = cardsSnapshot();
@@ -75,12 +78,12 @@ class GamePageState extends State<GamePage> {
         //fit: StackFit.expand,
         children: [
           GamePlayers(game: null),
-          GameSideMenu(),
           playerCards(),
           deck(),
-          faceUpCard(),
           fiveCardBorders(),
-          buttons()
+          faceUpCard(),
+          buttons(),
+          GameSideMenu(),
         ],
       ),
     );
@@ -230,6 +233,84 @@ class GamePageState extends State<GamePage> {
         builder: ((BuildContext context, BoxConstraints constraints) {
       return Stack(
         children: [
+          // Red dot posiition 1
+          Positioned(
+              top: (constraints.constrainHeight() / 2) + 50,
+              left:
+                  (constraints.constrainWidth() / 2) - ((cardWidth * 2.5) + 10),
+              child: const SizedBox(
+                  height: 70,
+                  width: 50,
+                  child: Center(
+                    child: Icon(
+                      Icons.circle_sharp,
+                      color: Colors.red,
+                      size: 12,
+                    ),
+                  ))),
+          
+          // Red dot posiition 2
+          Positioned(
+              top: (constraints.constrainHeight() / 2) + 50,
+              left:
+                  (constraints.constrainWidth() / 2) - ((cardWidth * 1.5) + 5),
+              child: const SizedBox(
+                  height: 70,
+                  width: 50,
+                  child: Center(
+                    child: Icon(
+                      Icons.circle_sharp,
+                      color: Colors.red,
+                      size: 12,
+                    ),
+                  ))),
+          
+          // Red dot posiition 3
+          Positioned(
+              top: (constraints.constrainHeight() / 2) + 50,
+              left: (constraints.constrainWidth() / 2) - (cardWidth / 2),
+              child: const SizedBox(
+                  height: 70,
+                  width: 50,
+                  child: Center(
+                    child: Icon(
+                      Icons.circle_sharp,
+                      color: Colors.red,
+                      size: 12,
+                    ),
+                  ))),
+          
+          // Red dot posiition 4
+          Positioned(
+              top: (constraints.constrainHeight() / 2) + 50,
+              left: (constraints.constrainWidth() / 2) + ((cardWidth / 2) + 5),
+              child: const SizedBox(
+                  height: 70,
+                  width: 50,
+                  child: Center(
+                    child: Icon(
+                      Icons.circle_sharp,
+                      color: Colors.red,
+                      size: 12,
+                    ),
+                  ))),
+          
+          // Red dot posiition 5
+          Positioned(
+              top: (constraints.constrainHeight() / 2) + 50,
+              left:
+                  (constraints.constrainWidth() / 2) + ((cardWidth * 1.5) + 10),
+              child: const SizedBox(
+                  height: 70,
+                  width: 50,
+                  child: Center(
+                    child: Icon(
+                      Icons.circle_sharp,
+                      color: Colors.red,
+                      size: 12,
+                    ),
+                  ))),
+
           // Card position #1 (faceUpCard)
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
@@ -238,61 +319,77 @@ class GamePageState extends State<GamePage> {
               child: Container(
                 height: 70,
                 width: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.yellowAccent)),
+                // decoration: BoxDecoration(
+                //     border: Border.all(color: Colors.yellowAccent)),
               )),
 
           // Card position #2
-          Positioned(
+          AnimatedPositioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left:
-                  (constraints.constrainWidth() / 2) - ((cardWidth * 1.5) + 5),
+              left: playButtonSelected
+                  ? (constraints.constrainWidth() / 2) -
+                      ((cardWidth * 2.5) + 10)
+                  : (constraints.constrainWidth() / 2) -
+                      ((cardWidth * 1.5) + 5),
+              duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
                 height: 70,
                 width: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.yellowAccent)),
+                // decoration: BoxDecoration(
+                //     border: Border.all(color: Colors.yellowAccent)),
                 child: tableCard(0),
               )),
 
           // Card position #3
-          Positioned(
+          AnimatedPositioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left: (constraints.constrainWidth() / 2) - (cardWidth / 2),
+              left: playButtonSelected
+                  ? (constraints.constrainWidth() / 2) -
+                      ((cardWidth * 2.5) + 10)
+                  : (constraints.constrainWidth() / 2) - (cardWidth / 2),
+              duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
                 height: 70,
                 width: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.yellowAccent)),
+                // decoration: BoxDecoration(
+                //     border: Border.all(color: Colors.yellowAccent)),
                 child: tableCard(1),
               )),
 
           // Card position #4
-          Positioned(
+          AnimatedPositioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left: (constraints.constrainWidth() / 2) + ((cardWidth / 2) + 5),
+              left: playButtonSelected
+                  ? (constraints.constrainWidth() / 2) -
+                      ((cardWidth * 2.5) + 10)
+                  : (constraints.constrainWidth() / 2) + ((cardWidth / 2) + 5),
+              duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
                 height: 70,
                 width: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.yellowAccent)),
+                // decoration: BoxDecoration(
+                //     border: Border.all(color: Colors.yellowAccent)),
                 child: tableCard(2),
               )),
 
           //Card position #5
-          Positioned(
+          AnimatedPositioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left:
-                  (constraints.constrainWidth() / 2) + ((cardWidth * 1.5) + 10),
+              left: playButtonSelected
+                  ? (constraints.constrainWidth() / 2) -
+                      ((cardWidth * 2.5) + 10)
+                  : (constraints.constrainWidth() / 2) +
+                      ((cardWidth * 1.5) + 10),
+              duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
                 height: 70,
                 width: 50,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.yellowAccent)),
+                //decoration: BoxDecoration(
+                //border: Border.all(color: Colors.yellowAccent)),
                 child: tableCard(3),
               )),
         ],
@@ -399,7 +496,17 @@ class GamePageState extends State<GamePage> {
                 onPressed: () {
                   addCard();
                 },
-              ))
+              )),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    playButtonSelected = true;
+                  });
+                },
+                child: Text("Play")),
+          )
         ],
       ),
     );

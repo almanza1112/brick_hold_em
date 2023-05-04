@@ -54,26 +54,26 @@ class _GameSideMenuState extends State<GameSideMenu>
               color: Colors.white,
               icon: const Icon(Icons.menu)),
         ),
-        SafeArea(
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: IconButton(
-                onPressed: () {
-                  controller2.forward();
-                },
-                color: Colors.white,
-                icon: const Icon(Icons.chat_bubble)),
-          ),
-        ),
+        // SafeArea(
+        //   child: Align(
+        //     alignment: Alignment.bottomLeft,
+        //     child: IconButton(
+        //         onPressed: () {
+        //           controller2.forward();
+        //         },
+        //         color: Colors.white,
+        //         icon: const Icon(Icons.chat_bubble)),
+        //   ),
+        // ),
         // MENU
         SlideTransition(
           position: offsetAnimation,
           child: mainMenu(),
         ),
-        SlideTransition(
-          position: offsetAnimation2,
-          child: chatSection(),
-        )
+        // SlideTransition(
+        //   position: offsetAnimation2,
+        //   child: chatSection(),
+        // )
       ],
     );
   }
