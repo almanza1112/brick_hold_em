@@ -37,6 +37,7 @@ class GamePageState extends State<GamePage> {
 
   late Future<List<String>> _cardsSnapshot;
   late Future<String> _getFaceUpCard;
+  List<Widget> tappedCards = <Widget>[];
 
   double cardWidth = 50;
   double cardHeight = 70;
@@ -45,9 +46,16 @@ class GamePageState extends State<GamePage> {
   var cardWidgetsBuilderList = <Widget>[];
 
   bool isStateChanged = false;
+  bool isYourTurn = false;
 
   Duration tableCardAnimationDuration = const Duration(milliseconds: 500);
   bool playButtonSelected = false;
+
+  DatabaseReference turnOrderListener =
+      FirebaseDatabase.instance.ref('tables/1/turnOrder/turnPlayer');
+  DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
+  TextStyle turnPlayerTextStyle = const TextStyle(
+      color: Colors.orange, fontSize: 24, fontWeight: FontWeight.bold);
 
   @override
   void initState() {
@@ -58,8 +66,6 @@ class GamePageState extends State<GamePage> {
   }
 
   addUserToTable() async {
-    DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
-
     await database.update({
       "players/$uid/name": FirebaseAuth.instance.currentUser!.displayName,
       "players/$uid/photoURL": FirebaseAuth.instance.currentUser!.photoURL
@@ -84,9 +90,57 @@ class GamePageState extends State<GamePage> {
           faceUpCard(),
           buttons(),
           GameSideMenu(),
+          turnPlayerInfo()
         ],
       ),
     );
+  }
+
+  Widget turnPlayerInfo() {
+    return SafeArea(
+      child: Stack(children: [
+        Positioned(
+          top: 40,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: StreamBuilder(
+                stream: turnOrderListener.onValue,
+                builder: ((context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const Text("There was an error getting turn info");
+                  }
+
+                  if (snapshot.hasData) {
+                    var turnPlayerUid =
+                        (snapshot.data!).snapshot.value as String;
+                    print("Turn player UID: $turnPlayerUid");
+                    if (turnPlayerUid == uid) {
+                      //setIsYourTurn(true);
+                      return Text(
+                        "It's your turn!",
+                        style: turnPlayerTextStyle,
+                      );
+                    } else {
+                      return Text(
+                        "Waiting on other player's turn!",
+                        style: turnPlayerTextStyle,
+                      );
+                    }
+                  } else {
+                    return const Text("Snapshot has no data!");
+                  }
+                })),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  void setIsYourTurn(bool yourTurn) {
+    setState(() {
+      isYourTurn = yourTurn;
+    });
   }
 
   Widget playerCards() {
@@ -152,7 +206,6 @@ class GamePageState extends State<GamePage> {
     }
   }
 
-  List<Widget> tappedCards = <Widget>[];
   Widget card(CardKey cardKey) {
     String cardName = cardKey.cardName!;
     var _cardKey = ValueKey(cardKey);
@@ -248,7 +301,7 @@ class GamePageState extends State<GamePage> {
                       size: 12,
                     ),
                   ))),
-          
+
           // Red dot posiition 2
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
@@ -264,7 +317,7 @@ class GamePageState extends State<GamePage> {
                       size: 12,
                     ),
                   ))),
-          
+
           // Red dot posiition 3
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
@@ -279,7 +332,7 @@ class GamePageState extends State<GamePage> {
                       size: 12,
                     ),
                   ))),
-          
+
           // Red dot posiition 4
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
@@ -294,7 +347,7 @@ class GamePageState extends State<GamePage> {
                       size: 12,
                     ),
                   ))),
-          
+
           // Red dot posiition 5
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
@@ -486,30 +539,88 @@ class GamePageState extends State<GamePage> {
   }
 
   Widget buttons() {
-    return SafeArea(
-      child: Stack(
-        children: [
-          Align(
-              alignment: Alignment.bottomRight,
-              child: IconButton(
-                icon: Image.asset("assets/images/plus_one.png"),
+    return Visibility(
+      //visible: isYourTurn,
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Align(
+                alignment: Alignment.bottomRight,
+                child: IconButton(
+                  icon: Image.asset("assets/images/plus_one.png"),
+                  onPressed: () {
+                    addCard();
+                  },
+                )),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: ElevatedButton(
+                  onPressed: () {
+                    playButton();
+                  },
+                  child: Text("Play")),
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: ElevatedButton(
                 onPressed: () {
-                  addCard();
+                  passPlay();
                 },
-              )),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    playButtonSelected = true;
-                  });
-                },
-                child: Text("Play")),
-          )
-        ],
+                child: Text("pass"),
+              ),
+            )
+          ],
+        ),
       ),
     );
+  }
+
+  playButton() async {
+    setState(() {
+      playButtonSelected = true;
+    });
+    List<String> cardsBeingPlayed = <String>[];
+    for (int i = 0; i < tappedCards.length; i++) {
+      ValueKey<CardKey> t = tappedCards[i].key! as ValueKey<CardKey>;
+      cardsBeingPlayed.add(t.value.cardName!);
+    }
+
+    DatabaseReference dbMoves = FirebaseDatabase.instance.ref('tables/1/moves');
+    DatabaseReference newMoves = dbMoves.push();
+    await newMoves.set({uid: cardsBeingPlayed}).then((value) {
+      setFaceUpCard(cardsBeingPlayed.last);
+    });
+  }
+
+  setFaceUpCard(String card) async {
+    DatabaseReference faceUpCardRef =
+        FirebaseDatabase.instance.ref('tables/1/cards');
+
+        await faceUpCardRef.update({
+          'faceUpCard' : [card]
+        }).then((value) {
+          setState(() { 
+
+            //playButtonSelected = false;
+          });
+        });
+  }
+
+  // TODO: this needs to go in backend
+  passPlay() async {
+    DatabaseReference turnOrderRef =
+        FirebaseDatabase.instance.ref('tables/1/turnOrder/players');
+    var event = await turnOrderRef.once();
+    var turnOrderList = List<String>.from(event.snapshot.value as List);
+    late String nextTurnPlayer;
+    if (turnOrderList[0] == uid) {
+      nextTurnPlayer = turnOrderList[1];
+    } else {
+      nextTurnPlayer = turnOrderList[0];
+    }
+    DatabaseReference turnPlayerRef =
+        FirebaseDatabase.instance.ref('tables/1/turnOrder');
+    turnPlayerRef.update({'turnPlayer': nextTurnPlayer});
   }
 
   addCard() async {
