@@ -36,7 +36,7 @@ class GamePageState extends State<GamePage> {
   Matrix4 playersCardsTransform = Matrix4.translationValues(0, 0, 2);
 
   late Future<List<String>> _cardsSnapshot;
-  late Future<String> _getFaceUpCard;
+  //late Future<String> _getFaceUpCard;
   List<Widget> tappedCards = <Widget>[];
 
   double cardWidth = 50;
@@ -53,6 +53,8 @@ class GamePageState extends State<GamePage> {
 
   DatabaseReference turnOrderListener =
       FirebaseDatabase.instance.ref('tables/1/turnOrder/turnPlayer');
+  DatabaseReference faceUpCardListener = FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
+
   DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
   TextStyle turnPlayerTextStyle = const TextStyle(
       color: Colors.orange, fontSize: 24, fontWeight: FontWeight.bold);
@@ -60,20 +62,9 @@ class GamePageState extends State<GamePage> {
   @override
   void initState() {
     _cardsSnapshot = cardsSnapshot();
-    _getFaceUpCard = getFaceUpCard();
+    //_getFaceUpCard = getFaceUpCard();
     addUserToTable();
     super.initState();
-  }
-
-  addUserToTable() async {
-    await database.update({
-      "players/$uid/name": FirebaseAuth.instance.currentUser!.displayName,
-      "players/$uid/photoURL": FirebaseAuth.instance.currentUser!.photoURL
-    }).then((value) {
-      print("much success");
-    }).onError((error, stackTrace) {
-      print("I am a failure");
-    });
   }
 
   @override
@@ -94,6 +85,24 @@ class GamePageState extends State<GamePage> {
         ],
       ),
     );
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  addUserToTable() async {
+    await database.update({
+      "players/$uid/name": FirebaseAuth.instance.currentUser!.displayName,
+      "players/$uid/photoURL": FirebaseAuth.instance.currentUser!.photoURL
+    }).then((value) {
+      print("much success");
+    }).onError((error, stackTrace) {
+      print("I am a failure");
+    });
   }
 
   Widget turnPlayerInfo() {
@@ -197,13 +206,6 @@ class GamePageState extends State<GamePage> {
         ),
       ]),
     );
-  }
-
-  @override
-  void setState(VoidCallback fn) {
-    if (mounted) {
-      super.setState(fn);
-    }
   }
 
   Widget card(CardKey cardKey) {
@@ -481,20 +483,35 @@ class GamePageState extends State<GamePage> {
               top: (constraints.constrainHeight() / 2) + 50,
               left:
                   (constraints.constrainWidth() / 2) - ((cardWidth * 2.5) + 10),
-              child: FutureBuilder(
-                future: _getFaceUpCard,
+              child: StreamBuilder(
+                stream: faceUpCardListener.onValue,
                 builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    faceUpCardName = snapshot.data.toString();
-                    return Image.asset(
-                      "assets/images/$faceUpCardName.png",
-                      width: cardWidth,
-                      height: cardHeight,
-                    );
-                  } else {
-                    return Text(
-                        "An error occcured retrieving the face up card");
+                  if (snapshot.hasError) {
+                    return const Text("Error gettign card");
                   }
+
+                  if (snapshot.hasData) {
+                    String faceUpCard = (snapshot.data!).snapshot.value as String;
+                    print(faceUpCard);
+                    return Image.asset("assets/images/$faceUpCard.png", width: cardWidth, height: cardHeight,);
+
+                  } else {
+                    return const Text("game has not started");
+                  }
+
+
+                  // THIS CODE IS FOR FUTUREBUILDER
+                  // if (snapshot.hasData) {
+                  //   faceUpCardName = snapshot.data.toString();
+                  //   return Image.asset(
+                  //     "assets/images/$faceUpCardName.png",
+                  //     width: cardWidth,
+                  //     height: cardHeight,
+                  //   );
+                  // } else {
+                  //   return Text(
+                  //       "An error occcured retrieving the face up card");
+                  // }
                 },
               ))
         ],
@@ -588,21 +605,32 @@ class GamePageState extends State<GamePage> {
     DatabaseReference dbMoves = FirebaseDatabase.instance.ref('tables/1/moves');
     DatabaseReference newMoves = dbMoves.push();
     await newMoves.set({uid: cardsBeingPlayed}).then((value) {
-      setFaceUpCard(cardsBeingPlayed.last);
+      setFaceUpCardAndHand(cardsBeingPlayed.last);
     });
   }
 
-  setFaceUpCard(String card) async {
+  setFaceUpCardAndHand(String card) async {
+    List<String> cardsInHand = <String>[];
+    for (int i = 0; i < cardWidgetsBuilderList.length; i++) {
+      ValueKey<CardKey> t = cardWidgetsBuilderList[i].key! as ValueKey<CardKey>;
+      cardsInHand.add(t.value.cardName!);
+    }
+
     DatabaseReference faceUpCardRef =
         FirebaseDatabase.instance.ref('tables/1/cards');
 
         await faceUpCardRef.update({
-          'faceUpCard' : [card]
+          'faceUpCard' : card,
+          '$uid/startingHand' : cardsInHand 
         }).then((value) {
-          setState(() { 
 
-            //playButtonSelected = false;
+          Future.delayed(const Duration(milliseconds: 500), () {
+            setState(() {
+              playButtonSelected = false;
+              tappedCards.clear();
+            });
           });
+          
         });
   }
 
