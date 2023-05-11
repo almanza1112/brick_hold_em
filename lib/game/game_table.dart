@@ -1,4 +1,3 @@
-import 'package:brick_hold_em/game/cards_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flame/input.dart';

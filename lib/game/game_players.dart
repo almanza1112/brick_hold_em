@@ -1,24 +1,25 @@
 import 'package:brick_hold_em/game/game_table.dart';
+import 'package:brick_hold_em/game/player.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 //import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'progress_indicator.dart';
 
 // TODO: when clicking on player, information or profile shows up...apply logic
 class GamePlayers extends StatefulWidget {
-   GameTable? game;
+  GameTable? game;
 
-   GamePlayers({
+  GamePlayers({
     Key? key,
-     this.game,
   }) : super(key: key);
-
 
   _GamePlayersState createState() => _GamePlayersState();
 }
 
-class _GamePlayersState extends State<GamePlayers> {
-  double imageRadius = 30 ;
+class _GamePlayersState extends State<GamePlayers>
+    with TickerProviderStateMixin {
+  double imageRadius = 30;
   TextStyle chipsText = const TextStyle(fontSize: 10, color: Colors.white);
   TextStyle playerNameStyle =
       const TextStyle(fontSize: 12, color: Colors.deepOrangeAccent);
@@ -39,10 +40,15 @@ class _GamePlayersState extends State<GamePlayers> {
   String player4PhotoURL = "";
 
   DatabaseReference players = FirebaseDatabase.instance.ref('tables/1/players');
+  
   var uid = FirebaseAuth.instance.currentUser!.uid;
+  bool isPlayersTurn = false;
+
+  late AnimationController controller;
+  late Animation<Color?> colorTween;
 
 // TODO need to check on this logic
-@override
+  @override
   void setState(fn) {
     if (mounted) {
       super.setState(fn);
@@ -51,11 +57,11 @@ class _GamePlayersState extends State<GamePlayers> {
 
   @override
   void initState() {
-    super.initState();
+
     players.onValue.listen((event) async {
       final _map = Map<String, dynamic>.from(event.snapshot.value as Map);
-      //List<dynamic> data = _map[FirebaseAuth.instance.currentUser!.uid];
       List<String> playerUids = [];
+      List<Player> players = <Player>[];
       for (var element in _map.keys) {
         // add the players that are not you
         if (element != uid) {
@@ -65,19 +71,27 @@ class _GamePlayersState extends State<GamePlayers> {
 
       // TODO: need to apply dynamic logic
       if (playerUids.isNotEmpty) {
+        Player p1 = Player(
+            name: _map[playerUids[0]]["name"],
+            photoUrl: _map[playerUids[0]]["photoURL"]);
         var player1Data = _map[playerUids[0]];
+
         setState(() {
           player1Name = player1Data["name"];
           player1PhotoURL = player1Data["photoURL"];
         });
       }
     });
+
+     
+
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    print("uhhhh");
     return Stack(
-      
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 0),
@@ -110,12 +124,13 @@ class _GamePlayersState extends State<GamePlayers> {
                       bottom: 0,
                       left: 0,
                       child: player(player4Name, player4PhotoURL, 1000)),
-                      // Player 5
+                  // Player 5
                   Positioned(
                       top: 0,
                       left: 0,
                       right: 0,
                       child: player(player4Name, player4PhotoURL, 1000)),
+                 
                 ],
               ),
             ),
@@ -147,22 +162,31 @@ class _GamePlayersState extends State<GamePlayers> {
             ),
           ],
         ),
-        Visibility(
-          visible: playerDetailsVisible,
-          child: Text(
-            playerUsername,
-            style: playerNameStyle,
+        SizedBox(
+          height: 35,
+          width: 100,
+          child: Column(
+            children: [
+              Expanded(child: Container()),
+              Visibility(
+                visible: playerDetailsVisible,
+                child: Text(
+                  playerUsername,
+                  style: playerNameStyle,
+                ),
+              ),
+              Visibility(
+                  visible: playerDetailsVisible,
+                  child: Text("$playerChips ch", style: chipsText)),
+              Visibility(
+                  visible: waitingVisibile,
+                  child: const Text(
+                    "Waiting..",
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ))
+            ],
           ),
         ),
-        Visibility(
-            visible: playerDetailsVisible,
-            child: Text("$playerChips ch", style: chipsText)),
-        Visibility(
-            visible: waitingVisibile,
-            child: const Text(
-              "Waiting..",
-              style: TextStyle(color: Colors.white, fontSize: 12),
-            ))
       ],
     );
   }

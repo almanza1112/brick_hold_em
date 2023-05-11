@@ -25,7 +25,7 @@ class _GameMainState extends State<GameMain> {
         fit: StackFit.expand,
         children: [
           GameWidget(game: game),
-          GamePlayers(game: game),
+          GamePlayers(),
           GameSideMenu(),
           GameCards()
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:brick_hold_em/game/progress_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -53,11 +54,13 @@ class GamePageState extends State<GamePage> {
 
   DatabaseReference turnOrderListener =
       FirebaseDatabase.instance.ref('tables/1/turnOrder/turnPlayer');
-  DatabaseReference faceUpCardListener = FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
+  DatabaseReference faceUpCardListener =
+      FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
 
   DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
   TextStyle turnPlayerTextStyle = const TextStyle(
       color: Colors.orange, fontSize: 24, fontWeight: FontWeight.bold);
+
 
   @override
   void initState() {
@@ -74,14 +77,15 @@ class GamePageState extends State<GamePage> {
       body: Stack(
         //fit: StackFit.expand,
         children: [
-          GamePlayers(game: null),
+          GamePlayers(),
+          ProgressIndicatorTurn(),
           playerCards(),
           deck(),
           fiveCardBorders(),
           faceUpCard(),
           buttons(),
           GameSideMenu(),
-          turnPlayerInfo()
+          turnPlayerInfo(),
         ],
       ),
     );
@@ -123,7 +127,6 @@ class GamePageState extends State<GamePage> {
                   if (snapshot.hasData) {
                     var turnPlayerUid =
                         (snapshot.data!).snapshot.value as String;
-                    print("Turn player UID: $turnPlayerUid");
                     if (turnPlayerUid == uid) {
                       //setIsYourTurn(true);
                       return Text(
@@ -275,11 +278,16 @@ class GamePageState extends State<GamePage> {
 
   Widget deck() {
     return Center(
-        child: Image.asset(
-      "assets/images/backside.png",
-      fit: BoxFit.cover,
-      width: cardWidth,
-      height: cardHeight,
+        child: GestureDetector(
+      onTap: () {
+        addCard();
+      },
+      child: Image.asset(
+        "assets/images/backside.png",
+        fit: BoxFit.cover,
+        width: cardWidth,
+        height: cardHeight,
+      ),
     ));
   }
 
@@ -491,14 +499,17 @@ class GamePageState extends State<GamePage> {
                   }
 
                   if (snapshot.hasData) {
-                    String faceUpCard = (snapshot.data!).snapshot.value as String;
+                    String faceUpCard =
+                        (snapshot.data!).snapshot.value as String;
                     print(faceUpCard);
-                    return Image.asset("assets/images/$faceUpCard.png", width: cardWidth, height: cardHeight,);
-
+                    return Image.asset(
+                      "assets/images/$faceUpCard.png",
+                      width: cardWidth,
+                      height: cardHeight,
+                    );
                   } else {
                     return const Text("game has not started");
                   }
-
 
                   // THIS CODE IS FOR FUTUREBUILDER
                   // if (snapshot.hasData) {
@@ -562,14 +573,6 @@ class GamePageState extends State<GamePage> {
         child: Stack(
           children: [
             Align(
-                alignment: Alignment.bottomRight,
-                child: IconButton(
-                  icon: Image.asset("assets/images/plus_one.png"),
-                  onPressed: () {
-                    addCard();
-                  },
-                )),
-            Align(
               alignment: Alignment.bottomCenter,
               child: ElevatedButton(
                   onPressed: () {
@@ -606,6 +609,7 @@ class GamePageState extends State<GamePage> {
     DatabaseReference newMoves = dbMoves.push();
     await newMoves.set({uid: cardsBeingPlayed}).then((value) {
       setFaceUpCardAndHand(cardsBeingPlayed.last);
+      passPlay();
     });
   }
 
@@ -619,19 +623,15 @@ class GamePageState extends State<GamePage> {
     DatabaseReference faceUpCardRef =
         FirebaseDatabase.instance.ref('tables/1/cards');
 
-        await faceUpCardRef.update({
-          'faceUpCard' : card,
-          '$uid/startingHand' : cardsInHand 
-        }).then((value) {
-
-          Future.delayed(const Duration(milliseconds: 500), () {
-            setState(() {
-              playButtonSelected = false;
-              tappedCards.clear();
-            });
-          });
-          
+    await faceUpCardRef.update(
+        {'faceUpCard': card, '$uid/startingHand': cardsInHand}).then((value) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        setState(() {
+          playButtonSelected = false;
+          tappedCards.clear();
         });
+      });
+    });
   }
 
   // TODO: this needs to go in backend
@@ -676,6 +676,7 @@ class GamePageState extends State<GamePage> {
           cardXY: playersCardsTransform)));
     });
   }
+
 }
 
 class CardKey {
