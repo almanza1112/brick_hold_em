@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:brick_hold_em/game/progress_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +6,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 import 'package:brick_hold_em/game/game_players.dart';
+import 'package:flutter/services.dart';
 
 import 'game_sidemenu.dart';
 
@@ -61,10 +61,6 @@ class GamePageState extends State<GamePage> {
   TextStyle turnPlayerTextStyle = const TextStyle(
       color: Colors.orange, fontSize: 24, fontWeight: FontWeight.bold);
 
-  
- 
-
-
   @override
   void initState() {
     _cardsSnapshot = cardsSnapshot();
@@ -75,9 +71,8 @@ class GamePageState extends State<GamePage> {
 
   @override
   Widget build(BuildContext context) {
-    int countdown = 10;
     return Scaffold(
-      backgroundColor: Colors.green,
+      backgroundColor: Colors.green[700],
       body: Stack(
         //fit: StackFit.expand,
         children: [
@@ -90,27 +85,10 @@ class GamePageState extends State<GamePage> {
           buttons(),
           GameSideMenu(),
           turnPlayerInfo(),
-          Positioned(
-            top: 30,
-            left: 40,
-            child: StatefulBuilder(builder: (context, setState) {
-              if (countdown > 0) {
-                Timer(Duration(seconds: 1), () {
-                  setState(() {
-                    countdown--;
-                  });
-                });
-              }
-              
-              
-              return Text("$countdown");
-            }),
-          )
         ],
       ),
     );
   }
-
 
   @override
   void setState(VoidCallback fn) {
@@ -131,6 +109,8 @@ class GamePageState extends State<GamePage> {
   }
 
   Widget turnPlayerInfo() {
+    int countdown = 30;
+
     return SafeArea(
       child: Stack(children: [
         Positioned(
@@ -150,13 +130,32 @@ class GamePageState extends State<GamePage> {
                         (snapshot.data!).snapshot.value as String;
                     if (turnPlayerUid == uid) {
                       //setIsYourTurn(true);
-                      return Text(
-                        "It's your turn!",
-                        style: turnPlayerTextStyle,
-                      );
+                      return StatefulBuilder(builder: (context, setState) {
+                        // Sound for the countdown
+                        SystemSound.play(SystemSoundType.click);
+                        // Vibration for the countdown
+                        HapticFeedback.mediumImpact();
+
+                        if (countdown > 0) {
+                          Timer(Duration(seconds: 1), () {
+                            setState(() {
+                              countdown--;
+                            });
+                          });
+                        } else {
+                          ranOutOfTime();
+                        }
+
+                        return Column(
+                          children: [
+                            Text("IT'S YOUR TURN", style: turnPlayerTextStyle,),
+                            Text("$countdown", style: turnPlayerTextStyle,)
+                          ],
+                        );
+                      });
                     } else {
                       return Text(
-                        "Waiting on other player's turn!",
+                        "Waiting...",
                         style: turnPlayerTextStyle,
                       );
                     }
@@ -673,6 +672,7 @@ class GamePageState extends State<GamePage> {
   }
 
   addCard() async {
+  
     final dealerRef = FirebaseDatabase.instance.ref('tables/1/cards/dealer');
     final playersCardsRef =
         FirebaseDatabase.instance.ref('tables/1/cards/$uid/startingHand');
@@ -698,6 +698,10 @@ class GamePageState extends State<GamePage> {
     });
   }
 
+  ranOutOfTime() async {
+    await addCard();
+    await passPlay();
+  }
 }
 
 class CardKey {
