@@ -61,6 +61,9 @@ class GamePageState extends State<GamePage> {
   TextStyle turnPlayerTextStyle = const TextStyle(
       color: Colors.orange, fontSize: 24, fontWeight: FontWeight.bold);
 
+  
+ 
+
 
   @override
   void initState() {
@@ -72,6 +75,7 @@ class GamePageState extends State<GamePage> {
 
   @override
   Widget build(BuildContext context) {
+    int countdown = 10;
     return Scaffold(
       backgroundColor: Colors.green,
       body: Stack(
@@ -86,10 +90,27 @@ class GamePageState extends State<GamePage> {
           buttons(),
           GameSideMenu(),
           turnPlayerInfo(),
+          Positioned(
+            top: 30,
+            left: 40,
+            child: StatefulBuilder(builder: (context, setState) {
+              if (countdown > 0) {
+                Timer(Duration(seconds: 1), () {
+                  setState(() {
+                    countdown--;
+                  });
+                });
+              }
+              
+              
+              return Text("$countdown");
+            }),
+          )
         ],
       ),
     );
   }
+
 
   @override
   void setState(VoidCallback fn) {

@@ -46,7 +46,7 @@ void startTimer() {
       /// [AnimationController]s can be created with `vsync: this` because of
       /// [TickerProviderStateMixin].
       vsync: this,
-      duration: const Duration(seconds: 60),
+      duration: const Duration(seconds: 3),
     )..addListener(() {
         setState(() {});
       })..addStatusListener((status) {
