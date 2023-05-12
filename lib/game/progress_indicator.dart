@@ -105,15 +105,6 @@ void startTimer() {
             ),
           ),
         ),
-        Positioned(
-          top: 20,
-          left: 20,
-          child: Container(
-            width: 10,
-            height: 10,
-            child: Text("DATAAAAAAAAA"),
-          ),
-        )
       ],
     );
   }
