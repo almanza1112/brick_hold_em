@@ -111,28 +111,7 @@ void startTimer() {
 
 @override
   void dispose() {
-    _timer.cancel();
     super.dispose();
   }
 
-
-
-  changeTurnPlayer() async {
-
-    DatabaseReference turnOrderRef =
-        FirebaseDatabase.instance.ref('tables/1/turnOrder/players');
-    var event = await turnOrderRef.once();
-    var turnOrderList = List<String>.from(event.snapshot.value as List);
-    late String nextTurnPlayer;
-    if (turnOrderList[0] == uid) {
-      nextTurnPlayer = turnOrderList[1];
-    } else {
-      nextTurnPlayer = turnOrderList[0];
-    }
-                  print(nextTurnPlayer);
-
-    DatabaseReference turnPlayerRef =
-        FirebaseDatabase.instance.ref('tables/1/turnOrder');
-    turnPlayerRef.update({'turnPlayer': nextTurnPlayer});
-  }
 }
