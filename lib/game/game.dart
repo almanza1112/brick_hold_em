@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:brick_hold_em/game/game_players.dart';
 import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import 'game_sidemenu.dart';
 
@@ -61,6 +62,9 @@ class GamePageState extends State<GamePage> {
   TextStyle turnPlayerTextStyle = const TextStyle(
       color: Colors.orange, fontSize: 24, fontWeight: FontWeight.bold);
 
+         final player = AudioPlayer();
+
+
   @override
   void initState() {
     _cardsSnapshot = cardsSnapshot();
@@ -77,7 +81,6 @@ class GamePageState extends State<GamePage> {
         //fit: StackFit.expand,
         children: [
           GamePlayers(),
-          ProgressIndicatorTurn(),
           playerCards(),
           deck(),
           fiveCardBorders(),
@@ -672,7 +675,9 @@ class GamePageState extends State<GamePage> {
   }
 
   addCard() async {
-  
+    Source s = AssetSource("sounds/card_drawn.mp3");
+    //player.setSource(AssetSource('sounds/card_drawn.mp3'));
+    player.play(s);
     final dealerRef = FirebaseDatabase.instance.ref('tables/1/cards/dealer');
     final playersCardsRef =
         FirebaseDatabase.instance.ref('tables/1/cards/$uid/startingHand');

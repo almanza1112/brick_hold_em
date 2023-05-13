@@ -40,7 +40,7 @@ class _GamePlayersState extends State<GamePlayers>
   String player4PhotoURL = "";
 
   DatabaseReference players = FirebaseDatabase.instance.ref('tables/1/players');
-  
+
   var uid = FirebaseAuth.instance.currentUser!.uid;
   bool isPlayersTurn = false;
 
@@ -57,7 +57,6 @@ class _GamePlayersState extends State<GamePlayers>
 
   @override
   void initState() {
-
     players.onValue.listen((event) async {
       final _map = Map<String, dynamic>.from(event.snapshot.value as Map);
       List<String> playerUids = [];
@@ -82,8 +81,6 @@ class _GamePlayersState extends State<GamePlayers>
         });
       }
     });
-
-     
 
     super.initState();
   }
@@ -130,7 +127,7 @@ class _GamePlayersState extends State<GamePlayers>
                       left: 0,
                       right: 0,
                       child: player(player4Name, player4PhotoURL, 1000)),
-                 
+                  ProgressIndicatorTurn(),
                 ],
               ),
             ),
