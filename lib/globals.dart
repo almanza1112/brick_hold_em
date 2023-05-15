@@ -15,3 +15,7 @@ String loggedInUserUsername = "loggedInUserUsername";
 // Firebase keys
 // (fsk = Firestore Key Name)
 String fskUsername = "username";
+
+// End point
+//String END_POINT = "https://brick-hold-em-api.onrender.com/";
+String END_POINT = "http://192.168.0.118:3000"; // for when local

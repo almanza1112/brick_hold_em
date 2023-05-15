@@ -21,8 +21,7 @@ class _ProgressIndicatorState extends State<ProgressIndicatorTurn>
   late Timer _timer;
   int _start = 60;
 
-
-void startTimer() {
+  void startTimer() {
     const oneSec = Duration(seconds: 1);
     _timer = Timer.periodic(
       oneSec,
@@ -47,9 +46,11 @@ void startTimer() {
       /// [TickerProviderStateMixin].
       vsync: this,
       duration: const Duration(seconds: 3),
-    )..addListener(() {
+    )
+      ..addListener(() {
         setState(() {});
-      })..addStatusListener((status) {
+      })
+      ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           //changeTurnPlayer();
         }
@@ -58,10 +59,9 @@ void startTimer() {
     colorTween =
         controller.drive(ColorTween(begin: Colors.black, end: Colors.red));
     controller.repeat(reverse: false);
-    
+
     turnPlayerRef.onValue.listen((event) {
       String turnPlayerUid = event.snapshot.value as String;
-
 
       if (turnPlayerUid == uid) {
         // it is your turn
@@ -70,8 +70,6 @@ void startTimer() {
         setState(() {
           isOtherPlayersTurn = false;
         });
-
-
       } else {
         // Other Players turn
         controller.reset();
@@ -109,9 +107,15 @@ void startTimer() {
     );
   }
 
-@override
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void dispose() {
     super.dispose();
   }
-
 }

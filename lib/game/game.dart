@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'package:brick_hold_em/game/progress_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:brick_hold_em/game/game_players.dart';
 import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:brick_hold_em/globals.dart' as globals;
 
 import 'game_sidemenu.dart';
 
@@ -659,19 +662,13 @@ class GamePageState extends State<GamePage> {
 
   // TODO: this needs to go in backend
   passPlay() async {
-    DatabaseReference turnOrderRef =
-        FirebaseDatabase.instance.ref('tables/1/turnOrder/players');
-    var event = await turnOrderRef.once();
-    var turnOrderList = List<String>.from(event.snapshot.value as List);
-    late String nextTurnPlayer;
-    if (turnOrderList[0] == uid) {
-      nextTurnPlayer = turnOrderList[1];
-    } else {
-      nextTurnPlayer = turnOrderList[0];
-    }
-    DatabaseReference turnPlayerRef =
-        FirebaseDatabase.instance.ref('tables/1/turnOrder');
-    turnPlayerRef.update({'turnPlayer': nextTurnPlayer});
+     http.Response response = await http.get(Uri.parse(
+        "${globals.END_POINT}/table/passturn"));
+
+        Map data = jsonDecode(response.body);
+        print("HEREEEE");
+        print(data);
+
   }
 
   addCard() async {
