@@ -328,11 +328,18 @@ class LoginPageState extends State<LoginPage> {
   }
 
   signInWithGoogle() async {
+
     setState(() {
       visibleStatus = false;
     });
+
+            print("i am right here");
+
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await GoogleSignIn(scopes: <String>["email"]).signIn();
+
+                print("i am right here too");
+
 
     // Check if email is already being used with correct authentication method
     Map result = await isEmailUsed(googleUser!.email, "google.com");
@@ -372,8 +379,10 @@ class LoginPageState extends State<LoginPage> {
   }
 
   Future<Map> isEmailUsed(String email, String providerID) async {
+    String url = "${globals.END_POINT}/sign_in/$email?providerID=$providerID";
+    print("URL is here: $url");
     http.Response response = await http.get(Uri.parse(
-        'https://brick-hold-em-api.onrender.com/sign_in/$email?providerID=$providerID'));
+        '${globals.END_POINT}/sign_in/$email?providerID=$providerID'));
 
     Map data = jsonDecode(response.body);
 

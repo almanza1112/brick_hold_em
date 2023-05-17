@@ -84,7 +84,7 @@ class _ProgressIndicatorState extends State<ProgressIndicatorTurn>
 
   @override
   Widget build(BuildContext context) {
-    print("siuuuu");
+    //print("siuuuu");
     return Stack(
       children: [
         Positioned(

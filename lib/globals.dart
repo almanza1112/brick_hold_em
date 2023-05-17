@@ -18,4 +18,4 @@ String fskUsername = "username";
 
 // End point
 //String END_POINT = "https://brick-hold-em-api.onrender.com/";
-String END_POINT = "http://192.168.0.118:3000"; // for when local
+String END_POINT = "http://192.168.1.17:3000"; // for when local

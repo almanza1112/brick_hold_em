@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'package:brick_hold_em/game/progress_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -60,13 +59,14 @@ class GamePageState extends State<GamePage> {
       FirebaseDatabase.instance.ref('tables/1/turnOrder/turnPlayer');
   DatabaseReference faceUpCardListener =
       FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
+  DatabaseReference deckCountListener =
+      FirebaseDatabase.instance.ref('tables/1/cards/dealer/deckCount');
 
   DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
   TextStyle turnPlayerTextStyle = const TextStyle(
       color: Colors.orange, fontSize: 24, fontWeight: FontWeight.bold);
 
-         final player = AudioPlayer();
-
+  final player = AudioPlayer();
 
   @override
   void initState() {
@@ -103,14 +103,20 @@ class GamePageState extends State<GamePage> {
     }
   }
 
+  // TODO: need to add this to the backend to get info for username or displayname
   addUserToTable() async {
     await database.update({
-      "players/$uid/name": FirebaseAuth.instance.currentUser!.displayName,
-      "players/$uid/photoURL": FirebaseAuth.instance.currentUser!.photoURL
+      "players/$uid": {
+        'name' : FirebaseAuth.instance.currentUser!.displayName,
+        'photoURL': FirebaseAuth.instance.currentUser!.photoURL,
+        'cardCount' : 0,
+
+      }
     }).then((value) {
-      print("much success");
+      // User added
     }).onError((error, stackTrace) {
-      print("I am a failure");
+      // TODO: error game flow
+      // Show Dialog that user was not added, error occured
     });
   }
 
@@ -154,8 +160,14 @@ class GamePageState extends State<GamePage> {
 
                         return Column(
                           children: [
-                            Text("IT'S YOUR TURN", style: turnPlayerTextStyle,),
-                            Text("$countdown", style: turnPlayerTextStyle,)
+                            Text(
+                              "IT'S YOUR TURN",
+                              style: turnPlayerTextStyle,
+                            ),
+                            Text(
+                              "$countdown",
+                              style: turnPlayerTextStyle,
+                            )
                           ],
                         );
                       });
@@ -293,7 +305,7 @@ class GamePageState extends State<GamePage> {
 
   Future<List<String>> cardsSnapshot() async {
     final snapshot =
-        await onceRef.child('tables/1/cards/$uid/startingHand').get();
+        await onceRef.child('tables/1/cards/playerCards/$uid/startingHand').get();
     if (snapshot.exists) {
       var cardsList = List<String>.from(snapshot.value as List);
       return cardsList;
@@ -305,16 +317,47 @@ class GamePageState extends State<GamePage> {
   Widget deck() {
     return Center(
         child: GestureDetector(
-      onTap: () {
-        addCard();
-      },
-      child: Image.asset(
-        "assets/images/backside.png",
-        fit: BoxFit.cover,
-        width: cardWidth,
-        height: cardHeight,
-      ),
-    ));
+            onTap: () {
+              addCard();
+            },
+            child: Container(
+              width: cardWidth,
+              height: cardHeight,
+              color: Colors.blueAccent,
+              child: Stack(
+                children: [
+                  Image.asset(
+                    "assets/images/backside.png",
+                    fit: BoxFit.cover,
+                    width: cardWidth,
+                    height: cardHeight,
+                  ),
+                  Center(
+                    child: StreamBuilder(
+                        stream: deckCountListener.onValue,
+                        builder: ((context, snapshot) {
+                          if (snapshot.hasError) {
+                            return CircularProgressIndicator();
+                          }
+
+                          if (snapshot.hasData) {
+                            int count = (snapshot.data!).snapshot.value as int;
+
+                            return Text(
+                              "$count",
+                              style: const TextStyle(
+                                  color: Colors.amberAccent,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800),
+                            );
+                          } else {
+                            return Text("n");
+                          }
+                        })),
+                  )
+                ],
+              ),
+            )));
   }
 
   Widget fiveCardBorders() {
@@ -527,7 +570,7 @@ class GamePageState extends State<GamePage> {
                   if (snapshot.hasData) {
                     String faceUpCard =
                         (snapshot.data!).snapshot.value as String;
-                    print(faceUpCard);
+                    print("faceUpCards: $faceUpCard");
                     return Image.asset(
                       "assets/images/$faceUpCard.png",
                       width: cardWidth,
@@ -640,44 +683,54 @@ class GamePageState extends State<GamePage> {
   }
 
   setFaceUpCardAndHand(String card) async {
-    List<String> cardsInHand = <String>[];
-    for (int i = 0; i < cardWidgetsBuilderList.length; i++) {
-      ValueKey<CardKey> t = cardWidgetsBuilderList[i].key! as ValueKey<CardKey>;
-      cardsInHand.add(t.value.cardName!);
-    }
+    // There is at least one card
+    if (cardWidgetsBuilderList.length > 0) {
+      List<String> cardsInHand = <String>[];
+      for (int i = 0; i < cardWidgetsBuilderList.length; i++) {
+        ValueKey<CardKey> t =
+            cardWidgetsBuilderList[i].key! as ValueKey<CardKey>;
+        cardsInHand.add(t.value.cardName!);
+      }
 
-    DatabaseReference faceUpCardRef =
-        FirebaseDatabase.instance.ref('tables/1/cards');
+      DatabaseReference faceUpCardRef =
+          FirebaseDatabase.instance.ref('tables/1/cards');
 
-    await faceUpCardRef.update(
-        {'faceUpCard': card, '$uid/startingHand': cardsInHand}).then((value) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        setState(() {
-          playButtonSelected = false;
-          tappedCards.clear();
+      await faceUpCardRef.update(
+          {'faceUpCard': card, 'playerCards/$uid/startingHand': cardsInHand}).then((value) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          setState(() {
+            playButtonSelected = false;
+            tappedCards.clear();
+          });
         });
       });
-    });
+    } else {
+      // No cards left, you are the winner
+
+    }
   }
 
-  // TODO: this needs to go in backend
   passPlay() async {
-     http.Response response = await http.get(Uri.parse(
-        "${globals.END_POINT}/table/passturn"));
+    http.Response response =
+        await http.get(Uri.parse("${globals.END_POINT}/table/passturn"));
 
-        Map data = jsonDecode(response.body);
-        print("HEREEEE");
-        print(data);
-
+    Map data = jsonDecode(response.body);
+    print("HEREEEE");
+    print(data);
   }
 
   addCard() async {
-    Source s = AssetSource("sounds/card_drawn.mp3");
-    //player.setSource(AssetSource('sounds/card_drawn.mp3'));
-    player.play(s);
-    final dealerRef = FirebaseDatabase.instance.ref('tables/1/cards/dealer');
+    // Why call the players starting hand again? To avoid confusion in case
+    // player has any cards that are tapped and on the table/ Can this be optimized?
+    // Maybe..
+    // TODO: look into this, not a priority
+
+    Source cardDrawnSound = AssetSource("sounds/card_drawn.mp3");
+    player.play(cardDrawnSound);
+    final dealerRef =
+        FirebaseDatabase.instance.ref('tables/1/cards/dealer/deck');
     final playersCardsRef =
-        FirebaseDatabase.instance.ref('tables/1/cards/$uid/startingHand');
+        FirebaseDatabase.instance.ref('tables/1/cards/playerCards/$uid/startingHand');
     final cardsRef = FirebaseDatabase.instance.ref('tables/1/cards');
     final event = await dealerRef.once();
     final playerEvent = await playersCardsRef.once();
@@ -689,7 +742,8 @@ class GamePageState extends State<GamePage> {
     playersCards.add(cardBeingAdded);
     deck.removeLast();
 
-    await cardsRef.update({"dealer": deck, "$uid/startingHand": playersCards});
+    await cardsRef
+        .update({"dealer/deck": deck, "playerCards/$uid/startingHand": playersCards});
 
     setState(() {
       isStateChanged = true;

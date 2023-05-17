@@ -5,6 +5,7 @@ class Player {
   final String? username;
   final String? photoUrl;
   final int? chips;
+  final int? cardCount;
   final String? uid;
 
   Player({
@@ -12,6 +13,7 @@ class Player {
     this.username,
     this.photoUrl,
     this.chips,
+    this.cardCount,
     this.uid,
   });
 
@@ -21,6 +23,7 @@ class Player {
     String? username,
     String? photoUrl,
     int? chips,
+    int? cardCount,
     String? uid,
   }) {
     return Player(
@@ -28,6 +31,7 @@ class Player {
       username: username ?? this.username,
       photoUrl: photoUrl ?? this.photoUrl,
       chips: chips ?? this.chips,
+      cardCount: cardCount ?? this.cardCount,
       uid: uid ?? this.uid,
     );
   }
@@ -38,6 +42,7 @@ class Player {
       'username': username,
       'photoUrl': photoUrl,
       'chips': chips,
+      'cardCount': cardCount,
       'uid': uid,
     };
   }
@@ -46,7 +51,7 @@ class Player {
 
   @override
   String toString() {
-    return 'Player(name: $name, username: $username, photoUrl: $photoUrl, chips: $chips, uid: $uid)';
+    return 'Player(name: $name, username: $username, photoUrl: $photoUrl, chips: $chips, cardCount: $cardCount, uid: $uid)';
   }
 
   @override
@@ -58,6 +63,7 @@ class Player {
       other.username == username &&
       other.photoUrl == photoUrl &&
       other.chips == chips &&
+      other.cardCount == cardCount &&
       other.uid == uid;
   }
 
@@ -65,9 +71,10 @@ class Player {
     return Player(
       name: map['name'],
       username: map['username'],
-      photoUrl: map['photoUrl'] ?? '',
-      chips: map['chips']?.toInt() ?? 0,
-      uid: map['uid'] ?? '',
+      photoUrl: map['photoUrl'],
+      chips: map['chips']?.toInt(),
+      cardCount: map['cardCount']?.toInt(),
+      uid: map['uid'],
     );
   }
 
@@ -79,6 +86,7 @@ class Player {
       username.hashCode ^
       photoUrl.hashCode ^
       chips.hashCode ^
+      cardCount.hashCode ^
       uid.hashCode;
   }
 }
