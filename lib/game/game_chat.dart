@@ -1,15 +1,12 @@
 
 
-import 'package:brick_hold_em/game/game_table.dart';
 import 'package:flutter/material.dart';
 
 class GameChat extends StatefulWidget {
   const GameChat({
     Key? key,
-    required this.game,
   }) : super(key: key);
 
-  final GameTable game;
 
   _GameChatState createState() => _GameChatState();
 }
