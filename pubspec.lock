@@ -248,7 +248,7 @@ packages:
       sha256: d10fe0a2187e4c84381338f38a38af2fb11d2d8ea37324522c124d27819e7dbd
       url: "https://pub.dev"
     source: hosted
-    version: "flu2.1"
+    version: "10.2.1"
   firebase_database_platform_interface:
     dependency: transitive
     description:
