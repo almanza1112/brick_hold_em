@@ -8,6 +8,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'player_profile_page_builder.dart';
+
 class GamePlayers extends StatefulWidget {
   final ValueChanged<String> onTurnChanged;
   const GamePlayers({
@@ -161,8 +163,12 @@ class _GamePlayersState extends State<GamePlayers>
       onTap: () {
         if (playerDetailsVisible) {
           print("object");
-          playerProfile(player);
-          _profileAnimationController.forward();
+          Navigator.push(
+            context,
+            PlayerProfilePageBuilder(
+              widget: PlayerProfilePage(player: player,),
+            ),
+          );
         }
       },
       child: Column(
@@ -217,6 +223,8 @@ class _GamePlayersState extends State<GamePlayers>
                   Text(
                     player.name!,
                     style: playerNameStyle,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 if (playerDetailsVisible)
                   Text("${player.chips} ch", style: chipsText),
