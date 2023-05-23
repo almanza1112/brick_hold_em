@@ -1,11 +1,18 @@
+import 'dart:async';
+
 import 'package:brick_hold_em/game/player.dart';
+import 'package:brick_hold_em/game/player_profile.dart';
+import 'package:brick_hold_em/game/progress_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class GamePlayers extends StatefulWidget {
+  final ValueChanged<String> onTurnChanged;
   const GamePlayers({
     Key? key,
+    required this.onTurnChanged,
   }) : super(key: key);
 
   @override
@@ -22,17 +29,51 @@ class _GamePlayersState extends State<GamePlayers>
   DatabaseReference playersRef =
       FirebaseDatabase.instance.ref('tables/1/players');
 
+  TextStyle turnPlayerTextStyle = const TextStyle(
+      color: Colors.orange, fontSize: 24, fontWeight: FontWeight.bold);
+
   var uid = FirebaseAuth.instance.currentUser!.uid;
   bool isPlayersTurn = false;
 
-  late AnimationController controller;
-  late Animation<Color?> colorTween;
+  DatabaseReference turnOrderListener =
+      FirebaseDatabase.instance.ref('tables/1/turnOrder/turnPlayer');
+
+  late AnimationController _profileAnimationController;
+  late Animation<Offset> _profileSlideAnimation;
+
+  Player selectedPlayer = Player(name: '', photoUrl: '', uid: '');
+
+  @override
+  void initState() {
+    _profileAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    );
+
+    _profileSlideAnimation = Tween<Offset>(
+      begin: Offset(0, 2), // Slide in from the bottom
+      end: Offset(0, 1),
+    ).animate(CurvedAnimation(
+      parent: _profileAnimationController,
+      curve: Curves.ease,
+    ));
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _profileAnimationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     print("game_players called");
     return Stack(
       children: [
+        turnPlayerInfo(),
+        //ProgressIndicatorTurn(),
+
         StreamBuilder(
             stream: playersRef.onValue,
             builder: ((context, snapshot) {
@@ -107,7 +148,7 @@ class _GamePlayersState extends State<GamePlayers>
                 return Text("something went wrong");
               }
             })),
-        //ProgressIndicatorTurn(),
+        playerProfile(selectedPlayer)
       ],
     );
   }
@@ -116,70 +157,177 @@ class _GamePlayersState extends State<GamePlayers>
     bool playerDetailsVisible =
         player.name!.isNotEmpty || player.photoUrl!.isNotEmpty;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Stack(
-          children: <Widget>[
-            CircleAvatar(
-              backgroundImage: playerDetailsVisible
-                  ? NetworkImage(player.photoUrl!)
-                  : const AssetImage('assets/images/poker_player.jpeg')
-                      as ImageProvider,
-              radius: imageRadius,
-            ),
-            if (playerDetailsVisible)
-              Positioned(
-                bottom: 0,
-                left: 0,
-                child: Transform(
-                    transform: Matrix4.translationValues(-10, 0, 0),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/images/backside.png',
-                          height: 35,
-                          width: 25,
-                        ),
-                        Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            "${player.cardCount!}",
-                            style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.amberAccent,
-                                fontWeight: FontWeight.w700),
-                          ),
-                        )
-                      ],
-                    )),
+    return GestureDetector(
+      onTap: () {
+        if (playerDetailsVisible) {
+          print("object");
+          playerProfile(player);
+          _profileAnimationController.forward();
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Stack(
+            children: <Widget>[
+              CircleAvatar(
+                backgroundImage: playerDetailsVisible
+                    ? NetworkImage(player.photoUrl!)
+                    : const AssetImage('assets/images/poker_player.jpeg')
+                        as ImageProvider,
+                radius: imageRadius,
               ),
-          ],
-        ),
-        SizedBox(
-          height: 35,
-          width: 100,
-          child: Column(
-            children: [
-              const Expanded(child: SizedBox()),
               if (playerDetailsVisible)
-                Text(
-                  player.name!,
-                  style: playerNameStyle,
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  child: Transform(
+                      transform: Matrix4.translationValues(-10, 0, 0),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/backside.png',
+                            height: 35,
+                            width: 25,
+                          ),
+                          Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "${player.cardCount!}",
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.amberAccent,
+                                  fontWeight: FontWeight.w700),
+                            ),
+                          )
+                        ],
+                      )),
                 ),
-              if (playerDetailsVisible)
-                Text("${player.chips} ch", style: chipsText),
-              if (!playerDetailsVisible)
-                const Text(
-                  "Waiting..",
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                )
             ],
           ),
+          SizedBox(
+            height: 35,
+            width: 100,
+            child: Column(
+              children: [
+                const Expanded(child: SizedBox()),
+                if (playerDetailsVisible)
+                  Text(
+                    player.name!,
+                    style: playerNameStyle,
+                  ),
+                if (playerDetailsVisible)
+                  Text("${player.chips} ch", style: chipsText),
+                if (!playerDetailsVisible)
+                  const Text(
+                    "Waiting..",
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget turnPlayerInfo() {
+    int countdown = 30;
+
+    return SafeArea(
+      child: Stack(children: [
+        Positioned(
+          top: 40,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: StreamBuilder(
+                stream: turnOrderListener.onValue,
+                builder: ((context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const Text("There was an error getting turn info");
+                  }
+
+                  if (snapshot.hasData) {
+                    var turnPlayerUid =
+                        (snapshot.data!).snapshot.value as String;
+                    widget.onTurnChanged(turnPlayerUid);
+                    if (turnPlayerUid == uid) {
+                      //setIsYourTurn(true);
+                      return StatefulBuilder(builder: (context, setState) {
+                        // Sound for the countdown
+                        SystemSound.play(SystemSoundType.click);
+                        // Vibration for the countdown
+                        HapticFeedback.heavyImpact();
+
+                        if (countdown > 0) {
+                          Timer(Duration(seconds: 1), () {
+                            setState(() {
+                              countdown--;
+                            });
+                          });
+                        } else {
+                          // TODO: APPLY THIS LOGIC
+                          //ranOutOfTime();
+                        }
+
+                        return Column(
+                          children: [
+                            Text(
+                              "IT'S YOUR TURN",
+                              style: turnPlayerTextStyle,
+                            ),
+                            Text(
+                              "$countdown",
+                              style: turnPlayerTextStyle,
+                            )
+                          ],
+                        );
+                      });
+                    } else {
+                      return Text(
+                        "Waiting...",
+                        style: turnPlayerTextStyle,
+                      );
+                    }
+                  } else {
+                    return const Text("Snapshot has no data!");
+                  }
+                })),
+          ),
         ),
-      ],
+      ]),
+    );
+  }
+
+  Widget playerProfile(Player player) {
+        Player p = player;
+
+    //print("player: ${player.toString()}");
+    return StatefulBuilder(
+      builder: (context, setState) {
+        setState((){
+          p = player;
+        });
+        return  SlideTransition(
+        position: _profileSlideAnimation,
+        child: Container(
+            height: MediaQuery.of(context).size.height * 0.5,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              children: [
+                Text(p.name!)
+              ],
+            )),
+      );
+      }
     );
   }
 }

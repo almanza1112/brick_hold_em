@@ -50,18 +50,12 @@ class GamePageState extends State<GamePage> {
 
   bool isYourTurn = false;
 
-
-
-  DatabaseReference turnOrderListener =
-      FirebaseDatabase.instance.ref('tables/1/turnOrder/turnPlayer');
   DatabaseReference faceUpCardListener =
       FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
   DatabaseReference deckCountListener =
       FirebaseDatabase.instance.ref('tables/1/cards/dealer/deckCount');
 
   DatabaseReference database = FirebaseDatabase.instance.ref('tables/1');
-  TextStyle turnPlayerTextStyle = const TextStyle(
-      color: Colors.orange, fontSize: 24, fontWeight: FontWeight.bold);
 
   final player = AudioPlayer();
 
@@ -78,13 +72,17 @@ class GamePageState extends State<GamePage> {
       body: Stack(
         //fit: StackFit.expand,
         children: [
-          GamePlayers(),
           GameCards(),
           deck(),
           faceUpCard(),
           buttons(),
+          GamePlayers(
+            onTurnChanged: (value) {
+              print("onValueChange: $value");
+            },
+          ),
+          
           GameSideMenu(),
-          turnPlayerInfo(),
         ],
       ),
     );
@@ -101,10 +99,9 @@ class GamePageState extends State<GamePage> {
   addUserToTable() async {
     await database.update({
       "players/$uid": {
-        'name' : FirebaseAuth.instance.currentUser!.displayName,
+        'name': FirebaseAuth.instance.currentUser!.displayName,
         'photoURL': FirebaseAuth.instance.currentUser!.photoURL,
-        'cardCount' : 0,
-
+        'cardCount': 0,
       }
     }).then((value) {
       // User added
@@ -114,79 +111,11 @@ class GamePageState extends State<GamePage> {
     });
   }
 
-  Widget turnPlayerInfo() {
-    int countdown = 30;
-
-    return SafeArea(
-      child: Stack(children: [
-        Positioned(
-          top: 40,
-          left: 0,
-          right: 0,
-          child: Center(
-            child: StreamBuilder(
-                stream: turnOrderListener.onValue,
-                builder: ((context, snapshot) {
-                  if (snapshot.hasError) {
-                    return const Text("There was an error getting turn info");
-                  }
-
-                  if (snapshot.hasData) {
-                    var turnPlayerUid =
-                        (snapshot.data!).snapshot.value as String;
-                    if (turnPlayerUid == uid) {
-                      //setIsYourTurn(true);
-                      return StatefulBuilder(builder: (context, setState) {
-                        // Sound for the countdown
-                        SystemSound.play(SystemSoundType.click);
-                        // Vibration for the countdown
-                        HapticFeedback.mediumImpact();
-
-                        if (countdown > 0) {
-                          Timer(Duration(seconds: 1), () {
-                            setState(() {
-                              countdown--;
-                            });
-                          });
-                        } else {
-                          ranOutOfTime();
-                        }
-
-                        return Column(
-                          children: [
-                            Text(
-                              "IT'S YOUR TURN",
-                              style: turnPlayerTextStyle,
-                            ),
-                            Text(
-                              "$countdown",
-                              style: turnPlayerTextStyle,
-                            )
-                          ],
-                        );
-                      });
-                    } else {
-                      return Text(
-                        "Waiting...",
-                        style: turnPlayerTextStyle,
-                      );
-                    }
-                  } else {
-                    return const Text("Snapshot has no data!");
-                  }
-                })),
-          ),
-        ),
-      ]),
-    );
-  }
-
   void setIsYourTurn(bool yourTurn) {
     setState(() {
       isYourTurn = yourTurn;
     });
   }
-
 
   Widget deck() {
     return Center(
@@ -233,7 +162,6 @@ class GamePageState extends State<GamePage> {
               ),
             )));
   }
-
 
   Widget faceUpCard() {
     return SafeArea(child: LayoutBuilder(
@@ -366,8 +294,8 @@ class GamePageState extends State<GamePage> {
     player.play(cardDrawnSound);
     final dealerRef =
         FirebaseDatabase.instance.ref('tables/1/cards/dealer/deck');
-    final playersCardsRef =
-        FirebaseDatabase.instance.ref('tables/1/cards/playerCards/$uid/startingHand');
+    final playersCardsRef = FirebaseDatabase.instance
+        .ref('tables/1/cards/playerCards/$uid/startingHand');
     final cardsRef = FirebaseDatabase.instance.ref('tables/1/cards');
     final event = await dealerRef.once();
     final playerEvent = await playersCardsRef.once();
@@ -379,8 +307,8 @@ class GamePageState extends State<GamePage> {
     playersCards.add(cardBeingAdded);
     deck.removeLast();
 
-    await cardsRef
-        .update({"dealer/deck": deck, "playerCards/$uid/startingHand": playersCards});
+    await cardsRef.update(
+        {"dealer/deck": deck, "playerCards/$uid/startingHand": playersCards});
 
     // TODO: only disablinf for now
     // setState(() {

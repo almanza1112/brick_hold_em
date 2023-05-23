@@ -1,4 +1,5 @@
-import 'package:flame/components.dart';
+
+import 'package:flutter/cupertino.dart';
 
 class CardKey {
   int? position;
