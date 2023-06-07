@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:brick_hold_em/game/game_cards.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -97,10 +98,13 @@ class GamePageState extends State<GamePage> {
 
   // TODO: need to add this to the backend to get info for username or displayname
   addUserToTable() async {
+    FlutterSecureStorage storage = const FlutterSecureStorage();
+    final username = await storage.read(key: globals.FSS_USERNAME);
     await database.update({
       "players/$uid": {
         'name': FirebaseAuth.instance.currentUser!.displayName,
         'photoURL': FirebaseAuth.instance.currentUser!.photoURL,
+        'username' : username,
         'cardCount': 0,
       }
     }).then((value) {

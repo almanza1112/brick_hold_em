@@ -1,4 +1,3 @@
-import 'package:brick_hold_em/friends_page.dart';
 import 'package:flutter/material.dart';
 
 class TournamentPage extends StatefulWidget {

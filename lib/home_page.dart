@@ -15,7 +15,7 @@ import 'howtoplay_page.dart';
 import 'tournament_page.dart';
 import 'competitive_page.dart';
 import 'profile_page.dart';
-import 'friends_page.dart';
+import 'friends/friends_page.dart';
 import 'ads_page.dart';
 
 class HomePage extends StatefulWidget {

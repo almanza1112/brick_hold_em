@@ -9,12 +9,32 @@ String settingsFXSound = "settingsFXSound";
 String settingsVibrate = "settingsVibrate";
 String settingsGameLiveChat = "settingsGameLiveChat";
 
+// Flutter Secure Storage keys
+// Logged in user info
+const String FSS_USERNAME = 'username';
+const String FSS_PASSWORD = 'password';
+
 // Logged-in user info
 String loggedInUserUsername = "loggedInUserUsername";
 
 // Firebase keys
 // (fsk = Firestore Key Name)
 String fskUsername = "username";
+
+// Firebase: Realtime Database 
+const String RD_KEY_USERNAME = 'username';
+
+// Firebase: Cloud Firestore
+String CF_COLLECTION_USERS = 'users';
+String CF_KEY_STATUS = 'status';
+String CF_KEY_UID = 'uid';
+String CF_KEY_PHOTOURL = 'photoURL';
+String CF_KEY_USERNAME = 'username';
+String CF_VALUE_REQUEST_SENT = 'requestSent';
+String CF_VALUE_REQUEST_RECEIVED = 'requestReceived';
+String CF_SUBCOLLECTION_FRIENDS = 'friends';
+String CF_DOC_PENDING_FRIEND_REQUESTS = 'pendingFriendRequests';
+String CF_DOC_FRIENDS = 'friends';
 
 // End point
 //String END_POINT = "https://brick-hold-em-api.onrender.com/";

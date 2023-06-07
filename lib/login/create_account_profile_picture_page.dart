@@ -4,15 +4,14 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:brick_hold_em/home_page.dart';
 import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountProfilePicturePage extends StatefulWidget {
@@ -333,7 +332,8 @@ class _CreateAccountProfilePictureState
     }
   }
 
-  void addUserToFirestore() {
+  void addUserToFirestore() async {
+    await populateSecureStorage();
     final uid = FirebaseAuth.instance.currentUser!.uid;
     db.collection("users").doc(uid).set({
       'fullName': newUserFullName,
@@ -352,5 +352,10 @@ class _CreateAccountProfilePictureState
         print("ERROR ON UPDATING NAME: $error");
       });
     }).catchError((error) => print("Failed to add user: $error"));
+  }
+
+  populateSecureStorage() async {
+    FlutterSecureStorage storage = const FlutterSecureStorage();
+    await storage.write(key: globals.FSS_USERNAME, value: newUserUsername);
   }
 }

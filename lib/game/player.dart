@@ -2,19 +2,19 @@ import 'dart:convert';
 
 class Player {
   final String? name;
-  final String? username;
-  final String? photoUrl;
+  final String username;
+  final String photoUrl;
   final int? chips;
   final int? cardCount;
-  final String? uid;
+  final String uid;
 
   Player({
     this.name,
-    this.username,
-    this.photoUrl,
+    required this.username,
+    required this.photoUrl,
     this.chips,
     this.cardCount,
-    this.uid,
+    required this.uid,
   });
 
 
@@ -70,11 +70,11 @@ class Player {
   factory Player.fromMap(Map<String, dynamic> map) {
     return Player(
       name: map['name'],
-      username: map['username'],
-      photoUrl: map['photoUrl'],
+      username: map['username'] ?? '',
+      photoUrl: map['photoUrl'] ?? '',
       chips: map['chips']?.toInt(),
       cardCount: map['cardCount']?.toInt(),
-      uid: map['uid'],
+      uid: map['uid'] ?? '',
     );
   }
 

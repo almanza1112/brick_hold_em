@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:brick_hold_em/globals.dart' as globals;
 
 import 'player_profile_page_builder.dart';
 
@@ -43,7 +44,7 @@ class _GamePlayersState extends State<GamePlayers>
   late AnimationController _profileAnimationController;
   late Animation<Offset> _profileSlideAnimation;
 
-  Player selectedPlayer = Player(name: '', photoUrl: '', uid: '');
+  Player selectedPlayer = Player(name: '', photoUrl: '', uid: '', username: '');
 
   @override
   void initState() {
@@ -101,6 +102,7 @@ class _GamePlayersState extends State<GamePlayers>
                       uid: playerUids[i],
                       name: map[playerUids[i]]['name'],
                       cardCount: map[playerUids[i]]['cardCount'],
+                      username: map[playerUids[i]][globals.RD_KEY_USERNAME],
                       //chips: map[playerUids[i]]['chips'],
                       photoUrl: map[playerUids[i]]['photoURL']);
 
@@ -108,7 +110,7 @@ class _GamePlayersState extends State<GamePlayers>
                 }
 
                 for (int i = players.length; i <= 5; i++) {
-                  Player player = Player(name: "", photoUrl: "", cardCount: 0);
+                  Player player = Player(name: "", photoUrl: "", cardCount: 0, username: '', uid: '');
                   players.add(player);
                 }
 
@@ -221,7 +223,7 @@ class _GamePlayersState extends State<GamePlayers>
                 const Expanded(child: SizedBox()),
                 if (playerDetailsVisible)
                   Text(
-                    player.name!,
+                    player.username,
                     style: playerNameStyle,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,

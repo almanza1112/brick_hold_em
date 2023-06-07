@@ -6,6 +6,7 @@ import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -314,9 +315,14 @@ class LoginPageState extends State<LoginPage> {
     var uid = FirebaseAuth.instance.currentUser!.uid;
     var db = FirebaseFirestore.instance;
     final docRef = db.collection("users").doc(uid);
-    docRef.get().then((DocumentSnapshot doc) {
+    docRef.get().then((DocumentSnapshot doc) async {
       if (doc.exists) {
-        // User exists, proceed to home page
+        // User exists, add username to FSS then proceed to HomePage
+        final result = doc.data() as Map<String, dynamic>;
+        String username = result[globals.FSS_USERNAME];
+        FlutterSecureStorage storage = const FlutterSecureStorage();
+        await storage.write(key: globals.FSS_USERNAME, value: username);
+        
         navigateToHomePage();
       } else {
         // User does not exist, proceed to create new account
@@ -333,13 +339,8 @@ class LoginPageState extends State<LoginPage> {
       visibleStatus = false;
     });
 
-            print("i am right here");
-
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await GoogleSignIn(scopes: <String>["email"]).signIn();
-
-                print("i am right here too");
-
 
     // Check if email is already being used with correct authentication method
     Map result = await isEmailUsed(googleUser!.email, "google.com");
@@ -357,8 +358,29 @@ class LoginPageState extends State<LoginPage> {
       // Email was found and with the same authenitcaion method
 
       // Once signed in, return the UserCredential
-      var userCred =
-          await FirebaseAuth.instance.signInWithCredential(credential);
+      await FirebaseAuth.instance.signInWithCredential(credential).then((value) {
+        final db = FirebaseFirestore.instance;
+        final userRef = db.collection(globals.CF_COLLECTION_USERS).doc(FirebaseAuth.instance.currentUser!.uid).get();
+        userRef.then((DocumentSnapshot doc) async {
+          if (doc.exists) {
+            final result = doc.data() as Map<String, dynamic>;
+            String username = result[globals.FSS_USERNAME];
+            FlutterSecureStorage storage = const FlutterSecureStorage();
+            await storage.write(key: globals.FSS_USERNAME, value: username);
+
+            navigateToHomePage();
+          } else {
+            // TODO: something really went wrong in this thought process
+          }
+        })
+        .onError((error, stackTrace) {
+          // TODO: show user there is an error
+        });
+        navigateToHomePage();
+      }).onError((error, stackTrace) {
+        // TODO: show user there is an error
+      });
+      
     } else if (result['result'] == "Authentication method does not match.") {
       // Email was found but with different authenticaion method
       setErrorMessage("An account with that email already exists.");
