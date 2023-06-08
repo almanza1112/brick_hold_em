@@ -1,7 +1,6 @@
 import 'package:brick_hold_em/game/player.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -73,7 +72,7 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
                     ),
                     Center(
                       child: CircleAvatar(
-                        backgroundImage: NetworkImage(widget.player.photoUrl!),
+                        backgroundImage: NetworkImage(widget.player.photoUrl),
                         radius: 60,
                       ),
                     ),

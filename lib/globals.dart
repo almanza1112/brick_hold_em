@@ -23,6 +23,9 @@ String fskUsername = "username";
 
 // Firebase: Realtime Database 
 const String RD_KEY_USERNAME = 'username';
+const String RD_KEY_PHOTOURL = 'photoURL';
+const String RD_KEY_UID = "uid";
+const String RD_KEY_CHIPS = 'chips';
 
 // Firebase: Cloud Firestore
 String CF_COLLECTION_USERS = 'users';

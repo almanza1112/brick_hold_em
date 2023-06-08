@@ -159,7 +159,7 @@ class _GamePlayersState extends State<GamePlayers>
 
   Widget player(Player player) {
     bool playerDetailsVisible =
-        player.name!.isNotEmpty || player.photoUrl!.isNotEmpty;
+        player.name!.isNotEmpty || player.photoUrl.isNotEmpty;
 
     return GestureDetector(
       onTap: () {
@@ -181,7 +181,7 @@ class _GamePlayersState extends State<GamePlayers>
             children: <Widget>[
               CircleAvatar(
                 backgroundImage: playerDetailsVisible
-                    ? NetworkImage(player.photoUrl!)
+                    ? NetworkImage(player.photoUrl)
                     : const AssetImage('assets/images/poker_player.jpeg')
                         as ImageProvider,
                 radius: imageRadius,
