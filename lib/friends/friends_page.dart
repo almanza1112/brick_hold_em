@@ -62,12 +62,17 @@ class _FriendsPageState extends State<FriendsPage> {
                           MaterialPageRoute(builder: (context) => FriendRequestsPage()));
                     },
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 6, bottom: 6, left: 16, right: 16),
+                      padding: const EdgeInsets.only(top: 12, bottom: 12, left: 16, right: 16),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text("$numOfFriendRequests friend requests"),
-                          const Expanded(child: SizedBox()),
-                          const Icon(Icons.arrow_forward_ios, color: Colors.white,)
+                          const Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.white,
+                          ),
+                          
                         ],
                       ),
                     ),
@@ -123,6 +128,7 @@ class _FriendsPageState extends State<FriendsPage> {
 
     for (int i = 0; i < result.length; i++) {
       Friend friend = Friend(
+          uid: result[i][globals.CF_KEY_UID],
           username: result[i][globals.CF_KEY_USERNAME],
           photoURL: result[i][globals.CF_KEY_PHOTOURL],
           status: result[i][globals.CF_KEY_STATUS]);
@@ -155,7 +161,7 @@ class _FriendsPageState extends State<FriendsPage> {
             backgroundImage: NetworkImage(friend.photoURL),
             radius: 20,
           ),
-          SizedBox(
+          const SizedBox(
             width: 12,
           ),
           Text(friend.username)
@@ -164,20 +170,4 @@ class _FriendsPageState extends State<FriendsPage> {
     );
   }
 
-  test() async {
-    // Searches all subcollections that are named Friends in every document and
-    // returns those documents. Then it updates those documents using forEach
-    final ref = await db
-        .collectionGroup("friends")
-        .where("status", isEqualTo: "requestRecieved")
-        .get();
-
-    List<dynamic> result = ref.docs.map((doc) => doc.data()).toList();
-
-    print(result[0]['status']);
-
-    // ref.docs.forEach((element) {
-    //   element.reference.update({"status": "requestSent"});
-    // });
-  }
 }

@@ -13,21 +13,33 @@ class PlayerProfilePage extends StatefulWidget {
 }
 
 class PlayerProfilePageState extends State<PlayerProfilePage> {
-
   final db = FirebaseFirestore.instance;
   final uid = FirebaseAuth.instance.currentUser!.uid;
 
+  late Stream<DocumentSnapshot> friendStatusStream;
 
-  late Future<String> friendStatusSnapshot;
-  TextStyle friendButtonTextStyle =
+  final TextStyle friendButtonTextStyle =
+      TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold);
+  final TextStyle addFriendButtonTextStyle =
       const TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
-  TextStyle reportButtonTextStyle =
+  final TextStyle reportButtonTextStyle =
       TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold);
 
-      @override
+  @override
   void initState() {
-    friendStatusSnapshot = checkFriendStatus();
+    friendStatusStream = FirebaseFirestore.instance
+        .collection("users")
+        .doc(uid)
+        .collection("friends")
+        .doc(widget.player.uid)
+        .snapshots();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    friendStatusStream.drain<dynamic>(null);
+    super.dispose();
   }
 
   @override
@@ -92,20 +104,7 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
                             .spaceEvenly, // use whichever suits your need
 
                         children: [
-                          Expanded(
-                            flex: 1,
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  addFriend();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.amber),
-                                child: FutureBuilder(
-                                  future: friendStatusSnapshot,
-                                  builder: (context, snapshot) {
-                                    return Text("data");
-                                  }))
-                          ),
+                          Expanded(flex: 1, child: friendStatusOnButton()),
                           const SizedBox(
                             width: 10,
                           ),
@@ -133,32 +132,70 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
     );
   }
 
-  Future<String> checkFriendStatus() async {
-    final userRef = db
-        .collection(globals.CF_COLLECTION_USERS)
-        .doc(uid)
-        .collection(globals.CF_SUBCOLLECTION_FRIENDS)
-        .where('pendingFriendRequests.${widget.player.uid}');
+  Widget friendStatusOnButton() {
+    return StreamBuilder(
+        stream: friendStatusStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Text("error on stream");
+          }
 
-    
-
-    userRef.get().then(
-      (doc) {
-        for ( var docSnapshot in doc.docs) {
-          print(docSnapshot.data());
-        }
-    });
-        return "yes";
-    
-
+          if (snapshot.hasData) {
+            try {
+              var data = snapshot.data!.data() as Map<String, dynamic>;
+              final status = data['status'];
+              if (status == globals.CF_VALUE_FRIENDS) {
+                return ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[100]),
+                    child: Text(
+                      "FRIENDS",
+                      style: friendButtonTextStyle,
+                    ));
+              } else if (status == globals.CF_VALUE_REQUEST_RECEIVED) {
+                return ElevatedButton(
+                    onPressed: acceptFriendRequest,
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                    child: Text("ACCEPT REQUEST",
+                        style: addFriendButtonTextStyle));
+              } else if (status == globals.CF_VALUE_REQUEST_SENT) {
+                return ElevatedButton(
+                    onPressed: cancelFriendRequest,
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                    child: Text("CANCEL REQUEST",
+                        style: addFriendButtonTextStyle));
+              } else {
+                return ElevatedButton(
+                    onPressed: () {},
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                    child: const CircularProgressIndicator());
+              }
+            } catch (err) {
+              return ElevatedButton(
+                  onPressed: sendFriendRequest,
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                  child: Text(
+                    "ADD FRIEND",
+                    style: addFriendButtonTextStyle,
+                  ));
+            }
+          } else {
+            return const Text("no data");
+          }
+        });
   }
 
-  void addFriend() async {
+  void sendFriendRequest() async {
     // Create a batch write so you can update both documents of users at the same time.
     // Add to array.
     final batch = db.batch();
 
-    FlutterSecureStorage storage = const FlutterSecureStorage();
+    const storage = FlutterSecureStorage();
     final username = await storage.read(key: globals.FSS_USERNAME);
     final userRef = db
         .collection(globals.CF_COLLECTION_USERS)
@@ -166,7 +203,7 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
         .collection(globals.CF_SUBCOLLECTION_FRIENDS)
         .doc(widget.player.uid);
     var userUpdate = <String, dynamic>{
-      globals.CF_KEY_USERNAME : widget.player.username,
+      globals.CF_KEY_USERNAME: widget.player.username,
       globals.CF_KEY_UID: widget.player.uid,
       globals.CF_KEY_PHOTOURL: widget.player.photoUrl,
       globals.CF_KEY_STATUS: globals.CF_VALUE_REQUEST_SENT
@@ -179,10 +216,61 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
         .collection(globals.CF_SUBCOLLECTION_FRIENDS)
         .doc(uid);
     var otherPlayerUpdate = <String, dynamic>{
-      globals.CF_KEY_USERNAME : username,
-      globals.CF_KEY_UID : uid,
-      globals.CF_KEY_PHOTOURL : FirebaseAuth.instance.currentUser!.photoURL,
+      globals.CF_KEY_USERNAME: username,
+      globals.CF_KEY_UID: uid,
+      globals.CF_KEY_PHOTOURL: FirebaseAuth.instance.currentUser!.photoURL,
       globals.CF_KEY_STATUS: globals.CF_VALUE_REQUEST_RECEIVED
+    };
+    batch.set(otherPlayerRef, otherPlayerUpdate, SetOptions(merge: true));
+
+    batch.commit().then((value) {}).catchError((err) {});
+  }
+
+  void cancelFriendRequest() {
+    final batch = db.batch();
+    final userRef = db
+        .collection(globals.CF_COLLECTION_USERS)
+        .doc(uid)
+        .collection(globals.CF_SUBCOLLECTION_FRIENDS)
+        .doc(widget.player.uid);
+
+    batch.delete(userRef);
+
+    final otherPlayerRef = db
+        .collection(globals.CF_COLLECTION_USERS)
+        .doc(widget.player.uid)
+        .collection(globals.CF_SUBCOLLECTION_FRIENDS)
+        .doc(uid);
+
+    batch.delete(otherPlayerRef);
+
+    batch.commit().then((value) {
+      print("batch success");
+    }).catchError((err) {
+      print(err);
+    });
+  }
+
+  void acceptFriendRequest() async {
+    final batch = db.batch();
+    final userRef = db
+        .collection(globals.CF_COLLECTION_USERS)
+        .doc(uid)
+        .collection(globals.CF_SUBCOLLECTION_FRIENDS)
+        .doc(widget.player.uid);
+    var userUpdate = <String, dynamic>{
+      globals.CF_KEY_STATUS: globals.CF_VALUE_FRIENDS
+    };
+
+    batch.set(userRef, userUpdate, SetOptions(merge: true));
+
+    final otherPlayerRef = db
+        .collection(globals.CF_COLLECTION_USERS)
+        .doc(widget.player.uid)
+        .collection(globals.CF_SUBCOLLECTION_FRIENDS)
+        .doc(uid);
+    var otherPlayerUpdate = <String, dynamic>{
+      globals.CF_KEY_STATUS: globals.CF_VALUE_FRIENDS
     };
     batch.set(otherPlayerRef, otherPlayerUpdate, SetOptions(merge: true));
 
@@ -192,6 +280,8 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
       print(err);
     });
   }
+
+  void manageFriendship() {}
 
   void reportPlayer() {}
 }
