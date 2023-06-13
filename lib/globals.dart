@@ -35,9 +35,9 @@ String CF_KEY_PHOTOURL = 'photoURL';
 String CF_KEY_USERNAME = 'username';
 String CF_VALUE_REQUEST_SENT = 'requestSent';
 String CF_VALUE_REQUEST_RECEIVED = 'requestReceived';
+String CF_VALUE_FRIENDS = 'friends';
 String CF_SUBCOLLECTION_FRIENDS = 'friends';
 String CF_DOC_PENDING_FRIEND_REQUESTS = 'pendingFriendRequests';
-String CF_DOC_FRIENDS = 'friends';
 
 // End point
 //String END_POINT = "https://brick-hold-em-api.onrender.com/";

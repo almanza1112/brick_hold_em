@@ -2,12 +2,14 @@ import 'dart:convert';
 
 class Friend {
 
+  String uid;
   String username;
   String? fullName;
   String photoURL;
   String status;
   
   Friend({
+    required this.uid,
     required this.username,
     this.fullName,
     required this.photoURL,
@@ -16,12 +18,14 @@ class Friend {
   
 
   Friend copyWith({
+    String? uid,
     String? username,
     String? fullName,
     String? photoURL,
     String? status,
   }) {
     return Friend(
+      uid: uid ?? this.uid,
       username: username ?? this.username,
       fullName: fullName ?? this.fullName,
       photoURL: photoURL ?? this.photoURL,
@@ -31,6 +35,7 @@ class Friend {
 
   Map<String, dynamic> toMap() {
     return {
+      'uid': uid,
       'username': username,
       'fullName': fullName,
       'photoURL': photoURL,
@@ -40,6 +45,7 @@ class Friend {
 
   factory Friend.fromMap(Map<String, dynamic> map) {
     return Friend(
+      uid: map['uid'] ?? '',
       username: map['username'] ?? '',
       fullName: map['fullName'],
       photoURL: map['photoURL'] ?? '',
@@ -53,7 +59,6 @@ class Friend {
 
   @override
   String toString() {
-    return 'Friend(username: $username, fullName: $fullName, photoURL: $photoURL, status: $status)';
+    return 'Friend(uid: $uid, username: $username, fullName: $fullName, photoURL: $photoURL, status: $status)';
   }
-
 }

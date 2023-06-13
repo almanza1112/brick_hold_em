@@ -75,6 +75,7 @@ class FriendRequestsPageState extends State<FriendRequestsPage> {
     List<dynamic> result = ref.docs.map((doc) => doc.data()).toList();
     for (int i = 0; i < result.length; i++) {
       Friend friend = Friend(
+          uid: result[i][globals.CF_KEY_UID],
           username: result[i][globals.CF_KEY_USERNAME],
           photoURL: result[i][globals.CF_KEY_PHOTOURL],
           status: result[i][globals.CF_KEY_STATUS]);
@@ -96,7 +97,7 @@ class FriendRequestsPageState extends State<FriendRequestsPage> {
           Text(friend.username),
           Expanded(child: Container()),
           ElevatedButton(
-              onPressed: () => acceptFriendRequest(),
+              onPressed: () => acceptFriendRequest(friend.uid),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
               child: const Text(
                 "ACCEPT",
@@ -106,7 +107,7 @@ class FriendRequestsPageState extends State<FriendRequestsPage> {
             width: 4,
           ),
           ElevatedButton(
-              onPressed: () => rejectFriendRequest(),
+              onPressed: () => rejectFriendRequest(friend.uid),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               child: const Text(
                 "REJECT",
@@ -117,11 +118,60 @@ class FriendRequestsPageState extends State<FriendRequestsPage> {
     );
   }
 
-  void acceptFriendRequest() {
+  void acceptFriendRequest(String friendUid) async {
+    final batch = db.batch();
+    final userRef = db
+        .collection(globals.CF_COLLECTION_USERS)
+        .doc(uid)
+        .collection(globals.CF_SUBCOLLECTION_FRIENDS)
+        .doc(friendUid);
+    var userUpdate = <String, dynamic>{
+      globals.CF_KEY_STATUS: globals.CF_VALUE_FRIENDS
+    };
 
+    batch.set(userRef, userUpdate, SetOptions(merge: true));
+
+    final otherPlayerRef = db
+        .collection(globals.CF_COLLECTION_USERS)
+        .doc(friendUid)
+        .collection(globals.CF_SUBCOLLECTION_FRIENDS)
+        .doc(uid);
+    var otherPlayerUpdate = <String, dynamic>{
+      globals.CF_KEY_STATUS: globals.CF_VALUE_FRIENDS
+    };
+    batch.set(otherPlayerRef, otherPlayerUpdate, SetOptions(merge: true));
+
+    batch.commit().then((value) {
+      // TODO: show that they are friends now
+      print("batch success");
+    }).catchError((err) {
+      print(err);
+    });
   }
 
-  void rejectFriendRequest() {
+  void rejectFriendRequest(String friendUid) {
+    final batch = db.batch();
+    final userRef = db
+        .collection(globals.CF_COLLECTION_USERS)
+        .doc(uid)
+        .collection(globals.CF_SUBCOLLECTION_FRIENDS)
+        .doc(friendUid);
 
+    batch.delete(userRef);
+
+    final otherPlayerRef = db
+        .collection(globals.CF_COLLECTION_USERS)
+        .doc(friendUid)
+        .collection(globals.CF_SUBCOLLECTION_FRIENDS)
+        .doc(uid);
+
+    batch.delete(otherPlayerRef);
+
+    batch.commit().then((value) {
+      // TODO: show that they are not friends
+      print("batch success");
+    }).catchError((err) {
+      print(err);
+    });
   }
 }
