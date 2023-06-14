@@ -5,7 +5,6 @@ import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountInformationPage extends StatefulWidget {

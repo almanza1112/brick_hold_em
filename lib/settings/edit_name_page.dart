@@ -1,8 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:brick_hold_em/globals.dart' as globals;
 
 class EditNamePage extends StatefulWidget {
   const EditNamePage({ required this.onChanged});
@@ -46,11 +43,11 @@ class _EditNamePageState extends State<EditNamePage> {
             child: Center(
               child: Container(
                 color: Colors.greenAccent[100],
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
+                child: const Padding(
+                  padding:  EdgeInsets.all(15),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Icon(Icons.check, color: Colors.green),
                       SizedBox(
                         width: 10,

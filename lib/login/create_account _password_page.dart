@@ -1,8 +1,6 @@
 import 'package:brick_hold_em/login/create_account_username_page.dart';
 import 'package:brick_hold_em/login/new_user_info.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountPasswordPage extends StatefulWidget {
   const CreateAccountPasswordPage({super.key, required this.newUserInfo});

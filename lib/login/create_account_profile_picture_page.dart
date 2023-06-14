@@ -15,16 +15,18 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountProfilePicturePage extends StatefulWidget {
-  var credential;
+  final credential;
   final NewUserInfo newUserInfo;
-  CreateAccountProfilePicturePage(
+  const CreateAccountProfilePicturePage(
       {Key? key, this.credential, required this.newUserInfo})
       : super(key: key);
-  _CreateAccountProfilePictureState createState() =>
-      _CreateAccountProfilePictureState();
+
+  @override
+  CreateAccountProfilePictureState createState() =>
+      CreateAccountProfilePictureState();
 }
 
-class _CreateAccountProfilePictureState
+class CreateAccountProfilePictureState
     extends State<CreateAccountProfilePicturePage> {
   EdgeInsets contentPadding = const EdgeInsets.only(left: 10, right: 10);
   EdgeInsets formFieldLabelPadding = const EdgeInsets.only(bottom: 5);
@@ -298,6 +300,7 @@ class _CreateAccountProfilePictureState
 
   void createUserAuth() async {
     try {
+      // ignore: unused_local_variable
       late UserCredential credential;
       if (widget.newUserInfo.loginType == globals.LOGIN_TYPE_EMAIL) {
         credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -351,7 +354,7 @@ class _CreateAccountProfilePictureState
       }).catchError((error) {
         print("ERROR ON UPDATING NAME: $error");
       });
-    }).catchError((error) => print("Failed to add user: $error"));
+    }).catchError((error) {});
   }
 
   populateSecureStorage() async {
