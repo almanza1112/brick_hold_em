@@ -10,6 +10,7 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		632093B82902284B00201686 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 632093B72902284B00201686 /* GoogleService-Info.plist */; };
+		63AC4D282A398D1E005E1847 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63AC4D272A398D1E005E1847 /* StoreKit.framework */; };
 		7265D43C7619C9F824F84F97 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C8B143B3294749F970BB812 /* Pods_Runner.framework */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
@@ -26,6 +27,7 @@
 		632093B72902284B00201686 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6387E6272920B31300A0A3F0 /* FBSDKCoreKit_Basics.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = FBSDKCoreKit_Basics.xcframework; path = Pods/FBSDKCoreKit_Basics/XCFrameworks/FBSDKCoreKit_Basics.xcframework; sourceTree = "<group>"; };
 		6387E62A2920B31900A0A3F0 /* FBSDKCoreKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = FBSDKCoreKit.xcframework; path = Pods/FBSDKCoreKit/XCFrameworks/FBSDKCoreKit.xcframework; sourceTree = "<group>"; };
+		63AC4D272A398D1E005E1847 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
@@ -46,6 +48,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7265D43C7619C9F824F84F97 /* Pods_Runner.framework in Frameworks */,
+				63AC4D282A398D1E005E1847 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +68,7 @@
 		7098D62287EB39F4C3796B7A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				63AC4D272A398D1E005E1847 /* StoreKit.framework */,
 				6387E62A2920B31900A0A3F0 /* FBSDKCoreKit.xcframework */,
 				6387E6272920B31300A0A3F0 /* FBSDKCoreKit_Basics.xcframework */,
 				5C8B143B3294749F970BB812 /* Pods_Runner.framework */,

@@ -1,3 +1,4 @@
+import 'package:brick_hold_em/purchase_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -124,7 +125,7 @@ class _HomePageState extends State<HomePage> {
                       closedColor: closedColor,
                       closedElevation: closedElevation,
                       openBuilder: (context, closedContainer) =>
-                          TournamentPage()),
+                          PurchasePage()),
                 ))),
         Padding(
             padding: const EdgeInsets.only(top: 10, bottom: 10),

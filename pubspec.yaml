@@ -50,6 +50,7 @@ dependencies:
   audioplayers: ^4.0.1
   indexed: ^0.0.8
   flutter_secure_storage: ^8.0.0
+  purchases_flutter: ^5.0.0
 
   
 
