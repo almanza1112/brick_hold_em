@@ -41,31 +41,18 @@ class _GamePlayersState extends State<GamePlayers>
   DatabaseReference turnOrderListener =
       FirebaseDatabase.instance.ref('tables/1/turnOrder/turnPlayer');
 
-  late AnimationController _profileAnimationController;
-  late Animation<Offset> _profileSlideAnimation;
+  
 
   Player selectedPlayer = Player(name: '', photoUrl: '', uid: '', username: '');
 
   @override
   void initState() {
-    _profileAnimationController = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 1),
-    );
-
-    _profileSlideAnimation = Tween<Offset>(
-      begin: Offset(0, 2), // Slide in from the bottom
-      end: Offset(0, 1),
-    ).animate(CurvedAnimation(
-      parent: _profileAnimationController,
-      curve: Curves.ease,
-    ));
+  
     super.initState();
   }
 
   @override
   void dispose() {
-    _profileAnimationController.dispose();
     super.dispose();
   }
 
@@ -74,7 +61,7 @@ class _GamePlayersState extends State<GamePlayers>
     print("game_players called");
     return Stack(
       children: [
-        turnPlayerInfo(),
+        //turnPlayerInfo(),
         //ProgressIndicatorTurn(),
 
         StreamBuilder(
@@ -152,7 +139,6 @@ class _GamePlayersState extends State<GamePlayers>
                 return Text("something went wrong");
               }
             })),
-        playerProfile(selectedPlayer)
       ],
     );
   }
@@ -274,7 +260,7 @@ class _GamePlayersState extends State<GamePlayers>
                         HapticFeedback.heavyImpact();
 
                         if (countdown > 0) {
-                          Timer(Duration(seconds: 1), () {
+                          Timer(const Duration(seconds: 1), () {
                             setState(() {
                               countdown--;
                             });
@@ -282,6 +268,7 @@ class _GamePlayersState extends State<GamePlayers>
                         } else {
                           // TODO: APPLY THIS LOGIC
                           //ranOutOfTime();
+                          widget.onTurnChanged;
                         }
 
                         return Column(
@@ -313,31 +300,5 @@ class _GamePlayersState extends State<GamePlayers>
     );
   }
 
-  Widget playerProfile(Player player) {
-        Player p = player;
-
-    //print("player: ${player.toString()}");
-    return StatefulBuilder(
-      builder: (context, setState) {
-        setState((){
-          p = player;
-        });
-        return  SlideTransition(
-        position: _profileSlideAnimation,
-        child: Container(
-            height: MediaQuery.of(context).size.height * 0.5,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              children: [
-                Text(p.name!)
-              ],
-            )),
-      );
-      }
-    );
-  }
+ 
 }

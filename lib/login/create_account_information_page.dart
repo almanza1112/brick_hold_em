@@ -184,6 +184,8 @@ class _CreateAccountInformationPageState
   }
 
   Widget nextButton() {
+                    print(globals.END_POINT);
+
     return Padding(
       padding: const EdgeInsets.all(30.0),
       child: ElevatedButton(

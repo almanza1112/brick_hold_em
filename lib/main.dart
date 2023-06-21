@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'auth_service.dart';
 
@@ -12,7 +13,7 @@ void main() async {
   
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp
-  ]).then((value) => runApp(MyApp()));
+  ]).then((value) => runApp(ProviderScope(child: MyApp())));
 }
 
 class MyApp extends StatelessWidget {

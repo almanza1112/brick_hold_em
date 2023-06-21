@@ -1,14 +1,29 @@
+import 'package:brick_hold_em/game/card_rules.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
+import 'package:brick_hold_em/globals.dart' as globals;
 import 'card_key.dart';
+import 'game_providers.dart';
 
-class GameCards extends StatefulWidget {
+class GameCards extends ConsumerStatefulWidget {
+  const GameCards({super.key});
+
+  @override
   GameCardsPageState createState() => GameCardsPageState();
 }
 
-class GameCardsPageState extends State<GameCards> {
+
+
+class GameCardsPageState extends ConsumerState<GameCards> {
   late Future<List<String>> _cardsSnapshot;
   final onceRef = FirebaseDatabase.instance.ref();
   bool isStateChanged = false;
@@ -18,8 +33,17 @@ class GameCardsPageState extends State<GameCards> {
   final uid = FirebaseAuth.instance.currentUser!.uid;
   List<Widget> tappedCards = <Widget>[];
 
-  Duration tableCardAnimationDuration = const Duration(milliseconds: 500);
+  final player = AudioPlayer();
+  DatabaseReference deckCountListener =
+      FirebaseDatabase.instance.ref('tables/1/cards/dealer/deckCount');
+
+  Duration tableCardAnimationDuration = const Duration(milliseconds: 250);
   bool playButtonSelected = false;
+
+  late double constrainHeight, constrainWidth;
+
+  DatabaseReference faceUpCardListener =
+      FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
 
   @override
   void initState() {
@@ -33,6 +57,9 @@ class GameCardsPageState extends State<GameCards> {
       children: [
         playerCards(),
         fiveCardBorders(),
+        faceUpCard(),
+        deck(),
+        buttons(),
       ],
     );
   }
@@ -89,6 +116,52 @@ class GameCardsPageState extends State<GameCards> {
         ),
       ]),
     );
+  }
+
+  Widget deck() {
+    return Center(
+        child: GestureDetector(
+            onTap: () {
+              addCard();
+            },
+            child: Container(
+              width: cardWidth,
+              height: cardHeight,
+              color: Colors.blueAccent,
+              child: Stack(
+                children: [
+                  Image.asset(
+                    "assets/images/backside.png",
+                    fit: BoxFit.cover,
+                    width: cardWidth,
+                    height: cardHeight,
+                  ),
+                  Center(
+                    child: StreamBuilder(
+                        stream: deckCountListener.onValue,
+                        builder: ((context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const CircularProgressIndicator();
+                          }
+
+                          if (snapshot.hasData) {
+                            int count = (snapshot.data!).snapshot.value as int;
+
+                            return Text(
+                              "$count",
+                              style: const TextStyle(
+                                  color: Colors.amberAccent,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800),
+                            );
+                          } else {
+                            return const Text("n");
+                          }
+                        })),
+                  )
+                ],
+              ),
+            )));
   }
 
   Widget fiveCardBorders() {
@@ -326,4 +399,171 @@ class GameCardsPageState extends State<GameCards> {
     }
   }
 
+  Widget faceUpCard() {
+    return SafeArea(child: LayoutBuilder(
+        builder: ((BuildContext context, BoxConstraints constraints) {
+      constrainWidth = constraints.constrainWidth();
+      constrainHeight = constraints.constrainHeight();
+      return Stack(
+        children: [
+          Positioned(
+              top: (constraints.constrainHeight() / 2) + 50,
+              left:
+                  (constraints.constrainWidth() / 2) - ((cardWidth * 2.5) + 10),
+              child: faceUpCardImage())
+        ],
+      );
+    })));
+  }
+
+  Widget faceUpCardImage() {
+    final liveFaceUpCard = ref.watch(faceUpCardProvider);
+
+    return liveFaceUpCard.when(data: (event) {
+      final data = event.snapshot.value;
+      return Image.asset(
+            "assets/images/${data.toString()}.png",
+            width: cardWidth,
+            height: cardHeight,
+          );
+    }, error: ((error, stackTrace) => Text(error.toString())), loading: () => const CircularProgressIndicator());
+    
+  }
+
+  Widget buttons() {
+    return Visibility(
+      //visible: isYourTurn,
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: ElevatedButton(
+                  onPressed: playButton, child: const Text("Play")),
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: ElevatedButton(
+                onPressed: () {
+                  passPlay();
+                },
+                child: const Text("pass"),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  playButton() async {
+    // Get faceUpCard from the StreamProvider = faceUpCardProvider
+    final faceUpCardRefOnce = ref.watch(faceUpCardProvider);
+    final faceUpCardName = faceUpCardRefOnce.asData!.value.snapshot.value;
+
+    List<String> cardsBeingPlayed = <String>[];
+    for (int i = 0; i < tappedCards.length; i++) {
+      ValueKey<CardKey> t = tappedCards[i].key! as ValueKey<CardKey>;
+      cardsBeingPlayed.add(t.value.cardName!);
+    }
+
+    List<String> totalCardsBeingPlayed = [faceUpCardName.toString(), ...cardsBeingPlayed];
+
+    final cardRules = CardRules(cards: totalCardsBeingPlayed);
+    var result = cardRules.play();
+
+    if (result == "success") {
+      DatabaseReference dbMoves =
+          FirebaseDatabase.instance.ref('tables/1/moves');
+      DatabaseReference newMoves = dbMoves.push();
+      await newMoves.set({uid: cardsBeingPlayed}).then((value) {
+        setState(() {
+          playButtonSelected = true;
+        });
+        setFaceUpCardAndHand(cardsBeingPlayed.last);
+        passPlay();
+      });
+    } else {
+      HapticFeedback.heavyImpact();
+       HapticFeedback.heavyImpact();
+    }
+  }
+
+  setFaceUpCardAndHand(String card) async {
+    //There is at least one card
+    if (cardWidgetsBuilderList.isNotEmpty) {
+      List<String> cardsInHand = <String>[];
+      for (int i = 0; i < cardWidgetsBuilderList.length; i++) {
+        ValueKey<CardKey> t =
+            cardWidgetsBuilderList[i].key! as ValueKey<CardKey>;
+        cardsInHand.add(t.value.cardName!);
+      }
+
+      DatabaseReference faceUpCardRef =
+          FirebaseDatabase.instance.ref('tables/1/cards');
+
+      await faceUpCardRef.update({
+        'faceUpCard': card,
+        'playerCards/$uid/startingHand': cardsInHand
+      }).then((value) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          setState(() {
+            playButtonSelected = false;
+            tappedCards.clear();
+          });
+        });
+      });
+    } else {
+      // No cards left, you are the winner
+    }
+  }
+
+  passPlay() async {
+    http.Response response =
+        await http.get(Uri.parse("${globals.END_POINT}/table/passturn"));
+
+    Map data = jsonDecode(response.body);
+    print("HEREEEE");
+    print(data);
+  }
+
+  addCard() async {
+    // Why call the players starting hand again? To avoid confusion in case
+    // player has any cards that are tapped and on the table/ Can this be optimized?
+    // Maybe..
+    // TODO: look into this, not a priority
+
+    //Source cardDrawnSound = AssetSource("sounds/card_drawn.mp3");
+    //player.play(cardDrawnSound);
+    final dealerRef =
+        FirebaseDatabase.instance.ref('tables/1/cards/dealer/deck');
+    final playersCardsRef = FirebaseDatabase.instance
+        .ref('tables/1/cards/playerCards/$uid/startingHand');
+    final cardsRef = FirebaseDatabase.instance.ref('tables/1/cards');
+    final event = await dealerRef.once();
+    final playerEvent = await playersCardsRef.once();
+
+    var deck = List<String>.from(event.snapshot.value as List);
+    var playersCards = List<String>.from(playerEvent.snapshot.value as List);
+
+    var cardBeingAdded = deck[deck.length - 1];
+    playersCards.add(cardBeingAdded);
+    deck.removeLast();
+
+    await cardsRef.update(
+        {"dealer/deck": deck, "playerCards/$uid/startingHand": playersCards});
+
+    setState(() {
+      isStateChanged = true;
+      cardWidgetsBuilderList.add(card(CardKey(
+        position: cardWidgetsBuilderList.length,
+        cardName: cardBeingAdded,
+      )));
+    });
+  }
+
+  ranOutOfTime() async {
+    await addCard();
+    await passPlay();
+  }
 }
