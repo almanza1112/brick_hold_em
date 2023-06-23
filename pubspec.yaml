@@ -52,6 +52,7 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   purchases_flutter: ^5.0.0
   flutter_riverpod: ^2.3.6
+  percent_indicator: ^4.2.3
 
   
 

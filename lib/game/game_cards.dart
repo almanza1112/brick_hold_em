@@ -1,5 +1,4 @@
 import 'package:brick_hold_em/game/card_rules.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -20,8 +19,6 @@ class GameCards extends ConsumerStatefulWidget {
   @override
   GameCardsPageState createState() => GameCardsPageState();
 }
-
-
 
 class GameCardsPageState extends ConsumerState<GameCards> {
   late Future<List<String>> _cardsSnapshot;
@@ -53,14 +50,16 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        playerCards(),
-        fiveCardBorders(),
-        faceUpCard(),
-        deck(),
-        buttons(),
-      ],
+    return SafeArea(
+      child: Stack(
+        children: [
+          playerCards(),
+          fiveCardBorders(),
+          faceUpCard(),
+          deck(),
+          buttons(),
+        ],
+      ),
     );
   }
 
@@ -335,7 +334,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   Future<List<String>> cardsSnapshot() async {
     final snapshot = await onceRef
-        .child('tables/1/cards/playerCards/$uid/startingHand')
+        .child('tables/1/cards/playerCards/$uid/hand')
         .get();
     if (snapshot.exists) {
       var cardsList = List<String>.from(snapshot.value as List);
@@ -419,46 +418,55 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   Widget faceUpCardImage() {
     final liveFaceUpCard = ref.watch(faceUpCardProvider);
 
-    return liveFaceUpCard.when(data: (event) {
-      final data = event.snapshot.value;
-      return Image.asset(
-            "assets/images/${data.toString()}.png",
+    return liveFaceUpCard.when(
+        data: (event) {
+          final data = event.snapshot.value.toString();
+          return Image.asset(
+            "assets/images/$data.png",
             width: cardWidth,
             height: cardHeight,
           );
-    }, error: ((error, stackTrace) => Text(error.toString())), loading: () => const CircularProgressIndicator());
-    
+        },
+        error: ((error, stackTrace) => Text(error.toString())),
+        loading: () => const CircularProgressIndicator());
   }
 
   Widget buttons() {
-    return Visibility(
-      //visible: isYourTurn,
-      child: SafeArea(
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: ElevatedButton(
-                  onPressed: playButton, child: const Text("Play")),
-            ),
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: ElevatedButton(
-                onPressed: () {
-                  passPlay();
-                },
-                child: const Text("pass"),
+    final liveTurnPlayer = ref.watch(turnPlayerProvider);
+
+    return liveTurnPlayer.when(
+        data: (event) {
+          final turnPlayerUid = event.snapshot.value.toString();
+          if (turnPlayerUid == uid) {
+            return Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      passPlay();
+                    },
+                    child: const Text("Pass"),
+                  ),
+                  ElevatedButton(
+                      onPressed: playButton, child: const Text("Play")),
+                ],
               ),
-            )
-          ],
-        ),
-      ),
-    );
+            );
+          } else {
+            return const SizedBox();
+          }
+        },
+        error: ((error, stackTrace) => Text(error.toString())),
+        loading: () => const CircularProgressIndicator());
   }
 
   playButton() async {
     // Get faceUpCard from the StreamProvider = faceUpCardProvider
-    final faceUpCardRefOnce = ref.watch(faceUpCardProvider);
+    final faceUpCardRefOnce = ref.read(faceUpCardProvider);
     final faceUpCardName = faceUpCardRefOnce.asData!.value.snapshot.value;
 
     List<String> cardsBeingPlayed = <String>[];
@@ -467,7 +475,10 @@ class GameCardsPageState extends ConsumerState<GameCards> {
       cardsBeingPlayed.add(t.value.cardName!);
     }
 
-    List<String> totalCardsBeingPlayed = [faceUpCardName.toString(), ...cardsBeingPlayed];
+    List<String> totalCardsBeingPlayed = [
+      faceUpCardName.toString(),
+      ...cardsBeingPlayed
+    ];
 
     final cardRules = CardRules(cards: totalCardsBeingPlayed);
     var result = cardRules.play();
@@ -485,7 +496,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
       });
     } else {
       HapticFeedback.heavyImpact();
-       HapticFeedback.heavyImpact();
+      HapticFeedback.heavyImpact();
     }
   }
 
@@ -504,7 +515,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
       await faceUpCardRef.update({
         'faceUpCard': card,
-        'playerCards/$uid/startingHand': cardsInHand
+        'playerCards/$uid/hand': cardsInHand
       }).then((value) {
         Future.delayed(const Duration(milliseconds: 500), () {
           setState(() {
@@ -538,7 +549,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
     final dealerRef =
         FirebaseDatabase.instance.ref('tables/1/cards/dealer/deck');
     final playersCardsRef = FirebaseDatabase.instance
-        .ref('tables/1/cards/playerCards/$uid/startingHand');
+        .ref('tables/1/cards/playerCards/$uid/hand');
     final cardsRef = FirebaseDatabase.instance.ref('tables/1/cards');
     final event = await dealerRef.once();
     final playerEvent = await playersCardsRef.once();
@@ -551,7 +562,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
     deck.removeLast();
 
     await cardsRef.update(
-        {"dealer/deck": deck, "playerCards/$uid/startingHand": playersCards});
+        {"dealer/deck": deck, "playerCards/$uid/hand": playersCards});
 
     setState(() {
       isStateChanged = true;

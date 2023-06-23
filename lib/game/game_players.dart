@@ -1,21 +1,18 @@
-import 'dart:async';
-
+import 'package:brick_hold_em/game/game_turn_timer.dart';
 import 'package:brick_hold_em/game/player.dart';
 import 'package:brick_hold_em/game/player_profile.dart';
-import 'package:brick_hold_em/game/progress_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
+import 'package:percent_indicator/percent_indicator.dart';
 
 import 'player_profile_page_builder.dart';
 
 class GamePlayers extends StatefulWidget {
-  final ValueChanged<String> onTurnChanged;
   const GamePlayers({
     Key? key,
-    required this.onTurnChanged,
   }) : super(key: key);
 
   @override
@@ -59,10 +56,10 @@ class _GamePlayersState extends State<GamePlayers>
   @override
   Widget build(BuildContext context) {
     print("game_players called");
+  
     return Stack(
       children: [
-        //turnPlayerInfo(),
-        //ProgressIndicatorTurn(),
+        GameTurnTimer(),
 
         StreamBuilder(
             stream: playersRef.onValue,
@@ -165,12 +162,22 @@ class _GamePlayersState extends State<GamePlayers>
         children: [
           Stack(
             children: <Widget>[
-              CircleAvatar(
-                backgroundImage: playerDetailsVisible
-                    ? NetworkImage(player.photoUrl)
-                    : const AssetImage('assets/images/poker_player.jpeg')
-                        as ImageProvider,
-                radius: imageRadius,
+              CircularPercentIndicator(
+                animation: true,
+                animationDuration: 3000,
+                percent: 1,
+                //startAngle: 0.8,
+                //circularStrokeCap: CircularStrokeCap.butt,
+                //arcType: ArcType.FULL_REVERSED,
+                //arcBackgroundColor: Colors.amber,
+                lineWidth: 0,
+                progressColor: Colors.transparent,
+                center: CircleAvatar(backgroundImage:  playerDetailsVisible
+                        ? NetworkImage(player.photoUrl)
+                        : const AssetImage('assets/images/poker_player.jpeg')
+                            as ImageProvider,
+                            radius: imageRadius,),
+                radius: imageRadius +5,
               ),
               if (playerDetailsVisible)
                 Positioned(
@@ -228,77 +235,4 @@ class _GamePlayersState extends State<GamePlayers>
       ),
     );
   }
-
-
-  Widget turnPlayerInfo() {
-    int countdown = 30;
-
-    return SafeArea(
-      child: Stack(children: [
-        Positioned(
-          top: 40,
-          left: 0,
-          right: 0,
-          child: Center(
-            child: StreamBuilder(
-                stream: turnOrderListener.onValue,
-                builder: ((context, snapshot) {
-                  if (snapshot.hasError) {
-                    return const Text("There was an error getting turn info");
-                  }
-
-                  if (snapshot.hasData) {
-                    var turnPlayerUid =
-                        (snapshot.data!).snapshot.value as String;
-                    widget.onTurnChanged(turnPlayerUid);
-                    if (turnPlayerUid == uid) {
-                      //setIsYourTurn(true);
-                      return StatefulBuilder(builder: (context, setState) {
-                        // Sound for the countdown
-                        SystemSound.play(SystemSoundType.click);
-                        // Vibration for the countdown
-                        HapticFeedback.heavyImpact();
-
-                        if (countdown > 0) {
-                          Timer(const Duration(seconds: 1), () {
-                            setState(() {
-                              countdown--;
-                            });
-                          });
-                        } else {
-                          // TODO: APPLY THIS LOGIC
-                          //ranOutOfTime();
-                          widget.onTurnChanged;
-                        }
-
-                        return Column(
-                          children: [
-                            Text(
-                              "IT'S YOUR TURN",
-                              style: turnPlayerTextStyle,
-                            ),
-                            Text(
-                              "$countdown",
-                              style: turnPlayerTextStyle,
-                            )
-                          ],
-                        );
-                      });
-                    } else {
-                      return Text(
-                        "Waiting...",
-                        style: turnPlayerTextStyle,
-                      );
-                    }
-                  } else {
-                    return const Text("Snapshot has no data!");
-                  }
-                })),
-          ),
-        ),
-      ]),
-    );
-  }
-
- 
 }

@@ -9,9 +9,10 @@ final faceUpCardProvider = StreamProvider<DatabaseEvent>((ref) {
 });
 
 
-final turnOrderProvider = StreamProvider<DatabaseEvent>((ref) {
+final turnPlayerProvider = StreamProvider<DatabaseEvent>((ref) {
   DatabaseReference turnOrderRef =
       FirebaseDatabase.instance.ref('tables/1/turnOrder/turnPlayer');
-      
+
   return turnOrderRef.onValue;
 });
+
