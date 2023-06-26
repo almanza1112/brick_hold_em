@@ -3,7 +3,7 @@ import 'dart:convert';
 class Player {
   final String? name;
   final String username;
-  final String photoUrl;
+  final String photoURL;
   final int? chips;
   final int? cardCount;
   final String uid;
@@ -11,7 +11,7 @@ class Player {
   Player({
     this.name,
     required this.username,
-    required this.photoUrl,
+    required this.photoURL,
     this.chips,
     this.cardCount,
     required this.uid,
@@ -21,7 +21,7 @@ class Player {
   Player copyWith({
     String? name,
     String? username,
-    String? photoUrl,
+    String? photoURL,
     int? chips,
     int? cardCount,
     String? uid,
@@ -29,7 +29,7 @@ class Player {
     return Player(
       name: name ?? this.name,
       username: username ?? this.username,
-      photoUrl: photoUrl ?? this.photoUrl,
+      photoURL: photoURL ?? this.photoURL,
       chips: chips ?? this.chips,
       cardCount: cardCount ?? this.cardCount,
       uid: uid ?? this.uid,
@@ -40,7 +40,7 @@ class Player {
     return {
       'name': name,
       'username': username,
-      'photoUrl': photoUrl,
+      'photoURL': photoURL,
       'chips': chips,
       'cardCount': cardCount,
       'uid': uid,
@@ -51,7 +51,7 @@ class Player {
 
   @override
   String toString() {
-    return 'Player(name: $name, username: $username, photoUrl: $photoUrl, chips: $chips, cardCount: $cardCount, uid: $uid)';
+    return 'Player(name: $name, username: $username, photoURL: $photoURL, chips: $chips, cardCount: $cardCount, uid: $uid)';
   }
 
   @override
@@ -61,7 +61,7 @@ class Player {
     return other is Player &&
       other.name == name &&
       other.username == username &&
-      other.photoUrl == photoUrl &&
+      other.photoURL == photoURL &&
       other.chips == chips &&
       other.cardCount == cardCount &&
       other.uid == uid;
@@ -71,7 +71,7 @@ class Player {
     return Player(
       name: map['name'],
       username: map['username'] ?? '',
-      photoUrl: map['photoUrl'] ?? '',
+      photoURL: map['photoURL'] ?? '',
       chips: map['chips']?.toInt(),
       cardCount: map['cardCount']?.toInt(),
       uid: map['uid'] ?? '',
@@ -84,7 +84,7 @@ class Player {
   int get hashCode {
     return name.hashCode ^
       username.hashCode ^
-      photoUrl.hashCode ^
+      photoURL.hashCode ^
       chips.hashCode ^
       cardCount.hashCode ^
       uid.hashCode;

@@ -84,7 +84,7 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
                     ),
                     Center(
                       child: CircleAvatar(
-                        backgroundImage: NetworkImage(widget.player.photoUrl),
+                        backgroundImage: NetworkImage(widget.player.photoURL),
                         radius: 60,
                       ),
                     ),
@@ -205,7 +205,7 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
     var userUpdate = <String, dynamic>{
       globals.CF_KEY_USERNAME: widget.player.username,
       globals.CF_KEY_UID: widget.player.uid,
-      globals.CF_KEY_PHOTOURL: widget.player.photoUrl,
+      globals.CF_KEY_PHOTOURL: widget.player.photoURL,
       globals.CF_KEY_STATUS: globals.CF_VALUE_REQUEST_SENT
     };
     batch.set(userRef, userUpdate, SetOptions(merge: true));

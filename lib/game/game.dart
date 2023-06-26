@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:brick_hold_em/game/game_cards.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -81,11 +79,11 @@ class GamePageState extends State<GamePage> {
   }
 
   addUserToTable() async {
-    print("addddddddd");
     FlutterSecureStorage storage = const FlutterSecureStorage();
     final username = await storage.read(key: globals.FSS_USERNAME);
 
     var body = {
+      'uid' : uid,
       'name': FirebaseAuth.instance.currentUser!.displayName,
       'photoURL': FirebaseAuth.instance.currentUser!.photoURL,
       'username': username,
@@ -94,23 +92,8 @@ class GamePageState extends State<GamePage> {
         await http.post(Uri.parse("${globals.END_POINT}/table/join"), body: body);
 
     //Map data = jsonDecode(response.body);
-    print("and");
 
     print("adduserToTable: ${response.body}");
 
-
-    // await database.update({
-    //   "players/$uid": {
-    //     'name': FirebaseAuth.instance.currentUser!.displayName,
-    //     'photoURL': FirebaseAuth.instance.currentUser!.photoURL,
-    //     'username': username,
-    //     'cardCount': 0,
-    //   }
-    // }).then((value) {
-    //   // User added
-    // }).onError((error, stackTrace) {
-    //   // TODO: error game flow
-    //   // Show Dialog that user was not added, error occured
-    // });
   }
 }
