@@ -77,7 +77,7 @@ class GameTurnTimerState extends ConsumerState {
               );
             });
           } else {
-            return SizedBox();
+            return const SizedBox();
           }
         },
         error: ((error, stackTrace) => Text(error.toString())),
