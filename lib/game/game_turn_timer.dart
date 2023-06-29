@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:brick_hold_em/game/game_providers.dart';
+import 'package:brick_hold_em/game/progress_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,23 +20,31 @@ class GameTurnTimerState extends ConsumerState {
 
   final uid = FirebaseAuth.instance.currentUser!.uid;
 
+  Timer? _timer;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Stack(
       children: <Widget>[
-        Positioned(
-            top: 40, left: 0, right: 0, child: Center(child: turnPlayerTimer()))
+        turnPlayerTimer(),
       ],
     ));
   }
 
- @override
+  @override
   void setState(fn) {
     if (mounted) {
       super.setState(fn);
     }
   }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
+  }
+
   Widget turnPlayerTimer() {
     int countdown = 30;
 
@@ -43,41 +52,60 @@ class GameTurnTimerState extends ConsumerState {
 
     return liveTurnPlayer.when(
         data: (event) {
-          final turnPlayerUid = event.snapshot.value.toString();
+          final turnPlayerPosition = event.snapshot.value as int;
+          final playerPosition = ref.read(playerPositionProvider);
 
-          if (turnPlayerUid == uid) {
-            return StatefulBuilder(builder: (context, setState) {
-              // Sound for the countdown
-              SystemSound.play(SystemSoundType.click);
-              // Vibration for the countdown
-              HapticFeedback.heavyImpact();
-
-              if (countdown > 0) {
-                Timer(const Duration(seconds: 1), () {
-                  setState(() {
-                    countdown--;
+          if (turnPlayerPosition == playerPosition) {
+            return Positioned(
+              top: 40,
+              left: 0,
+              right: 0,
+              child: StatefulBuilder(builder: (context, setState) {
+                // Sound for the countdown
+                SystemSound.play(SystemSoundType.click);
+                // Vibration for the countdown
+                HapticFeedback.heavyImpact();
+            
+                if (countdown > 0) {
+                  _timer = Timer(const Duration(seconds: 1), () {
+                    setState(() {
+                      countdown--;
+                    });
                   });
-                });
-              } else {
-                // TODO: APPLY THIS LOGIC
-                //ranOutOfTime();
-              }
-
-              return Column(
-                children: [
-                  Text(
-                    "IT'S YOUR TURN",
-                    style: turnPlayerTextStyle,
-                  ),
-                  Text(
-                    "$countdown",
-                    style: turnPlayerTextStyle,
-                  )
-                ],
-              );
-            });
+                } else {
+                  // TODO: APPLY THIS LOGIC
+                  //ranOutOfTime();
+                }
+            
+                return Column(
+                  children: [
+                    Text(
+                      "IT'S YOUR TURN",
+                      style: turnPlayerTextStyle,
+                    ),
+                    Text(
+                      "$countdown",
+                      style: turnPlayerTextStyle,
+                    )
+                  ],
+                );
+              }),
+            );
           } else {
-            return const SizedBox();
+            num position = (turnPlayerPosition - ref.read(playerPositionProvider)) - 1;
+            
+            print("position: $position");
+            if (position < 0){
+              position = 6 + position;
+            } 
+            return Center(
+              child: SizedBox(
+                height: 450,
+                child: Stack(
+                  children: [ProgressIndicatorTurn(position: position as int ,)],
+                ),
+              ),
+            );
           }
         },
         error: ((error, stackTrace) => Text(error.toString())),

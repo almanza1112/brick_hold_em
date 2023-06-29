@@ -16,3 +16,7 @@ final turnPlayerProvider = StreamProvider<DatabaseEvent>((ref) {
   return turnOrderRef.onValue;
 });
 
+final otherPlayersPositionsProvider = StateProvider<List<int>>((ref) => [],);
+
+final playerPositionProvider = StateProvider<int>((ref) => 20);
+

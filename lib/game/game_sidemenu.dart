@@ -116,10 +116,10 @@ class _GameSideMenuState extends State<GameSideMenu>
                           removePlayer();
                           Navigator.pop(context);
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 20, bottom: 10),
+                        child: const Padding(
+                          padding:  EdgeInsets.only(top: 20, bottom: 10),
                           child: Row(
-                            children:  const [
+                            children:  [
                               Expanded(
                                 flex: 0, 
                                 child: Padding(
