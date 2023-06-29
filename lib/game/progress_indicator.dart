@@ -1,18 +1,18 @@
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
 class ProgressIndicatorTurn extends StatefulWidget {
-  const ProgressIndicatorTurn({super.key});
+  final int position;
+  const ProgressIndicatorTurn({super.key, required this.position});
 
-  _ProgressIndicatorState createState() => _ProgressIndicatorState();
+  @override
+  ProgressIndicatorState createState() => ProgressIndicatorState();
 }
 
-class _ProgressIndicatorState extends State<ProgressIndicatorTurn>
+class ProgressIndicatorState extends State<ProgressIndicatorTurn>
     with TickerProviderStateMixin {
   late AnimationController controller;
   late Animation<Color?> colorTween;
- 
+
   @override
   void initState() {
     controller = AnimationController(
@@ -32,36 +32,85 @@ class _ProgressIndicatorState extends State<ProgressIndicatorTurn>
 
     colorTween =
         controller.drive(ColorTween(begin: Colors.black, end: Colors.red));
-    controller.repeat(reverse: false);
+    //controller.repeat(reverse: false);
+    controller.forward();
 
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    print("progress indicator");
-    return Center(
-      child: SizedBox(
-        height: 450,
-        child: Stack(
-          children: [
-            Positioned(
-              bottom: 35,
-              right: 20,
-              child: SizedBox(
-                height: 60,
-                width: 60,
-                child: CircularProgressIndicator(
-                  strokeWidth: 5,
-                  value: controller.value,
-                  valueColor: colorTween,
-                ),
-              ),
-            ),
-          ],
+    print("progress indicator pos: ${widget.position}");
+
+    bool top = false, bottom = false, right = false, left = false;
+    late double topNum, leftNum, rightNum;
+    switch (widget.position) {
+      case 0:
+        bottom = true;
+        right = true;
+        rightNum = 20;
+        break;
+
+      case 1:
+        top = true;
+        right = true;
+        topNum = 125;
+        rightNum = 20;
+        break;
+
+      case 2:
+        top = true;
+        right = true;
+        left = true;
+        topNum = 0;
+        leftNum = 0;
+        rightNum = 0;
+        break;
+
+      case 3:
+        top = true;
+        left = true;
+        topNum = 125;
+        leftNum = 20;
+        break;
+
+      case 4:
+        bottom = true;
+        left = true;
+        leftNum = 20;
+        break;
+    }
+
+    if (widget.position == 2) {
+      return Align(
+        alignment: Alignment.topCenter,
+        child: SizedBox(
+          height: 60,
+          width: 60,
+          child: CircularProgressIndicator(
+            strokeWidth: 10,
+            value: controller.value,
+            valueColor: colorTween,
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      return Positioned(
+        top: top ? topNum : null,
+        right: right ? rightNum : null,
+        left: left ? leftNum : null,
+        bottom: bottom ? 40 : null,
+        child: SizedBox(
+          height: 60,
+          width: 60,
+          child: CircularProgressIndicator(
+            strokeWidth: 10,
+            value: controller.value,
+            valueColor: colorTween,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -73,6 +122,7 @@ class _ProgressIndicatorState extends State<ProgressIndicatorTurn>
 
   @override
   void dispose() {
+    controller.dispose();
     super.dispose();
   }
 }
