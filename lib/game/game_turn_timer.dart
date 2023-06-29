@@ -56,6 +56,12 @@ class GameTurnTimerState extends ConsumerState {
           final playerPosition = ref.read(playerPositionProvider);
 
           if (turnPlayerPosition == playerPosition) {
+            // Update the StateProvider
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(isPlayersTurnProvider.notifier).state = true;
+              ref.read(didPlayerAddCardThisTurnProvider.notifier).state = true;
+            });
+
             return Positioned(
               top: 40,
               left: 0,
@@ -65,7 +71,7 @@ class GameTurnTimerState extends ConsumerState {
                 SystemSound.play(SystemSoundType.click);
                 // Vibration for the countdown
                 HapticFeedback.heavyImpact();
-            
+
                 if (countdown > 0) {
                   _timer = Timer(const Duration(seconds: 1), () {
                     setState(() {
@@ -76,7 +82,7 @@ class GameTurnTimerState extends ConsumerState {
                   // TODO: APPLY THIS LOGIC
                   //ranOutOfTime();
                 }
-            
+
                 return Column(
                   children: [
                     Text(
@@ -92,17 +98,27 @@ class GameTurnTimerState extends ConsumerState {
               }),
             );
           } else {
-            num position = (turnPlayerPosition - ref.read(playerPositionProvider)) - 1;
-            
-            print("position: $position");
-            if (position < 0){
+            // Update the StateProvider
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(isPlayersTurnProvider.notifier).state = false;
+              ref.read(didPlayerAddCardThisTurnProvider.notifier).state = false;
+            });
+
+            num position =
+                (turnPlayerPosition - ref.read(playerPositionProvider)) - 1;
+
+            if (position < 0) {
               position = 6 + position;
-            } 
+            }
             return Center(
               child: SizedBox(
                 height: 450,
                 child: Stack(
-                  children: [ProgressIndicatorTurn(position: position as int ,)],
+                  children: [
+                    ProgressIndicatorTurn(
+                      position: position as int,
+                    )
+                  ],
                 ),
               ),
             );

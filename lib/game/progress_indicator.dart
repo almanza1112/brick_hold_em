@@ -84,13 +84,16 @@ class ProgressIndicatorState extends State<ProgressIndicatorTurn>
     if (widget.position == 2) {
       return Align(
         alignment: Alignment.topCenter,
-        child: SizedBox(
-          height: 60,
-          width: 60,
-          child: CircularProgressIndicator(
-            strokeWidth: 10,
-            value: controller.value,
-            valueColor: colorTween,
+        child: Transform(
+          transform: Matrix4.translationValues(0, -5, 0),
+          child: SizedBox(
+            height: 60,
+            width: 60,
+            child: CircularProgressIndicator(
+              strokeWidth: 10,
+              value: controller.value,
+              valueColor: colorTween,
+            ),
           ),
         ),
       );

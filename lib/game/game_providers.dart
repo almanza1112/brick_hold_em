@@ -10,13 +10,18 @@ final faceUpCardProvider = StreamProvider<DatabaseEvent>((ref) {
 
 
 final turnPlayerProvider = StreamProvider<DatabaseEvent>((ref) {
-  DatabaseReference turnOrderRef =
+  DatabaseReference turnPlayerRef =
       FirebaseDatabase.instance.ref('tables/1/turnOrder/turnPlayer');
 
-  return turnOrderRef.onValue;
+  return turnPlayerRef.onValue;
 });
 
-final otherPlayersPositionsProvider = StateProvider<List<int>>((ref) => [],);
+final otherPlayersAdjustedPositionsProvider = StateProvider<List<int>>((ref) => [],);
 
 final playerPositionProvider = StateProvider<int>((ref) => 20);
+
+final isPlayersTurnProvider = StateProvider<bool>(((ref) => false));
+
+final didPlayerAddCardThisTurnProvider = StateProvider<bool>(((ref) => true));
+
 

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+// import 'dart:convert'; // this is for jsonDecode
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -121,7 +121,10 @@ class GameCardsPageState extends ConsumerState<GameCards> {
     return Center(
         child: GestureDetector(
             onTap: () {
-              addCard();
+              // Make sure it is players turn and if player has not drawn a card yet
+              if (ref.read(didPlayerAddCardThisTurnProvider) && ref.read(isPlayersTurnProvider)){
+                addCard();
+              }
             },
             child: Container(
               width: cardWidth,
@@ -333,9 +336,8 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   }
 
   Future<List<String>> cardsSnapshot() async {
-    final snapshot = await onceRef
-        .child('tables/1/cards/playerCards/$uid/hand')
-        .get();
+    final snapshot =
+        await onceRef.child('tables/1/cards/playerCards/$uid/hand').get();
     if (snapshot.exists) {
       var cardsList = List<String>.from(snapshot.value as List);
       return cardsList;
@@ -344,6 +346,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
     }
   }
 
+  // TODO: Make into its on class for better functionality
   Widget card(CardKey cardKey) {
     String cardName = cardKey.cardName!;
     var _cardKey = ValueKey(cardKey);
@@ -357,15 +360,17 @@ class GameCardsPageState extends ConsumerState<GameCards> {
       curve: Curves.fastOutSlowIn,
       child: GestureDetector(
         onTap: () {
-          if (tappedCards.length < 4) {
-            var result = cardWidgetsBuilderList
-                .indexWhere((element) => element.key == _cardKey);
-            setState(() {
-              isStateChanged = true;
-              tappedCards.add(cardWidgetsBuilderList[result]);
-              cardWidgetsBuilderList
-                  .removeWhere((element) => element.key == _cardKey);
-            });
+          if (ref.read(isPlayersTurnProvider)) {
+            if (tappedCards.length < 4) {
+              var result = cardWidgetsBuilderList
+                  .indexWhere((element) => element.key == _cardKey);
+              setState(() {
+                isStateChanged = true;
+                tappedCards.add(cardWidgetsBuilderList[result]);
+                cardWidgetsBuilderList
+                    .removeWhere((element) => element.key == _cardKey);
+              });
+            }
           }
         },
         child: Image.asset(
@@ -433,11 +438,12 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   Widget buttons() {
     final liveTurnPlayer = ref.watch(turnPlayerProvider);
+    final playerPosition = ref.read(playerPositionProvider);
 
     return liveTurnPlayer.when(
         data: (event) {
-          final turnPlayerUid = event.snapshot.value.toString();
-          if (turnPlayerUid == uid) {
+          final turnPlayerUid = event.snapshot.value;
+          if (turnPlayerUid == playerPosition) {
             return Positioned(
               bottom: 0,
               left: 0,
@@ -533,39 +539,41 @@ class GameCardsPageState extends ConsumerState<GameCards> {
     http.Response response =
         await http.get(Uri.parse("${globals.END_POINT}/table/passturn"));
 
-    Map data = jsonDecode(response.body);
-    print("HEREEEE");
-    print(data);
+    //Map data = jsonDecode(response.body);
+    if (response.statusCode == 500) {
+      print("Error in API in table/passturn");
+    }
   }
 
   addCard() async {
     // Why call the players starting hand again? To avoid confusion in case
     // player has any cards that are tapped and on the table/ Can this be optimized?
     // Maybe..
-    // TODO: look into this, not a priority
+    // TODO: look into this, not a priority...maybe cloud function??
 
     //Source cardDrawnSound = AssetSource("sounds/card_drawn.mp3");
     //player.play(cardDrawnSound);
-    final dealerRef =
+    final deckRef =
         FirebaseDatabase.instance.ref('tables/1/cards/dealer/deck');
-    final playersCardsRef = FirebaseDatabase.instance
-        .ref('tables/1/cards/playerCards/$uid/hand');
+    final playersCardsRef =
+        FirebaseDatabase.instance.ref('tables/1/cards/playerCards/$uid/hand');
     final cardsRef = FirebaseDatabase.instance.ref('tables/1/cards');
-    final event = await dealerRef.once();
+    final deckEvent = await deckRef.once();
     final playerEvent = await playersCardsRef.once();
 
-    var deck = List<String>.from(event.snapshot.value as List);
+    var deck = List<String>.from(deckEvent.snapshot.value as List);
     var playersCards = List<String>.from(playerEvent.snapshot.value as List);
 
     var cardBeingAdded = deck[deck.length - 1];
     playersCards.add(cardBeingAdded);
     deck.removeLast();
 
-    await cardsRef.update(
-        {"dealer/deck": deck, "playerCards/$uid/hand": playersCards});
+    await cardsRef
+        .update({"dealer/deck": deck, "playerCards/$uid/hand": playersCards});
+
+    ref.read(didPlayerAddCardThisTurnProvider.notifier).state = true;
 
     setState(() {
-      isStateChanged = true;
       cardWidgetsBuilderList.add(card(CardKey(
         position: cardWidgetsBuilderList.length,
         cardName: cardBeingAdded,

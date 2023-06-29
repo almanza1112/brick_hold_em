@@ -85,12 +85,10 @@ class _GamePlayersState extends ConsumerState with TickerProviderStateMixin {
 
             // Update the StateProvider
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              ref.read(otherPlayersPositionsProvider.notifier).state =
+              ref.read(otherPlayersAdjustedPositionsProvider.notifier).state =
                   adjustedOtherPlayersKeys;
 
               ref.read(playerPositionProvider.notifier).state = playerKey;
-
-              print("playersPositions: ${ref.read(otherPlayersPositionsProvider)}");
             });
 
             List<Player> playersList = <Player>[];
