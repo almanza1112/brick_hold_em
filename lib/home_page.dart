@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:animations/animations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:brick_hold_em/globals.dart' as globals;
@@ -18,18 +20,27 @@ import 'profile_page.dart';
 import 'friends/friends_page.dart';
 import 'ads_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
+  const HomePage({super.key});
+
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends ConsumerState {
+  FlutterSecureStorage storage = const FlutterSecureStorage();
+  late int chips;
+
   @override
   void initState() {
     super.initState();
+    getChips(); //TODO: need to update this for data in general
     checkIfUserExists();
   }
 
+getChips() async {
+    await storage.read(key: globals.FSS_CHIPS);
+  }
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
@@ -204,7 +215,7 @@ class _HomePageState extends State<HomePage> {
             closedShape: closedShape,
             closedElevation: closedElevation,
             closedColor: closedColor,
-            openBuilder: (context, action) => CompetitivePage(),
+            openBuilder: (context, action) => const CompetitivePage(),
           ),
         ),
         // FRIENDLY BUTTON
@@ -355,28 +366,16 @@ class _HomePageState extends State<HomePage> {
                           //   FirebaseAuth.instance.currentUser!.displayName!,
                           //   style: const TextStyle(fontSize: 18, color: Colors.white),
                           // ),
-                          FutureBuilder<Map<String, dynamic>?>(
-                            future: setUserData(),
-                            builder: (context, snapshot) {
-                              /** TODO need to clean this up */
-                              if (snapshot.hasData) {
-                                var data = snapshot.data;
-                                var chips = data!["chips"];
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                      bottom: columnPadding),
-                                  child: Text(
-                                    "$chips chips",
-                                    style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white),
-                                  ),
-                                );
-                              } else {
-                                return const Text('i suck');
-                              }
-                            },
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: columnPadding),
+                            child: Text(
+                              "$chips chips",
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
                           )
                         ],
                       ),
@@ -417,6 +416,8 @@ class _HomePageState extends State<HomePage> {
                 )));
   }
 
+
+  // TODO: this should not be here, update this
   Future<Map<String, dynamic>?> setUserData() async {
     final docUser = FirebaseFirestore.instance
         .collection("users")
