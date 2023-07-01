@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:brick_hold_em/game/game_providers.dart';
+import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:brick_hold_em/game/progress_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -56,10 +56,14 @@ class GameTurnTimerState extends ConsumerState {
           final playerPosition = ref.read(playerPositionProvider);
 
           if (turnPlayerPosition == playerPosition) {
+
             // Update the StateProvider
             WidgetsBinding.instance.addPostFrameCallback((_) {
+              // Updating if it is the players turn to true
               ref.read(isPlayersTurnProvider.notifier).state = true;
-              ref.read(didPlayerAddCardThisTurnProvider.notifier).state = true;
+
+              // Updating if the player added a card this turn to false
+              ref.read(didPlayerAddCardThisTurnProvider.notifier).state = false;
             });
 
             return Positioned(
@@ -100,8 +104,12 @@ class GameTurnTimerState extends ConsumerState {
           } else {
             // Update the StateProvider
             WidgetsBinding.instance.addPostFrameCallback((_) {
+              // Updating if it is the players turn to false
               ref.read(isPlayersTurnProvider.notifier).state = false;
-              ref.read(didPlayerAddCardThisTurnProvider.notifier).state = false;
+
+              // Updating if the player added a card this turn to true as a 
+              // precaution
+              ref.read(didPlayerAddCardThisTurnProvider.notifier).state = true;
             });
 
             num position =

@@ -11,7 +11,7 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 import 'card_key.dart';
-import 'game_providers.dart';
+import '../providers/game_providers.dart';
 
 class GameCards extends ConsumerStatefulWidget {
   const GameCards({super.key});
@@ -122,7 +122,8 @@ class GameCardsPageState extends ConsumerState<GameCards> {
         child: GestureDetector(
             onTap: () {
               // Make sure it is players turn and if player has not drawn a card yet
-              if (ref.read(didPlayerAddCardThisTurnProvider) && ref.read(isPlayersTurnProvider)){
+              if (ref.read(didPlayerAddCardThisTurnProvider) == false &&
+                  ref.read(isPlayersTurnProvider) == true) {
                 addCard();
               }
             },
@@ -553,8 +554,11 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
     //Source cardDrawnSound = AssetSource("sounds/card_drawn.mp3");
     //player.play(cardDrawnSound);
-    final deckRef =
-        FirebaseDatabase.instance.ref('tables/1/cards/dealer/deck');
+    
+    // Updating state that the player already a card
+    ref.read(didPlayerAddCardThisTurnProvider.notifier).state = true;
+
+    final deckRef = FirebaseDatabase.instance.ref('tables/1/cards/dealer/deck');
     final playersCardsRef =
         FirebaseDatabase.instance.ref('tables/1/cards/playerCards/$uid/hand');
     final cardsRef = FirebaseDatabase.instance.ref('tables/1/cards');
@@ -570,8 +574,6 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
     await cardsRef
         .update({"dealer/deck": deck, "playerCards/$uid/hand": playersCards});
-
-    ref.read(didPlayerAddCardThisTurnProvider.notifier).state = true;
 
     setState(() {
       cardWidgetsBuilderList.add(card(CardKey(

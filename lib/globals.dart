@@ -13,6 +13,7 @@ String settingsGameLiveChat = "settingsGameLiveChat";
 // Logged in user info
 const String FSS_USERNAME = 'username';
 const String FSS_PASSWORD = 'password';
+const String FSS_CHIPS = 'chips';
 
 // Logged-in user info
 String loggedInUserUsername = "loggedInUserUsername";
@@ -33,6 +34,7 @@ String CF_KEY_STATUS = 'status';
 String CF_KEY_UID = 'uid';
 String CF_KEY_PHOTOURL = 'photoURL';
 String CF_KEY_USERNAME = 'username';
+String CF_KEY_CHIPS = 'chips';
 String CF_VALUE_REQUEST_SENT = 'requestSent';
 String CF_VALUE_REQUEST_RECEIVED = 'requestReceived';
 String CF_VALUE_FRIENDS = 'friends';

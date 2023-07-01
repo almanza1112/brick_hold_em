@@ -1,18 +1,22 @@
-import 'package:brick_hold_em/game/game_cards.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import 'package:brick_hold_em/game/game_players.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:video_player/video_player.dart';
+
+import 'package:brick_hold_em/game/game_cards.dart';
+import 'package:brick_hold_em/game/game_players.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 import 'game_sidemenu.dart';
 import 'game_turn_timer.dart';
 
 class GamePage extends StatefulWidget {
-  const GamePage({Key? key}) : super(key: key);
+  final VideoPlayerController controller;
+  const GamePage({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
 
   @override
   GamePageState createState() => GamePageState();
@@ -24,7 +28,11 @@ class GamePageState extends State<GamePage> {
   @override
   void initState() {
     addUserToTable();
+    Future.delayed(const Duration(seconds: 2)).then((val) {
+     widget.controller.dispose();
+    });
     super.initState();
+    
   }
 
   @override
@@ -37,6 +45,12 @@ class GamePageState extends State<GamePage> {
           const GameTurnTimer(),
           const GamePlayers(),
           GameSideMenu(),
+          IgnorePointer(
+            child: Hero(
+              tag: 'videoPlayer',
+              child: VideoPlayer(widget.controller),
+            ),
+          ),
         ],
       ),
     );
