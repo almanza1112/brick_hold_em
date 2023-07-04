@@ -1,3 +1,4 @@
+import 'package:brick_hold_em/login/login_page.dart';
 import 'package:brick_hold_em/settings/edit_email_page.dart';
 import 'package:brick_hold_em/settings/edit_name_page.dart';
 import 'package:brick_hold_em/settings/edit_profile_picture_page.dart';
@@ -130,10 +131,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         "Username",
                         style: textStyle,
                       )),
-                      Text(
-                        username,
-                        style: accountTextStyle,
-                      ),
+                      // Text(
+                      //   username,
+                      //   style: accountTextStyle,
+                      // ),
                       Icon(
                         Icons.arrow_forward_ios,
                         color: iconColor,
@@ -228,14 +229,18 @@ class _SettingsPageState extends State<SettingsPage> {
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
-                                child: Text("CANCEL")),
+                                child: const Text("CANCEL")),
                             TextButton(
                                 onPressed: () {
-                                  /** TODO: need to clean this up, NOT the correct way of doing this */
-                                  Navigator.pop(context);
-                                  Navigator.pop(context);
-
+                                  // Sign out of Firebase
                                   AuthService().signOut();
+
+                                   Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const LoginPage()),
+                                      (_) => false);
                                 },
                                 child: const Text("LOG OUT"))
                           ],

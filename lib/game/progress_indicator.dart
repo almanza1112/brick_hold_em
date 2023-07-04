@@ -40,8 +40,7 @@ class ProgressIndicatorState extends State<ProgressIndicatorTurn>
 
   @override
   Widget build(BuildContext context) {
-    print("progress indicator pos: ${widget.position}");
-
+    
     bool top = false, bottom = false, right = false, left = false;
     late double topNum, leftNum, rightNum;
     switch (widget.position) {

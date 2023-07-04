@@ -53,12 +53,6 @@ class LoginPageState extends ConsumerState {
               child:
                   Image(image: AssetImage('assets/images/BrickHoldEmLogo.png')),
             ),
-            const Padding(
-              padding: EdgeInsets.only(top: 50),
-              child: Center(
-                  child: Text("Sign In",
-                      style: TextStyle(color: Colors.white, fontSize: 30))),
-            ),
             Padding(
               padding: const EdgeInsets.only(top: 10, bottom: 10),
               child: AnimatedOpacity(
@@ -320,11 +314,11 @@ class LoginPageState extends ConsumerState {
       if (doc.exists) {
         // User exists, add username to FSS then proceed to HomePage
         final result = doc.data() as Map<String, dynamic>;
-
+        
         // Store user's username and chip total into FSS
         FlutterSecureStorage storage = const FlutterSecureStorage();
         await storage.write(key: globals.FSS_USERNAME, value: result[globals.FSS_USERNAME]);
-        await storage.write(key: globals.FSS_CHIPS, value: result[globals.FSS_CHIPS]);
+        await storage.write(key: globals.FSS_CHIPS, value: result[globals.FSS_CHIPS].toString());
 
         navigateToHomePage();
       } else {

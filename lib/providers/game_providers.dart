@@ -22,6 +22,8 @@ final playerPositionProvider = StateProvider<int>((ref) => 20);
 
 final isPlayersTurnProvider = StateProvider<bool>(((ref) => false));
 
-final didPlayerAddCardThisTurnProvider = StateProvider<bool>(((ref) => true));
+final didPlayerAddCardThisTurnProvider = StateProvider<bool>((ref) => true);
+
+final isPlayButtonSelectedProvider = StateProvider<bool>((ref) => false);
 
 

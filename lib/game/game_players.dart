@@ -14,14 +14,14 @@ class GamePlayers extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  _GamePlayersState createState() => _GamePlayersState();
+  GamePlayersState createState() => GamePlayersState();
 }
 
-class _GamePlayersState extends ConsumerState with TickerProviderStateMixin {
+class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
   double imageRadius = 30;
-  TextStyle chipsText = const TextStyle(fontSize: 10, color: Colors.white);
+  TextStyle chipsText = const TextStyle(fontSize: 10, color: Colors.amber);
   TextStyle playerNameStyle =
-      const TextStyle(fontSize: 12, color: Colors.deepOrangeAccent);
+      const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold);
 
   DatabaseReference playersRef =
       FirebaseDatabase.instance.ref('tables/1/players');
@@ -141,6 +141,7 @@ class _GamePlayersState extends ConsumerState with TickerProviderStateMixin {
         }));
   }
 
+  // TODO : make this in to its own class
   Widget player(Player player, int position) {
     bool left = false, right = false;
     switch (position) {
@@ -236,7 +237,15 @@ class _GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                     maxLines: 1,
                   ),
                 if (playerDetailsVisible)
-                  Text("${player.chips} ch", style: chipsText),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      const Icon(Icons.currency_exchange, size: 8, color: Colors.amber,),
+                      const SizedBox(width: 2,),
+                      Text(player.chips.toString(), style: chipsText,)
+                    ],
+                  ),
                 if (!playerDetailsVisible)
                   const Text(
                     "Waiting..",

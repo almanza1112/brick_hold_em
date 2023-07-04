@@ -56,7 +56,6 @@ class GameTurnTimerState extends ConsumerState {
           final playerPosition = ref.read(playerPositionProvider);
 
           if (turnPlayerPosition == playerPosition) {
-
             // Update the StateProvider
             WidgetsBinding.instance.addPostFrameCallback((_) {
               // Updating if it is the players turn to true
@@ -78,9 +77,11 @@ class GameTurnTimerState extends ConsumerState {
 
                 if (countdown > 0) {
                   _timer = Timer(const Duration(seconds: 1), () {
-                    setState(() {
-                      countdown--;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        countdown--;
+                      });
+                    }
                   });
                 } else {
                   // TODO: APPLY THIS LOGIC
@@ -107,7 +108,7 @@ class GameTurnTimerState extends ConsumerState {
               // Updating if it is the players turn to false
               ref.read(isPlayersTurnProvider.notifier).state = false;
 
-              // Updating if the player added a card this turn to true as a 
+              // Updating if the player added a card this turn to true as a
               // precaution
               ref.read(didPlayerAddCardThisTurnProvider.notifier).state = true;
             });

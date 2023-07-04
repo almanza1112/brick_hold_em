@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:brick_hold_em/globals.dart' as globals;
 
@@ -27,20 +26,19 @@ class HomePage extends ConsumerStatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
-class HomePageState extends ConsumerState {
+class HomePageState extends ConsumerState<HomePage> {
   FlutterSecureStorage storage = const FlutterSecureStorage();
-  late int chips;
+  late Future<List<String>> userInfo;
+  final Duration transitionDuration = const Duration(milliseconds: 400);
+
 
   @override
   void initState() {
     super.initState();
-    getChips(); //TODO: need to update this for data in general
+    userInfo = getUserInfo();
     checkIfUserExists();
   }
 
-getChips() async {
-    await storage.read(key: globals.FSS_CHIPS);
-  }
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
@@ -56,11 +54,11 @@ getChips() async {
               // ElevatedButton(onPressed: () {
               //   FirebaseAuth.instance.signOut();
               // }, child: Text("Sign out")),
-               const Padding(
-                 padding: EdgeInsets.only(top: 100, bottom: 100),
-                 child: Image(
-                     image: AssetImage('assets/images/BrickHoldEmLogo.png')),
-               ),
+              const Padding(
+                padding: EdgeInsets.only(top: 100, bottom: 100),
+                child: Image(
+                    image: AssetImage('assets/images/BrickHoldEmLogo.png')),
+              ),
               Expanded(
                   child: Row(
                 children: <Widget>[
@@ -82,7 +80,6 @@ getChips() async {
   }
 
   Widget leftMenu() {
-    const Duration transitionDuration = Duration(milliseconds: 750);
     const Color closedColor = Colors.transparent;
     const double closedElevation = 0;
 
@@ -326,6 +323,7 @@ getChips() async {
         child: OpenContainer(
             closedColor: Colors.brown.shade300,
             closedElevation: 0,
+            transitionDuration: transitionDuration,
             closedBuilder: ((context, openContainer) => Stack(
                   children: <Widget>[
                     Positioned.fill(
@@ -362,21 +360,40 @@ getChips() async {
                                       .instance.currentUser!.photoURL!)),
                             ),
                           ),
-                          // Text(
-                          //   FirebaseAuth.instance.currentUser!.displayName!,
-                          //   style: const TextStyle(fontSize: 18, color: Colors.white),
-                          // ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: columnPadding),
-                            child: Text(
-                              "$chips chips",
-                              style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
-                            ),
-                          )
+                          FutureBuilder(
+                              future: userInfo,
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  return const Text("error");
+                                }
+                                
+                                if (snapshot.hasData) {
+                                  List<String> userInfo =
+                                      List<String>.from(snapshot.data as List);
+                                  return Column(
+                                    children: [
+                                      Text(
+                                        userInfo[0],
+                                        style: const TextStyle(
+                                            fontSize: 18, color: Colors.white),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            bottom: columnPadding),
+                                        child: Text(
+                                          "${userInfo[1]} chips",
+                                          style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.amber),
+                                        ),
+                                      )
+                                    ],
+                                  );
+                                } else {
+                                  return const CircularProgressIndicator();
+                                }
+                              })
                         ],
                       ),
                     )
@@ -416,23 +433,10 @@ getChips() async {
                 )));
   }
 
+  Future<List<String>> getUserInfo() async {
+    final chips = await storage.read(key: globals.FSS_CHIPS);
+    final username = await storage.read(key: globals.FSS_USERNAME);
 
-  // TODO: this should not be here, update this
-  Future<Map<String, dynamic>?> setUserData() async {
-    final docUser = FirebaseFirestore.instance
-        .collection("users")
-        .doc(FirebaseAuth.instance.currentUser!.uid);
-    final snapshot = await docUser.get();
-
-    if (snapshot.exists) {
-      var data = snapshot.data();
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString(globals.loggedInUserUsername, data!["username"]);
-
-      return data;
-    } else {
-      /** TODO: need to clean this up */
-      return {"chips": '20'};
-    }
+    return [username!, chips!];
   }
 }
