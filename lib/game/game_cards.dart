@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-// import 'dart:convert'; // this is for jsonDecode
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -31,16 +30,19 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   List<Widget> tappedCards = <Widget>[];
 
   final player = AudioPlayer();
-  DatabaseReference deckCountListener =
-      FirebaseDatabase.instance.ref('tables/1/cards/dealer/deckCount');
 
   Duration tableCardAnimationDuration = const Duration(milliseconds: 250);
-  bool playButtonSelected = false;
 
   late double constrainHeight, constrainWidth;
 
   DatabaseReference faceUpCardListener =
       FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
+
+  DatabaseReference deckCountListener =
+      FirebaseDatabase.instance.ref('tables/1/cards/dealer/deckCount');
+
+  // DatabaseReference cardsInHandListener = FirebaseDatabase.instance
+  //     .ref('tables/1/cards/playerCards/32Zp41SqjzStoba7J6Tu2DYmk7E3/hand');
 
   @override
   void initState() {
@@ -116,6 +118,75 @@ class GameCardsPageState extends ConsumerState<GameCards> {
       ]),
     );
   }
+
+  // SO!! this widget below is an attempt to use StreamBuilder, this gets tricky since the stream can
+  // override the shuffle effect.
+  // TODO: need to look over this in the near f
+
+  /*
+   
+
+Widget playerCards() {
+    return SafeArea(
+      child: Stack(children: [
+        Positioned(
+          right: 0,
+          bottom: 50,
+          left: 0,
+          child: StreamBuilder(
+              stream: cardsInHandListener.onValue,
+              builder: ((context, snapshot) {
+                if (snapshot.hasData) {
+                  List cardsList = [];
+                  print(snapshot.data!.snapshot.children.length);
+                  for (final child in snapshot.data!.snapshot.children) {                    
+                    cardsList.add(child.value);
+                  }
+
+                  var cardWidgets = <Widget>[];
+                  //cardWidgets.clear(); //uncomment this line if you are declaring cardWidgets globally
+
+                  for (int i = 0; i < cardsList.length; i++) {
+                    CardKey cardKey =
+                        CardKey(position: i, cardName: cardsList[i]);
+                    cardWidgets.add(card(cardKey));
+                  }
+
+                  // I did this without an explanation, code works with this
+                  // if statement but have no idea why 
+                  if (!isStateChanged) {
+                    cardWidgetsBuilderList = cardWidgets;
+                  }
+
+                  print("infinite loop check");
+
+                  return SizedBox(
+                    height: 70,
+                    child: Center(
+                      child: ListView.builder(
+                        //clipBehavior: Clip.none,
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: cardWidgetsBuilderList.length,
+                        itemBuilder: (context, index) {
+                          return cardWidgetsBuilderList[index];
+                        },
+                      ),
+                    ),
+                  );
+                } else {
+                  return const Text(
+                      "Something went wrong. Unable to retrieve cards.");
+                }
+              })),
+        ),
+      ]),
+    );
+  }
+
+
+
+   */
 
   Widget deck() {
     return Center(
@@ -265,7 +336,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
           // Card position #2
           AnimatedPositioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left: playButtonSelected
+              left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
                       ((cardWidth * 2.5) + 10)
                   : (constraints.constrainWidth() / 2) -
@@ -283,7 +354,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
           // Card position #3
           AnimatedPositioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left: playButtonSelected
+              left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
                       ((cardWidth * 2.5) + 10)
                   : (constraints.constrainWidth() / 2) - (cardWidth / 2),
@@ -300,7 +371,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
           // Card position #4
           AnimatedPositioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left: playButtonSelected
+              left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
                       ((cardWidth * 2.5) + 10)
                   : (constraints.constrainWidth() / 2) + ((cardWidth / 2) + 5),
@@ -317,7 +388,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
           //Card position #5
           AnimatedPositioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left: playButtonSelected
+              left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
                       ((cardWidth * 2.5) + 10)
                   : (constraints.constrainWidth() / 2) +
@@ -352,13 +423,10 @@ class GameCardsPageState extends ConsumerState<GameCards> {
     String cardName = cardKey.cardName!;
     var _cardKey = ValueKey(cardKey);
 
-    return AnimatedContainer(
+    return SizedBox(
       key: _cardKey,
-      //transform: playersCardsTransform,
       width: cardWidth,
       height: cardHeight,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.fastOutSlowIn,
       child: GestureDetector(
         onTap: () {
           if (ref.read(isPlayersTurnProvider)) {
@@ -441,30 +509,48 @@ class GameCardsPageState extends ConsumerState<GameCards> {
     final liveTurnPlayer = ref.watch(turnPlayerProvider);
     final playerPosition = ref.read(playerPositionProvider);
 
+    const double leftPosition = 10;
+    const double rightPosition = 10;
+
     return liveTurnPlayer.when(
         data: (event) {
           final turnPlayerUid = event.snapshot.value;
           if (turnPlayerUid == playerPosition) {
             return Positioned(
               bottom: 0,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      passPlay();
-                    },
-                    child: const Text("Pass"),
-                  ),
-                  ElevatedButton(
-                      onPressed: playButton, child: const Text("Play")),
-                ],
+              left: leftPosition,
+              right: rightPosition,
+              child: Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: passPlay,
+                      child: const Text("Pass"),
+                    ),
+                    ElevatedButton(
+                        onPressed: playButton, child: const Text("Play")),
+                    ElevatedButton(
+                        onPressed: shuffleHand,
+                        child: const Icon(Icons.shuffle))
+                  ],
+                ),
               ),
             );
           } else {
-            return const SizedBox();
+            return Positioned(
+                left: leftPosition,
+                right: rightPosition,
+                bottom: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    ElevatedButton(
+                        onPressed: shuffleHand,
+                        child: const Icon(Icons.shuffle))
+                  ],
+                ));
           }
         },
         error: ((error, stackTrace) => Text(error.toString())),
@@ -495,9 +581,8 @@ class GameCardsPageState extends ConsumerState<GameCards> {
           FirebaseDatabase.instance.ref('tables/1/moves');
       DatabaseReference newMoves = dbMoves.push();
       await newMoves.set({uid: cardsBeingPlayed}).then((value) {
-        setState(() {
-          playButtonSelected = true;
-        });
+        ref.read(isPlayButtonSelectedProvider.notifier).state = true;
+
         setFaceUpCardAndHand(cardsBeingPlayed.last);
         passPlay();
       });
@@ -525,8 +610,8 @@ class GameCardsPageState extends ConsumerState<GameCards> {
         'playerCards/$uid/hand': cardsInHand
       }).then((value) {
         Future.delayed(const Duration(milliseconds: 500), () {
+          ref.read(isPlayButtonSelectedProvider.notifier).state = false;
           setState(() {
-            playButtonSelected = false;
             tappedCards.clear();
           });
         });
@@ -537,10 +622,14 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   }
 
   passPlay() async {
+    // Check if player added card from deck already
+    if (ref.read(didPlayerAddCardThisTurnProvider) == false) {
+      await addCard();
+    }
+
     http.Response response =
         await http.get(Uri.parse("${globals.END_POINT}/table/passturn"));
 
-    //Map data = jsonDecode(response.body);
     if (response.statusCode == 500) {
       print("Error in API in table/passturn");
     }
@@ -554,7 +643,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
     //Source cardDrawnSound = AssetSource("sounds/card_drawn.mp3");
     //player.play(cardDrawnSound);
-    
+
     // Updating state that the player already a card
     ref.read(didPlayerAddCardThisTurnProvider.notifier).state = true;
 
@@ -580,6 +669,13 @@ class GameCardsPageState extends ConsumerState<GameCards> {
         position: cardWidgetsBuilderList.length,
         cardName: cardBeingAdded,
       )));
+    });
+  }
+
+  shuffleHand() {
+    setState(() {
+      isStateChanged = true;
+      cardWidgetsBuilderList.shuffle();
     });
   }
 
