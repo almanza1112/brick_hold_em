@@ -33,12 +33,6 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
   bool isPlayersTurn = false;
   final double bottom = 0;
 
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -57,8 +51,7 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
 
             // Loop through each child from list returned and assign keys
             for (final child in snapshot.data!.snapshot.children) {
-              final childObj =
-                  Map<String, dynamic>.from(child.value as Map);
+              final childObj = Map<String, dynamic>.from(child.value as Map);
               if (childObj['uid'] != uid) {
                 final data = Player.fromMap(childObj);
                 otherPlayersList.add(data);
@@ -89,6 +82,8 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                   adjustedOtherPlayersKeys;
 
               ref.read(playerPositionProvider.notifier).state = playerKey;
+
+              ref.read(otherPlayersInformationProvider.notifier).state = otherPlayersList;
             });
 
             List<Player> playersList = <Player>[];
@@ -107,7 +102,6 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                 height: 450,
                 child: Stack(
                   children: [
-                    
                     Positioned(
                       bottom: 0,
                       right: 0,
@@ -124,13 +118,9 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                         right: 0,
                         child: player(playersList[2], 2)),
                     Positioned(
-                        top: 130,
-                        left: 0,
-                        child: player(playersList[3], 3)),
+                        top: 130, left: 0, child: player(playersList[3], 3)),
                     Positioned(
-                        left: 0,
-                        bottom: 0,
-                        child: player(playersList[4], 4)),
+                        left: 0, bottom: 0, child: player(playersList[4], 4)),
                   ],
                 ),
               ),
@@ -258,4 +248,5 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
       ),
     );
   }
+
 }

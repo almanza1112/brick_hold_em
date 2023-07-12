@@ -24,8 +24,11 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   final onceRef = FirebaseDatabase.instance.ref();
   bool isStateChanged = false;
   var cardWidgetsBuilderList = <Widget>[];
-  double cardWidth = 50;
-  double cardHeight = 70;
+  double handCardWidth = 50;
+  double handCardHeight = 70;
+  double tableCardWidth = 40;
+  double tableCardHeight = 56;
+
   final uid = FirebaseAuth.instance.currentUser!.uid;
   List<Widget> tappedCards = <Widget>[];
 
@@ -41,12 +44,17 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   DatabaseReference deckCountListener =
       FirebaseDatabase.instance.ref('tables/1/cards/dealer/deckCount');
 
+  DatabaseReference movesRef = FirebaseDatabase.instance.ref('tables/1/moves');
+
+  late DatabaseReference playerCardCount;
+
   // DatabaseReference cardsInHandListener = FirebaseDatabase.instance
   //     .ref('tables/1/cards/playerCards/32Zp41SqjzStoba7J6Tu2DYmk7E3/hand');
 
   @override
   void initState() {
     _cardsSnapshot = cardsSnapshot();
+    playerCardCount = FirebaseDatabase.instance.ref('tables/1/cards/playerCards/$uid/hand');
     super.initState();
   }
 
@@ -199,16 +207,16 @@ Widget playerCards() {
               }
             },
             child: Container(
-              width: cardWidth,
-              height: cardHeight,
+              width: tableCardWidth,
+              height: tableCardHeight,
               color: Colors.blueAccent,
               child: Stack(
                 children: [
                   Image.asset(
                     "assets/images/backside.png",
                     fit: BoxFit.cover,
-                    width: cardWidth,
-                    height: cardHeight,
+                    width: tableCardWidth,
+                    height: tableCardHeight,
                   ),
                   Center(
                     child: StreamBuilder(
@@ -246,8 +254,8 @@ Widget playerCards() {
           // Red dot posiition 1
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left:
-                  (constraints.constrainWidth() / 2) - ((cardWidth * 2.5) + 10),
+              left: (constraints.constrainWidth() / 2) -
+                  ((tableCardWidth * 2.5) + 10),
               child: const SizedBox(
                   height: 70,
                   width: 50,
@@ -262,8 +270,8 @@ Widget playerCards() {
           // Red dot posiition 2
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left:
-                  (constraints.constrainWidth() / 2) - ((cardWidth * 1.5) + 5),
+              left: (constraints.constrainWidth() / 2) -
+                  ((tableCardWidth * 1.5) + 5),
               child: const SizedBox(
                   height: 70,
                   width: 50,
@@ -278,7 +286,7 @@ Widget playerCards() {
           // Red dot posiition 3
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left: (constraints.constrainWidth() / 2) - (cardWidth / 2),
+              left: (constraints.constrainWidth() / 2) - (tableCardWidth / 2),
               child: const SizedBox(
                   height: 70,
                   width: 50,
@@ -293,7 +301,8 @@ Widget playerCards() {
           // Red dot posiition 4
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left: (constraints.constrainWidth() / 2) + ((cardWidth / 2) + 5),
+              left: (constraints.constrainWidth() / 2) +
+                  ((tableCardWidth / 2) + 5),
               child: const SizedBox(
                   height: 70,
                   width: 50,
@@ -308,8 +317,8 @@ Widget playerCards() {
           // Red dot posiition 5
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left:
-                  (constraints.constrainWidth() / 2) + ((cardWidth * 1.5) + 10),
+              left: (constraints.constrainWidth() / 2) +
+                  ((tableCardWidth * 1.5) + 10),
               child: const SizedBox(
                   height: 70,
                   width: 50,
@@ -324,8 +333,8 @@ Widget playerCards() {
           // Card position #1 (faceUpCard)
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left:
-                  (constraints.constrainWidth() / 2) - ((cardWidth * 2.5) + 10),
+              left: (constraints.constrainWidth() / 2) -
+                  ((tableCardWidth * 2.5) + 10),
               child: Container(
                 height: 70,
                 width: 50,
@@ -338,14 +347,14 @@ Widget playerCards() {
               top: (constraints.constrainHeight() / 2) + 50,
               left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
-                      ((cardWidth * 2.5) + 10)
+                      ((tableCardWidth * 2.5) + 10)
                   : (constraints.constrainWidth() / 2) -
-                      ((cardWidth * 1.5) + 5),
+                      ((tableCardWidth * 1.5) + 5),
               duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
-                height: 70,
-                width: 50,
+                height: tableCardHeight,
+                width: tableCardWidth,
                 // decoration: BoxDecoration(
                 //     border: Border.all(color: Colors.yellowAccent)),
                 child: tableCard(0),
@@ -356,13 +365,13 @@ Widget playerCards() {
               top: (constraints.constrainHeight() / 2) + 50,
               left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
-                      ((cardWidth * 2.5) + 10)
-                  : (constraints.constrainWidth() / 2) - (cardWidth / 2),
+                      ((tableCardWidth * 2.5) + 10)
+                  : (constraints.constrainWidth() / 2) - (tableCardWidth / 2),
               duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
-                height: 70,
-                width: 50,
+                height: tableCardHeight,
+                width: tableCardWidth,
                 // decoration: BoxDecoration(
                 //     border: Border.all(color: Colors.yellowAccent)),
                 child: tableCard(1),
@@ -373,13 +382,14 @@ Widget playerCards() {
               top: (constraints.constrainHeight() / 2) + 50,
               left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
-                      ((cardWidth * 2.5) + 10)
-                  : (constraints.constrainWidth() / 2) + ((cardWidth / 2) + 5),
+                      ((tableCardWidth * 2.5) + 10)
+                  : (constraints.constrainWidth() / 2) +
+                      ((tableCardWidth / 2) + 5),
               duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
-                height: 70,
-                width: 50,
+                height: tableCardHeight,
+                width: tableCardWidth,
                 // decoration: BoxDecoration(
                 //     border: Border.all(color: Colors.yellowAccent)),
                 child: tableCard(2),
@@ -390,14 +400,14 @@ Widget playerCards() {
               top: (constraints.constrainHeight() / 2) + 50,
               left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
-                      ((cardWidth * 2.5) + 10)
+                      ((tableCardWidth * 2.5) + 10)
                   : (constraints.constrainWidth() / 2) +
-                      ((cardWidth * 1.5) + 10),
+                      ((tableCardWidth * 1.5) + 10),
               duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
-                height: 70,
-                width: 50,
+                height: tableCardHeight,
+                width: tableCardWidth,
                 //decoration: BoxDecoration(
                 //border: Border.all(color: Colors.yellowAccent)),
                 child: tableCard(3),
@@ -425,8 +435,8 @@ Widget playerCards() {
 
     return SizedBox(
       key: _cardKey,
-      width: cardWidth,
-      height: cardHeight,
+      width: handCardWidth,
+      height: handCardHeight,
       child: GestureDetector(
         onTap: () {
           if (ref.read(isPlayersTurnProvider)) {
@@ -445,8 +455,8 @@ Widget playerCards() {
         child: Image.asset(
           "assets/images/$cardName.png",
           fit: BoxFit.cover,
-          width: cardWidth,
-          height: cardHeight,
+          width: handCardWidth,
+          height: handCardHeight,
         ),
       ),
     );
@@ -481,9 +491,10 @@ Widget playerCards() {
         children: [
           Positioned(
               top: (constraints.constrainHeight() / 2) + 50,
-              left:
-                  (constraints.constrainWidth() / 2) - ((cardWidth * 2.5) + 10),
-              child: faceUpCardImage())
+              left: (constraints.constrainWidth() / 2) -
+                  ((tableCardWidth * 2.5) + 10),
+              child: GestureDetector(
+                  onTap: getPreviousMove, child: faceUpCardImage()))
         ],
       );
     })));
@@ -497,12 +508,18 @@ Widget playerCards() {
           final data = event.snapshot.value.toString();
           return Image.asset(
             "assets/images/$data.png",
-            width: cardWidth,
-            height: cardHeight,
+            width: tableCardWidth,
+            height: tableCardHeight,
           );
         },
         error: ((error, stackTrace) => Text(error.toString())),
         loading: () => const CircularProgressIndicator());
+  }
+
+  getPreviousMove() async {
+    movesRef.limitToLast(1).get().then((snapshot) {
+      print(snapshot.value);
+    });
   }
 
   Widget buttons() {
@@ -562,38 +579,51 @@ Widget playerCards() {
     final faceUpCardRefOnce = ref.read(faceUpCardProvider);
     final faceUpCardName = faceUpCardRefOnce.asData!.value.snapshot.value;
 
+    // Create empty list for cards that are being played (tapped cards)
     List<String> cardsBeingPlayed = <String>[];
+
+    // Loop through tappCards list to populate cardsBeingPlayed list
     for (int i = 0; i < tappedCards.length; i++) {
       ValueKey<CardKey> t = tappedCards[i].key! as ValueKey<CardKey>;
       cardsBeingPlayed.add(t.value.cardName!);
     }
 
+    // Create list that adds faceUpCard
     List<String> totalCardsBeingPlayed = [
       faceUpCardName.toString(),
       ...cardsBeingPlayed
     ];
 
+    // Make sure list with the faceUpCard(totalCardsBeingPlayed) is a
+    // valid hand to be played
     final cardRules = CardRules(cards: totalCardsBeingPlayed);
     var result = cardRules.play();
 
+    // It is a valid hand
     if (result == "success") {
       DatabaseReference dbMoves =
           FirebaseDatabase.instance.ref('tables/1/moves');
       DatabaseReference newMoves = dbMoves.push();
-      await newMoves.set({uid: cardsBeingPlayed}).then((value) {
+
+      var update = {"uid": uid, "move": cardsBeingPlayed};
+
+      await newMoves.set(update).then((value) {
+        // Makes tapped cards on table animate to discard pile
         ref.read(isPlayButtonSelectedProvider.notifier).state = true;
 
         setFaceUpCardAndHand(cardsBeingPlayed.last);
-        passPlay();
       });
     } else {
+      // TODO: make this more visibly known to the user that it isnt a valid hand
+      // It is not a valid hand, show user that it isnt
       HapticFeedback.heavyImpact();
       HapticFeedback.heavyImpact();
     }
   }
 
+  // TODO: is this optimal? Updating the hand? not important
   setFaceUpCardAndHand(String card) async {
-    //There is at least one card
+    // There is at least one card
     if (cardWidgetsBuilderList.isNotEmpty) {
       List<String> cardsInHand = <String>[];
       for (int i = 0; i < cardWidgetsBuilderList.length; i++) {
@@ -605,19 +635,29 @@ Widget playerCards() {
       DatabaseReference faceUpCardRef =
           FirebaseDatabase.instance.ref('tables/1/cards');
 
+      // update faceUPCard and player's hand
       await faceUpCardRef.update({
         'faceUpCard': card,
         'playerCards/$uid/hand': cardsInHand
-      }).then((value) {
+      }).then((value) async {
         Future.delayed(const Duration(milliseconds: 500), () {
           ref.read(isPlayButtonSelectedProvider.notifier).state = false;
           setState(() {
             tappedCards.clear();
           });
         });
+        http.Response response =
+            await http.get(Uri.parse("${globals.END_POINT}/table/passturn"));
+
+        if (response.statusCode == 500) {
+          // TODO: show error
+        }
       });
     } else {
       // No cards left, you are the winner
+      playerCardCount.remove().then((value) {
+        print("removed success");
+      });
     }
   }
 
@@ -665,6 +705,7 @@ Widget playerCards() {
         .update({"dealer/deck": deck, "playerCards/$uid/hand": playersCards});
 
     setState(() {
+      isStateChanged = true;
       cardWidgetsBuilderList.add(card(CardKey(
         position: cardWidgetsBuilderList.length,
         cardName: cardBeingAdded,

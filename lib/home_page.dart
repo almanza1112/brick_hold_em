@@ -29,7 +29,7 @@ class HomePage extends ConsumerStatefulWidget {
 class HomePageState extends ConsumerState<HomePage> {
   FlutterSecureStorage storage = const FlutterSecureStorage();
   late Future<List<String>> userInfo;
-  final Duration transitionDuration = const Duration(milliseconds: 400);
+  final Duration transitionDuration = const Duration(milliseconds: 500);
 
 
   @override
@@ -170,7 +170,6 @@ class HomePageState extends ConsumerState<HomePage> {
     const double fontSize = 18;
     const Color fontColor = Colors.white;
 
-    const Duration transitionDuration = Duration(milliseconds: 750);
     const Color closedColor = Colors.transparent;
     const double closedElevation = 0;
     const RoundedRectangleBorder closedShape = RoundedRectangleBorder(
@@ -204,7 +203,7 @@ class HomePageState extends ConsumerState<HomePage> {
                   width: double.infinity,
                   child: const Align(
                     alignment: Alignment.center,
-                    child: Text("NO LIMIT",
+                    child: Text("COMPETITIVE",
                         style: TextStyle(fontSize: fontSize, color: fontColor)),
                   )),
             ),
@@ -236,7 +235,7 @@ class HomePageState extends ConsumerState<HomePage> {
                   width: double.infinity,
                   child: const Align(
                     alignment: Alignment.center,
-                    child: Text("TOURNAMENT",
+                    child: Text("FRIENDLY",
                         style: TextStyle(fontSize: fontSize, color: fontColor)),
                   )),
             ),
