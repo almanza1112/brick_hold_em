@@ -8,12 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
-import 'auth_service.dart';
-
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
-  _SettingsPageState createState() => _SettingsPageState();
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
@@ -23,10 +22,10 @@ class _SettingsPageState extends State<SettingsPage> {
   String fullName = FirebaseAuth.instance.currentUser!.displayName!;
   late String username;
   String email = FirebaseAuth.instance.currentUser!.email!;
-  bool backgroundSound = true;
-  bool fxSound = true;
-  bool vibrate = true;
-  bool liveChat = true;
+  late bool backgroundSound = true;
+  late bool fxSound = true;
+  late bool vibrate = true;
+  late bool liveChat = true;
   bool dailyNotifications = true;
   TextStyle textStyle = const TextStyle(
       fontSize: 18, color: Colors.white, fontWeight: FontWeight.w200);
@@ -45,7 +44,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
@@ -70,7 +68,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: titleStyle,
                 ),
               ),
-              
+
               // FULL NAME
               InkWell(
                 onTap: () {
@@ -107,7 +105,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
-              
+
               // USERNAME
               InkWell(
                 onTap: () {
@@ -144,7 +142,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
-              
+
               // EMAIL
               InkWell(
                 onTap: () {
@@ -181,7 +179,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
-              
+
               // PROFILE PICTURE
               InkWell(
                 onTap: () {
@@ -213,7 +211,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
-              
+
               // LOG OUT
               InkWell(
                 onTap: () {
@@ -231,17 +229,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 },
                                 child: const Text("CANCEL")),
                             TextButton(
-                                onPressed: () {
-                                  // Sign out of Firebase
-                                  AuthService().signOut();
-
-                                   Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const LoginPage()),
-                                      (_) => false);
-                                },
+                                onPressed: signOut,
                                 child: const Text("LOG OUT"))
                           ],
                         );
@@ -255,7 +243,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
-              
+
               Padding(
                 padding: titlePadding,
                 child: Text(
@@ -263,8 +251,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: titleStyle,
                 ),
               ),
-              
-              // BACKGROUND 
+
+              // BACKGROUND
               SwitchListTile(
                   title: Text(
                     "Background",
@@ -274,10 +262,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (bool value) {
                     setState(() {
                       backgroundSound = value;
-                      setSwitchState(globals.settingsBackgroundSound, value);
+                      setSwitchState(globals.SETTINGS_BACKGROUND_SOUND, value);
                     });
                   }),
-              
+
               // FX
               SwitchListTile(
                   title: Text(
@@ -288,10 +276,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (bool value) {
                     setState(() {
                       fxSound = value;
-                      setSwitchState(globals.settingsFXSound, value);
+                      setSwitchState(globals.SETTINGS_FX_SOUND, value);
                     });
                   }),
-              
+
               // VIBRATE
               SwitchListTile(
                   title: Text(
@@ -302,10 +290,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (bool value) {
                     setState(() {
                       vibrate = value;
-                      setSwitchState(globals.settingsVibrate, value);
+                      setSwitchState(globals.SETTINGS_VIBRATE, value);
                     });
                   }),
-              
+
               Padding(
                 padding: titlePadding,
                 child: Text(
@@ -313,7 +301,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: titleStyle,
                 ),
               ),
-              
+
               // LIVE CHAT
               SwitchListTile(
                   title: Text(
@@ -324,10 +312,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (bool value) {
                     setState(() {
                       liveChat = value;
-                      setSwitchState(globals.settingsGameLiveChat, value);
+                      setSwitchState(globals.SETTINGS_GAME_LIVE_CHAT, value);
                     });
                   }),
-              
+
               Padding(
                 padding: titlePadding,
                 child: Text(
@@ -335,7 +323,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: titleStyle,
                 ),
               ),
-              
+
               // DAILY
               SwitchListTile(
                   title: Text(
@@ -353,32 +341,35 @@ class _SettingsPageState extends State<SettingsPage> {
         ));
   }
 
-  getSwitchValues() async {
-    // Access SharedPreferences, get values
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? backgroundSoundSwitchState =
-        prefs.getBool(globals.settingsBackgroundSound);
-    bool? fxSoundSwitchState = prefs.getBool(globals.settingsFXSound);
-
-    bool? vibrateSwitchState = prefs.getBool(globals.settingsVibrate);
-    bool? chatSwitchState = prefs.getBool(globals.settingsGameLiveChat);
-    String? loggedInUserUsername =
-        prefs.getString(globals.loggedInUserUsername);
-
-    // Set values
+  Future<void> getSwitchValues() async {
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      username = loggedInUserUsername!;
-      // TODO: backgroundSound and below throws null when first 
-      //creating profile, need to fix
-      backgroundSound = backgroundSoundSwitchState!;
-      fxSound = fxSoundSwitchState!;
-      vibrate = vibrateSwitchState!;
-      liveChat = chatSwitchState!;
+      backgroundSound =
+          prefs.getBool(globals.SETTINGS_BACKGROUND_SOUND) ?? false;
+      fxSound = prefs.getBool(globals.SETTINGS_FX_SOUND) ?? false;
+      vibrate = prefs.getBool(globals.SETTINGS_VIBRATE) ?? false;
+      liveChat = prefs.getBool(globals.SETTINGS_GAME_LIVE_CHAT) ?? false;
     });
   }
 
   setSwitchState(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setBool(key, value);
+  }
+
+  void signOut() async {
+    // Delete all Settings
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+
+    // Sign out of Firebase
+    FirebaseAuth.instance.signOut();
+
+    if (context.mounted) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (_) => false);
+    }
   }
 }
