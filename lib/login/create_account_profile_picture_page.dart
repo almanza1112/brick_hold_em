@@ -13,6 +13,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateAccountProfilePicturePage extends StatefulWidget {
   final credential;
@@ -149,22 +150,16 @@ class CreateAccountProfilePictureState
     }
     setState(() {
       cachedImage = file;
-      print("PATHHHH");
-      print(file.path);
     });
   }
 
   Future<File> getImageFileFromAssets(String path) async {
-          print("1");
 
     final byteData = await rootBundle.load(path);
-
     final file = File('${(await getTemporaryDirectory()).path}/$path');
     await file.create(recursive: true);
     await file.writeAsBytes(byteData.buffer
         .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-
-    print("2");
 
     return file;
   }
@@ -268,7 +263,6 @@ class CreateAccountProfilePictureState
     late File imageFile;
     if (croppedFile == null) {
       imageFile = File(cachedImage.path);
-
     } else {
       imageFile = File(croppedFile!.path);
     }
@@ -290,8 +284,7 @@ class CreateAccountProfilePictureState
           .updatePhotoURL(downloadURL)
           .then((value) {
         // Proceed to homepagee
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => HomePage()));
+        navigateToHome();
       }).catchError((error) {
         print(error);
       });
@@ -307,7 +300,7 @@ class CreateAccountProfilePictureState
           email: newUserEmail!,
           password: newUserPassword!,
         );
-      } else if (widget.newUserInfo.loginType == globals.LOGIN_TYPE_GOOGLE){
+      } else if (widget.newUserInfo.loginType == globals.LOGIN_TYPE_GOOGLE) {
         credential =
             await FirebaseAuth.instance.signInWithCredential(widget.credential);
       } else {
@@ -316,7 +309,6 @@ class CreateAccountProfilePictureState
 
       // TODO: need to implement error...see credential that is not used above.
       // perhaps a .then().error()
-
 
       // Check if user is signed in
       if (FirebaseAuth.instance.currentUser!.email!.isNotEmpty) {
@@ -360,5 +352,18 @@ class CreateAccountProfilePictureState
   populateSecureStorage() async {
     FlutterSecureStorage storage = const FlutterSecureStorage();
     await storage.write(key: globals.FSS_USERNAME, value: newUserUsername);
+  }
+
+  void setSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool(globals.SETTINGS_BACKGROUND_SOUND, true);
+    prefs.setBool(globals.SETTINGS_FX_SOUND, true);
+    prefs.setBool(globals.SETTINGS_VIBRATE, true);
+    prefs.setBool(globals.SETTINGS_GAME_LIVE_CHAT, true);
+  }
+
+  void navigateToHome() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const HomePage()));
   }
 }

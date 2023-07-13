@@ -4,10 +4,10 @@ const String LOGIN_TYPE_GOOGLE = "google";
 const String LOGIN_TYPE_EMAIL = "email";
 
 // Settings Shared Prefences keys
-String settingsBackgroundSound = "settingsBackgroundSound";
-String settingsFXSound = "settingsFXSound";
-String settingsVibrate = "settingsVibrate";
-String settingsGameLiveChat = "settingsGameLiveChat";
+String SETTINGS_BACKGROUND_SOUND = "settingsBackgroundSound";
+String SETTINGS_FX_SOUND = "settingsFXSound";
+String SETTINGS_VIBRATE = "settingsVibrate";
+String SETTINGS_GAME_LIVE_CHAT = "settingsGameLiveChat";
 
 // Flutter Secure Storage keys
 // Logged in user info

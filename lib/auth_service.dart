@@ -13,9 +13,4 @@ class AuthService {
       return const HomePage();
     }
   }
-
-  signOut() {
-    FirebaseAuth.instance.signOut();
-  }
-
 }

@@ -12,6 +12,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'create_account_username_page.dart';
 
@@ -29,6 +30,7 @@ class LoginPageState extends ConsumerState {
   bool obscureText = true;
   bool visibleStatus = false;
   String errorText = "";
+
   void toggle() {
     setState(() {
       obscureText = !obscureText;
@@ -249,12 +251,9 @@ class LoginPageState extends ConsumerState {
     FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) {
-          navigateToHomePage();
-        })
-        .onError((error, stackTrace) {
+      navigateToHomePage();
+    }).onError((error, stackTrace) {
       var errorString = error.toString();
-
-
 
       if (errorString.contains("too-many-requests")) {
         setErrorMessage("Too many failed attemps, try again later.");
@@ -289,10 +288,13 @@ class LoginPageState extends ConsumerState {
       String email = userData["email"];
       String photoURL = userData["picture"]["data"]["url"];
 
-      var userInfo = NewUserInfo(fullName: fullName, email: email, photoURL: photoURL, loginType: globals.LOGIN_TYPE_FACEBOOK);
+      var userInfo = NewUserInfo(
+          fullName: fullName,
+          email: email,
+          photoURL: photoURL,
+          loginType: globals.LOGIN_TYPE_FACEBOOK);
       checkIfUserExists(userInfo);
     }).onError((error, stackTrace) {
-      
       var errorString = error.toString();
 
       if (errorString.contains("account-exists")) {
@@ -314,11 +316,17 @@ class LoginPageState extends ConsumerState {
       if (doc.exists) {
         // User exists, add username to FSS then proceed to HomePage
         final result = doc.data() as Map<String, dynamic>;
-        
+
         // Store user's username and chip total into FSS
         FlutterSecureStorage storage = const FlutterSecureStorage();
-        await storage.write(key: globals.FSS_USERNAME, value: result[globals.FSS_USERNAME]);
-        await storage.write(key: globals.FSS_CHIPS, value: result[globals.FSS_CHIPS].toString());
+        await storage.write(
+            key: globals.FSS_USERNAME, value: result[globals.FSS_USERNAME]);
+        await storage.write(
+            key: globals.FSS_CHIPS,
+            value: result[globals.FSS_CHIPS].toString());
+        
+        // Set Settings
+        setSettings();
 
         navigateToHomePage();
       } else {
@@ -331,19 +339,20 @@ class LoginPageState extends ConsumerState {
   }
 
   signInWithGoogle() async {
-    print("hereeeeeeee");
     setState(() {
       visibleStatus = false;
     });
 
     // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn(scopes: <String>["email"]).signIn();
+    final GoogleSignInAccount? googleUser =
+        await GoogleSignIn(scopes: <String>["email"]).signIn();
 
     // Check if email is already being used with correct authentication method
     Map result = await isEmailUsed(googleUser!.email, "google.com");
 
     // Obtain the auth details from the request
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
 
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
@@ -355,33 +364,45 @@ class LoginPageState extends ConsumerState {
       // Email was found and with the same authenitcaion method
 
       // Once signed in, return the UserCredential
-      await FirebaseAuth.instance.signInWithCredential(credential).then((value) {
+      await FirebaseAuth.instance
+          .signInWithCredential(credential)
+          .then((value) {
         final db = FirebaseFirestore.instance;
-        final userRef = db.collection(globals.CF_COLLECTION_USERS).doc(FirebaseAuth.instance.currentUser!.uid).get();
+        final userRef = db
+            .collection(globals.CF_COLLECTION_USERS)
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .get();
         userRef.then((DocumentSnapshot doc) async {
           if (doc.exists) {
+            // User exists
+
+            // Store user's username and chip total into FSS
             final result = doc.data() as Map<String, dynamic>;
             String username = result[globals.FSS_USERNAME];
             FlutterSecureStorage storage = const FlutterSecureStorage();
             await storage.write(key: globals.FSS_USERNAME, value: username);
+            await storage.write(
+                key: globals.FSS_CHIPS,
+                value: result[globals.FSS_CHIPS].toString());
 
+            // Set Settings
+            setSettings();
+
+            // Naviagate to Home
             navigateToHomePage();
           } else {
             // TODO: something really went wrong in this thought process
           }
-        })
-        .onError((error, stackTrace) {
+        }).onError((error, stackTrace) {
           // TODO: show user there is an error
         });
         navigateToHomePage();
       }).onError((error, stackTrace) {
         // TODO: show user there is an error
       });
-      
     } else if (result['result'] == "Authentication method does not match.") {
       // Email was found but with different authenticaion method
       setErrorMessage("An account with that email already exists.");
-
     } else if (result['result'] == "New user.") {
       // Email was not found, this is a new user
       var newUserInfo = NewUserInfo(
@@ -426,5 +447,13 @@ class LoginPageState extends ConsumerState {
   void navigateToHomePage() {
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => const HomePage()));
+  }
+
+  void setSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool(globals.SETTINGS_BACKGROUND_SOUND, true);
+    prefs.setBool(globals.SETTINGS_FX_SOUND, true);
+    prefs.setBool(globals.SETTINGS_VIBRATE, true);
+    prefs.setBool(globals.SETTINGS_GAME_LIVE_CHAT, true);
   }
 }
