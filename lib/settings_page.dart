@@ -4,6 +4,7 @@ import 'package:brick_hold_em/settings/edit_name_page.dart';
 import 'package:brick_hold_em/settings/edit_profile_picture_page.dart';
 import 'package:brick_hold_em/settings/edit_username_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
@@ -20,7 +21,9 @@ class _SettingsPageState extends State<SettingsPage> {
   EdgeInsets accountRowPadding =
       const EdgeInsets.only(left: 14, right: 14, bottom: 10, top: 15);
   String fullName = FirebaseAuth.instance.currentUser!.displayName!;
-  late String username;
+  String username = '';
+  FlutterSecureStorage storage = const FlutterSecureStorage();
+
   String email = FirebaseAuth.instance.currentUser!.email!;
   late bool backgroundSound = true;
   late bool fxSound = true;
@@ -39,6 +42,11 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    getUsername().then((value) {
+      setState(() {
+        username = value ?? '';
+      });
+    },);
     getSwitchValues();
   }
 
@@ -129,10 +137,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         "Username",
                         style: textStyle,
                       )),
-                      // Text(
-                      //   username,
-                      //   style: accountTextStyle,
-                      // ),
+                      Text(
+                        username,
+                        style: accountTextStyle,
+                      ),
                       Icon(
                         Icons.arrow_forward_ios,
                         color: iconColor,
@@ -350,6 +358,11 @@ class _SettingsPageState extends State<SettingsPage> {
       vibrate = prefs.getBool(globals.SETTINGS_VIBRATE) ?? false;
       liveChat = prefs.getBool(globals.SETTINGS_GAME_LIVE_CHAT) ?? false;
     });
+  }
+
+  Future<String?> getUsername() async {
+    var username = await storage.read(key: globals.FSS_USERNAME);
+    return username;
   }
 
   setSwitchState(String key, bool value) async {

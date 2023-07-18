@@ -4,6 +4,7 @@ class Player {
   final String? name;
   final String username;
   final String photoURL;
+  final String? fullName;
   final int? chips;
   final int? cardCount;
   final String uid;
@@ -12,6 +13,7 @@ class Player {
     this.name,
     required this.username,
     required this.photoURL,
+    this.fullName,
     this.chips,
     this.cardCount,
     required this.uid,
@@ -22,6 +24,7 @@ class Player {
     String? name,
     String? username,
     String? photoURL,
+    String? fullName,
     int? chips,
     int? cardCount,
     String? uid,
@@ -30,6 +33,7 @@ class Player {
       name: name ?? this.name,
       username: username ?? this.username,
       photoURL: photoURL ?? this.photoURL,
+      fullName: fullName ?? this.fullName,
       chips: chips ?? this.chips,
       cardCount: cardCount ?? this.cardCount,
       uid: uid ?? this.uid,
@@ -41,6 +45,7 @@ class Player {
       'name': name,
       'username': username,
       'photoURL': photoURL,
+      'fullName': fullName,
       'chips': chips,
       'cardCount': cardCount,
       'uid': uid,
@@ -51,7 +56,7 @@ class Player {
 
   @override
   String toString() {
-    return 'Player(name: $name, username: $username, photoURL: $photoURL, chips: $chips, cardCount: $cardCount, uid: $uid)';
+    return 'Player(name: $name, username: $username, photoURL: $photoURL, fullName: $fullName, chips: $chips, cardCount: $cardCount, uid: $uid)';
   }
 
   @override
@@ -62,6 +67,7 @@ class Player {
       other.name == name &&
       other.username == username &&
       other.photoURL == photoURL &&
+      other.fullName == fullName &&
       other.chips == chips &&
       other.cardCount == cardCount &&
       other.uid == uid;
@@ -72,6 +78,7 @@ class Player {
       name: map['name'],
       username: map['username'] ?? '',
       photoURL: map['photoURL'] ?? '',
+      fullName: map['fullName'],
       chips: map['chips']?.toInt(),
       cardCount: map['cardCount']?.toInt(),
       uid: map['uid'] ?? '',
@@ -85,6 +92,7 @@ class Player {
     return name.hashCode ^
       username.hashCode ^
       photoURL.hashCode ^
+      fullName.hashCode ^
       chips.hashCode ^
       cardCount.hashCode ^
       uid.hashCode;

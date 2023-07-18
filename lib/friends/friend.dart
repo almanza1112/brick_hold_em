@@ -4,14 +4,14 @@ class Friend {
 
   String uid;
   String username;
-  String? fullName;
+  String fullName;
   String photoURL;
   String status;
   
   Friend({
     required this.uid,
     required this.username,
-    this.fullName,
+    required this.fullName,
     required this.photoURL,
     required this.status,
   });
@@ -47,7 +47,7 @@ class Friend {
     return Friend(
       uid: map['uid'] ?? '',
       username: map['username'] ?? '',
-      fullName: map['fullName'],
+      fullName: map['fullName'] ?? '',
       photoURL: map['photoURL'] ?? '',
       status: map['status'] ?? '',
     );

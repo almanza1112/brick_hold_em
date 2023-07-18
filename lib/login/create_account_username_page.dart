@@ -1,14 +1,18 @@
-import 'package:brick_hold_em/auth_service.dart';
 import 'package:brick_hold_em/login/create_account_profile_picture_page.dart';
 import 'package:brick_hold_em/login/new_user_info.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountUsernamePage extends StatefulWidget {
   final credential;
   final NewUserInfo newUserInfo;
-  CreateAccountUsernamePage({Key? key, this.credential, required this.newUserInfo}) :super(key: key);
-  _CreateAccountUsernamePageState createState() =>
+  const CreateAccountUsernamePage(
+      {Key? key, this.credential, required this.newUserInfo})
+      : super(key: key);
+      
+  @override
+  State<CreateAccountUsernamePage> createState() =>
       _CreateAccountUsernamePageState();
 }
 
@@ -29,19 +33,14 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [Scaffold(
+    return Stack(children: [
+      Scaffold(
         backgroundColor: Colors.brown.shade300,
         appBar: AppBar(
           backgroundColor: Colors.brown.shade300,
           shadowColor: Colors.transparent,
           leading: BackButton(
-            onPressed: () {
-              if(widget.newUserInfo.loginType == globals.LOGIN_TYPE_FACEBOOK) {
-                AuthService().signOut();
-              }
-              Navigator.pop(context);
-            },
+            onPressed: backButton,
           ),
         ),
         body: Stack(children: [
@@ -112,8 +111,7 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
       ),
       SafeArea(
           child: Align(alignment: Alignment.bottomRight, child: nextButton()))
-      ]
-    );
+    ]);
   }
 
   Widget nextButton() {
@@ -122,7 +120,8 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
       child: TextButton(
           onPressed: () {
             if (formKey.currentState!.validate()) {
-              var newUserInfo = widget.newUserInfo.copyWith(username: usernameController.text.trim());
+              var newUserInfo = widget.newUserInfo
+                  .copyWith(username: usernameController.text.trim());
               navigateToProfilePic(newUserInfo);
             }
           },
@@ -160,6 +159,14 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => CreateAccountProfilePicturePage(credential: widget.credential, newUserInfo: newUserInfo)));
+            builder: (context) => CreateAccountProfilePicturePage(
+                credential: widget.credential, newUserInfo: newUserInfo)));
+  }
+
+  Future<void> backButton() async {
+    if (widget.newUserInfo.loginType == globals.LOGIN_TYPE_FACEBOOK) {
+      FirebaseAuth.instance.signOut();
+    }
+    Navigator.pop(context);
   }
 }

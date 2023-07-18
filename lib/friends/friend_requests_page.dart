@@ -6,7 +6,10 @@ import 'package:brick_hold_em/globals.dart' as globals;
 import 'friend.dart';
 
 class FriendRequestsPage extends StatefulWidget {
-  FriendRequestsPageState createState() => FriendRequestsPageState();
+  const FriendRequestsPage({super.key});
+
+  @override
+  State<FriendRequestsPage> createState() => FriendRequestsPageState();
 }
 
 class FriendRequestsPageState extends State<FriendRequestsPage> {
@@ -78,6 +81,7 @@ class FriendRequestsPageState extends State<FriendRequestsPage> {
           uid: result[i][globals.CF_KEY_UID],
           username: result[i][globals.CF_KEY_USERNAME],
           photoURL: result[i][globals.CF_KEY_PHOTOURL],
+          fullName: result[i][globals.CF_KEY_FULLNAME],
           status: result[i][globals.CF_KEY_STATUS]);
       friendList.add(friend);
     }
@@ -85,8 +89,9 @@ class FriendRequestsPageState extends State<FriendRequestsPage> {
   }
 
   Widget friendRequestRow(Friend friend) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 6, bottom: 6, left: 16, right: 16),
+    return Container(
+      height: 80,
+      padding: const EdgeInsets.all(8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
@@ -94,7 +99,21 @@ class FriendRequestsPageState extends State<FriendRequestsPage> {
             backgroundImage: NetworkImage(friend.photoURL),
             radius: 20,
           ),
-          Text(friend.username),
+          const SizedBox(width: 20),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                friend.username,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                friend.fullName,
+                style: const TextStyle(fontSize: 12),
+              )
+            ],
+          ),
           Expanded(child: Container()),
           ElevatedButton(
               onPressed: () => acceptFriendRequest(friend.uid),

@@ -1,4 +1,5 @@
 import 'package:brick_hold_em/friends/friend_requests_page.dart';
+import 'package:brick_hold_em/friends/search_users_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,10 @@ import 'package:brick_hold_em/globals.dart' as globals;
 import 'friend.dart';
 
 class FriendsPage extends StatefulWidget {
-  _FriendsPageState createState() => _FriendsPageState();
+  const FriendsPage({super.key});
+
+  @override
+  State<FriendsPage> createState() => _FriendsPageState();
 }
 
 class _FriendsPageState extends State<FriendsPage> {
@@ -38,7 +42,7 @@ class _FriendsPageState extends State<FriendsPage> {
         ),
         actions: <Widget>[
           IconButton(
-              onPressed: () {},
+              onPressed: navigateToSearchUsers,
               icon: const Icon(
                 Icons.search,
                 color: Colors.white,
@@ -58,21 +62,25 @@ class _FriendsPageState extends State<FriendsPage> {
                   var numOfFriendRequests = snapshot.data as int;
                   return GestureDetector(
                     onTap: () {
-                       Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => FriendRequestsPage()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const FriendRequestsPage()));
                     },
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 12, bottom: 12, left: 16, right: 16),
+                      padding: const EdgeInsets.only(
+                          top: 12, bottom: 12, left: 16, right: 16),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text("$numOfFriendRequests friend requests"),
-                          const Icon(
-                          Icons.arrow_forward_ios,
-                          color: Colors.white,
+                          Text(
+                            "$numOfFriendRequests friend requests",
+                            style: const TextStyle(
+                                color: Colors.amber,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600),
                           ),
-                          
                         ],
                       ),
                     ),
@@ -85,10 +93,9 @@ class _FriendsPageState extends State<FriendsPage> {
             child: FutureBuilder(
                 future: _friendsList,
                 builder: ((context, snapshot) {
-                  print("no");
                   if (snapshot.hasError) {
                     return const Text(
-                        "Something went wrong. Unable to retrieve cards.");
+                        "Something went wrong. Unable to retrieve friends list.");
                   }
 
                   if (snapshot.hasData) {
@@ -106,7 +113,7 @@ class _FriendsPageState extends State<FriendsPage> {
                         });
                   } else {
                     return const Text(
-                        "Something went wrong. Unable to retrieve cards.");
+                        "Something went wrong. Unable to retrieve friends list.");
                   }
                 })),
           ),
@@ -131,11 +138,11 @@ class _FriendsPageState extends State<FriendsPage> {
           uid: result[i][globals.CF_KEY_UID],
           username: result[i][globals.CF_KEY_USERNAME],
           photoURL: result[i][globals.CF_KEY_PHOTOURL],
+          fullName: result[i][globals.CF_KEY_FULLNAME],
           status: result[i][globals.CF_KEY_STATUS]);
       friendList.add(friend);
     }
 
-    print("object");
     return friendList;
   }
 
@@ -152,8 +159,9 @@ class _FriendsPageState extends State<FriendsPage> {
   }
 
   Widget friendRow(Friend friend) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 6, bottom: 6, left: 16, right: 16),
+    return Container(
+      height: 80,
+      padding: const EdgeInsets.all(8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
@@ -162,12 +170,29 @@ class _FriendsPageState extends State<FriendsPage> {
             radius: 20,
           ),
           const SizedBox(
-            width: 12,
+            width: 20,
           ),
-          Text(friend.username)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                friend.username,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+               Text(
+                friend.fullName,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
+          )
         ],
       ),
     );
   }
 
+  void navigateToSearchUsers() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => SearchUsersPage()));
+  }
 }

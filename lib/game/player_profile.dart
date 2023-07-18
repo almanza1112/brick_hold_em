@@ -195,8 +195,11 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
     // Add to array.
     final batch = db.batch();
 
+    // Get player's username from FSS
     const storage = FlutterSecureStorage();
     final username = await storage.read(key: globals.FSS_USERNAME);
+    final fullName = FirebaseAuth.instance.currentUser!.displayName;
+
     final userRef = db
         .collection(globals.CF_COLLECTION_USERS)
         .doc(uid)
@@ -204,6 +207,7 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
         .doc(widget.player.uid);
     var userUpdate = <String, dynamic>{
       globals.CF_KEY_USERNAME: widget.player.username,
+      globals.CF_KEY_FULLNAME: widget.player.fullName,
       globals.CF_KEY_UID: widget.player.uid,
       globals.CF_KEY_PHOTOURL: widget.player.photoURL,
       globals.CF_KEY_STATUS: globals.CF_VALUE_REQUEST_SENT
@@ -217,6 +221,7 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
         .doc(uid);
     var otherPlayerUpdate = <String, dynamic>{
       globals.CF_KEY_USERNAME: username,
+      globals.CF_KEY_FULLNAME: fullName,
       globals.CF_KEY_UID: uid,
       globals.CF_KEY_PHOTOURL: FirebaseAuth.instance.currentUser!.photoURL,
       globals.CF_KEY_STATUS: globals.CF_VALUE_REQUEST_RECEIVED
