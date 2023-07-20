@@ -17,7 +17,7 @@ import 'tournament_page.dart';
 import 'competitive_page.dart';
 import 'profile_page.dart';
 import 'friends/friends_page.dart';
-import 'ads_page.dart';
+import 'ads/ads_page.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -110,7 +110,7 @@ class HomePageState extends ConsumerState<HomePage> {
                       transitionDuration: transitionDuration,
                       closedColor: closedColor,
                       closedElevation: closedElevation,
-                      openBuilder: (context, closedContainer) => AdsPage()),
+                      openBuilder: (context, closedContainer) => const AdsPage()),
                 ))),
         Padding(
             padding: const EdgeInsets.only(top: 10, bottom: 10),

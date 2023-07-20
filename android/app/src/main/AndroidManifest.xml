@@ -65,5 +65,10 @@
             </intent-filter>
         </activity>
 
+        <!-- Google Ad Mob -->
+        <meta-data 
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3361872396467095~3796364803" />
+
     </application>
 </manifest>

@@ -65,22 +65,22 @@ class CompetitivePageState extends ConsumerState {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Padding(
-                  padding: titlePadding,
-                  child: Text(
-                    "MODE",
-                    style: titleStyle,
-                  ),
-                ),
-                SwitchListTile(
-                    title: Text("Private", style: textStyle),
-                    value: privateSwitch,
-                    activeColor: Colors.green.shade500,
-                    onChanged: (bool value) {
-                      setState(() {
-                        privateSwitch = value;
-                      });
-                    }),
+                // Padding(
+                //   padding: titlePadding,
+                //   child: Text(
+                //     "MODE",
+                //     style: titleStyle,
+                //   ),
+                // ),
+                // SwitchListTile(
+                //     title: Text("Private", style: textStyle),
+                //     value: privateSwitch,
+                //     activeColor: Colors.green.shade500,
+                //     onChanged: (bool value) {
+                //       setState(() {
+                //         privateSwitch = value;
+                //       });
+                //     }),
                 Padding(
                   padding: titlePadding,
                   child: Text(
