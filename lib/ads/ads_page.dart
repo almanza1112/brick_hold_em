@@ -10,25 +10,24 @@ class AdsPage extends StatefulWidget {
 }
 
 class _AdsPageState extends State<AdsPage> {
-  final initFuture = MobileAds.instance.initialize();
-  late var adState;
+  final Future<InitializationStatus> initFuture =
+      MobileAds.instance.initialize();
   RewardedAd? _rewardedAd;
   int rewardedScore = 0;
 
   @override
   void initState() {
-    adState = AdState(initFuture);
-    createRewardedAd();
     super.initState();
+    createRewardedAd();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('EARN CHIPS'),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.black,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {
@@ -37,33 +36,39 @@ class _AdsPageState extends State<AdsPage> {
         ),
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text('Rewarded Score is: $rewardedScore'),
-          const SizedBox(height: 30,),
-          ElevatedButton(onPressed: _showRewarededAd, child: const Text("get 100 chips"))
+          Center(child: Text('Rewarded Score is: $rewardedScore', style: const TextStyle(color: Colors.white),)),
+          const SizedBox(
+            height: 30,
+          ),
+          ElevatedButton(
+              onPressed: _showRewarededAd, child: const Text("get 100 chips"))
         ],
       ),
     );
   }
 
-
-  void createRewardedAd(){
-    RewardedAd.load(adUnitId: AdState.rewardedAdUnitId!, request: const AdRequest(), 
-      rewardedAdLoadCallback: 
-      RewardedAdLoadCallback(
-          onAdLoaded: (ad) => setState(() {
-            _rewardedAd = ad;
-            }
-          ),
-          onAdFailedToLoad: (error) => setState(() {
-            _rewardedAd = null;
-          }),
-        )
-    );
+  void createRewardedAd() {
+    RewardedAd.load(
+        adUnitId: AdState.rewardedAdUnitId!,
+        request: const AdRequest(),
+        rewardedAdLoadCallback: RewardedAdLoadCallback(
+          onAdLoaded: (ad) {
+            setState(() {
+              _rewardedAd = ad;
+            });
+          },
+          onAdFailedToLoad: (error) {
+            setState(() {
+              _rewardedAd = null;
+            });
+          },
+        ));
   }
 
   void _showRewarededAd() {
-    if (_rewardedAd != null){
+    if (_rewardedAd != null) {
       _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
         onAdDismissedFullScreenContent: (ad) {
           ad.dispose();
@@ -74,9 +79,11 @@ class _AdsPageState extends State<AdsPage> {
           createRewardedAd();
         },
       );
-      _rewardedAd!.show(onUserEarnedReward: (ad, reward) => setState(() {
-        rewardedScore += 100;
-      }));
+      _rewardedAd!.show(onUserEarnedReward: (ad, reward) {
+        setState(() {
+          rewardedScore += 100;
+        });
+      });
       _rewardedAd = null;
     }
   }
