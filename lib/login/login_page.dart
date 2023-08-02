@@ -343,6 +343,10 @@ class LoginPageState extends ConsumerState {
       visibleStatus = false;
     });
 
+    // Adding this line to sign out will insure that the Google Login pop up
+    // window appears to select an account
+    await GoogleSignIn(scopes: <String>["email"]).signOut();
+
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser =
         await GoogleSignIn(scopes: <String>["email"]).signIn();

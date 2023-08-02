@@ -352,6 +352,8 @@ class CreateAccountProfilePictureState
   populateSecureStorage() async {
     FlutterSecureStorage storage = const FlutterSecureStorage();
     await storage.write(key: globals.FSS_USERNAME, value: newUserUsername);
+    await storage.write(
+        key: globals.FSS_CHIPS, value: "1000");
   }
 
   void setSettings() async {

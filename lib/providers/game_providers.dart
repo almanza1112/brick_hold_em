@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../game/player.dart';
 
 final faceUpCardProvider = StreamProvider<DatabaseEvent>((ref) {
-  DatabaseReference faceUpCardRef =
-      FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
+  // DatabaseReference faceUpCardRef =
+  //     FirebaseDatabase.instance.ref('tables/1/cards/faceUpCard');
 
+  Query faceUpCardRef = FirebaseDatabase.instance.ref('tables/1/cards/discardPile').limitToLast(1);
   return faceUpCardRef.onValue;
 });
 

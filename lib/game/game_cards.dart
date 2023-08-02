@@ -505,9 +505,11 @@ Widget playerCards() {
 
     return liveFaceUpCard.when(
         data: (event) {
-          final data = event.snapshot.value.toString();
+
+          var map = event.snapshot.value! as Map<Object?, Object?>;
+          var d = map[map.keys.first] as List<Object?>;
           return Image.asset(
-            "assets/images/$data.png",
+            "assets/images/${d[0]}.png",
             width: tableCardWidth,
             height: tableCardHeight,
           );
@@ -577,7 +579,8 @@ Widget playerCards() {
   playButton() async {
     // Get faceUpCard from the StreamProvider = faceUpCardProvider
     final faceUpCardRefOnce = ref.read(faceUpCardProvider);
-    final faceUpCardName = faceUpCardRefOnce.asData!.value.snapshot.value;
+    final map = faceUpCardRefOnce.asData!.value.snapshot.value as Map<Object?, Object?>;
+    var data = map[map.keys.first] as List<Object?>;
 
     // Create empty list for cards that are being played (tapped cards)
     List<String> cardsBeingPlayed = <String>[];
@@ -590,7 +593,7 @@ Widget playerCards() {
 
     // Create list that adds faceUpCard
     List<String> totalCardsBeingPlayed = [
-      faceUpCardName.toString(),
+      data[0].toString(),
       ...cardsBeingPlayed
     ];
 

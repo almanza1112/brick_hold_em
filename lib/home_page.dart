@@ -55,7 +55,7 @@ class HomePageState extends ConsumerState<HomePage> {
               //   FirebaseAuth.instance.signOut();
               // }, child: Text("Sign out")),
               const Padding(
-                padding: EdgeInsets.only(top: 100, bottom: 100),
+                padding: EdgeInsets.only(top: 70, bottom: 70),
                 child: Image(
                     image: AssetImage('assets/images/BrickHoldEmLogo.png')),
               ),
@@ -131,8 +131,7 @@ class HomePageState extends ConsumerState<HomePage> {
                       transitionDuration: transitionDuration,
                       closedColor: closedColor,
                       closedElevation: closedElevation,
-                      openBuilder: (context, closedContainer) =>
-                          PurchasePage()),
+                      openBuilder: (context, closedContainer) => PurchasePage()),
                 ))),
         Padding(
             padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -153,7 +152,7 @@ class HomePageState extends ConsumerState<HomePage> {
                       transitionDuration: transitionDuration,
                       closedColor: closedColor,
                       closedElevation: closedElevation,
-                      openBuilder: (context, closedContainer) => FriendsPage()),
+                      openBuilder: (context, closedContainer) => const FriendsPage()),
                 ))),
         Expanded(
             child: Column(
@@ -315,7 +314,7 @@ class HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget profileMenu() {
-    const double columnPadding = 25;
+    const double columnPadding = 10;
     return Container(
         color: Colors.transparent,
         width: 160,
@@ -326,7 +325,7 @@ class HomePageState extends ConsumerState<HomePage> {
             closedBuilder: ((context, openContainer) => Stack(
                   children: <Widget>[
                     Positioned.fill(
-                        right: 20,
+                        right: 40,
                         child: Container(
                           decoration: const BoxDecoration(
                               color: Colors.red,

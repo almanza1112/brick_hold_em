@@ -1,6 +1,10 @@
 import 'package:brick_hold_em/ads/ad_state.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:brick_hold_em/globals.dart' as globals;
 
 class AdsPage extends StatefulWidget {
   const AdsPage({super.key});
@@ -13,11 +17,16 @@ class _AdsPageState extends State<AdsPage> {
   final Future<InitializationStatus> initFuture =
       MobileAds.instance.initialize();
   RewardedAd? _rewardedAd;
-  int rewardedScore = 0;
+
+  FirebaseFirestore db = FirebaseFirestore.instance;
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  FlutterSecureStorage storage = const FlutterSecureStorage();
+  late Future<String?> usersChips;
 
   @override
   void initState() {
     super.initState();
+    usersChips = getChips();
     createRewardedAd();
   }
 
@@ -38,7 +47,16 @@ class _AdsPageState extends State<AdsPage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Center(child: Text('Rewarded Score is: $rewardedScore', style: const TextStyle(color: Colors.white),)),
+          Center(
+              child: FutureBuilder(
+                future: usersChips,
+                builder: (context, snapshot) {
+                  return Text(
+            'Rewarded Score is: ${snapshot.data}',
+            style: const TextStyle(color: Colors.white),
+          );
+                }
+              )),
           const SizedBox(
             height: 30,
           ),
@@ -47,6 +65,10 @@ class _AdsPageState extends State<AdsPage> {
         ],
       ),
     );
+  }
+
+  Future<String?> getChips() async {
+    return await storage.read(key: globals.FSS_CHIPS);
   }
 
   void createRewardedAd() {
@@ -79,12 +101,24 @@ class _AdsPageState extends State<AdsPage> {
           createRewardedAd();
         },
       );
-      _rewardedAd!.show(onUserEarnedReward: (ad, reward) {
-        setState(() {
-          rewardedScore += 100;
-        });
-      });
+      _rewardedAd!.show(onUserEarnedReward: (ad, reward) => updateChipCount());
       _rewardedAd = null;
     }
+  }
+
+  void updateChipCount() async {
+    var chips = await storage.read(key: globals.FSS_CHIPS);
+    int updatedChipsCounter = int.parse(chips!) + 100;
+
+    db
+        .collection("users")
+        .doc(uid)
+        .update({"chips": updatedChipsCounter}).then((value) async {
+      await storage.write(
+          key: globals.FSS_CHIPS, value: updatedChipsCounter.toString());
+    }).catchError((error) {});
+    setState(() {
+      usersChips = updatedChipsCounter as Future<String?>;
+    });
   }
 }
