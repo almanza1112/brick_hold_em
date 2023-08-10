@@ -38,8 +38,8 @@ final didPlayerAddCardThisTurnProvider = StateProvider<bool>((ref) => true);
 
 final isPlayButtonSelectedProvider = StateProvider<bool>((ref) => false);
 
-final brickCardSuitProvider = StateProvider<String>((ref) => 'spades');
+final brickCardSuitPositionProvider = StateProvider<int>((ref) => 0);
 
-final brickCardNumberProvider = StateProvider<String>((ref) => 'Ace');
+final brickCardNumberPositionProvider = StateProvider<int>((ref) => 0);
 
 

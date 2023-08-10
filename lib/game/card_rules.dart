@@ -7,7 +7,6 @@ class CardRules {
   String invalidCardCombo = 'invalid card combo';
 
   String play() {
-    print(cards);
     switch (cards.length) {
       case 2:
         return _playForTwoCards();
@@ -131,6 +130,8 @@ class CardRules {
       // full house
       return success;
     } else {
+
+      // Create list of cardValues to determine Straight
       List<int> cardValues = [
         card1['value'],
         card2['value'],
@@ -139,11 +140,12 @@ class CardRules {
         card5['value']
       ];
 
+      // Sort the list
       cardValues.sort();
-      print(cardValues);
 
-      final ifThereIsAnAce = cardValues.indexWhere((num) => num == 1);
-      print(ifThereIsAnAce);
+      // Check if there is an Ace(1) among the cards
+      final ifThereIsAnAce = cardValues.indexWhere((e) => e == 1);
+      
       if (ifThereIsAnAce == -1) {
         // There isnt an ace, proceed to see for regular straight
         for (int i = 1; i < cardValues.length; i++) {
@@ -153,20 +155,40 @@ class CardRules {
         }
         return success;
       } else {
-        print("elseeee");
-
-        if (cardValues[4] == 5) {
-          // A, 2, 3, 4 ,5
-          for (int i = 1; i < cardValues.length; i++) {
-            if (cardValues[i] != cardValues[i - 1] + 1) {
-              return invalidCardCombo;
-            }
-          }
+        // There is an Ace, all variations of Ace being a bridge
+        if (cardValues[0] == 1 &&
+            cardValues[1] == 7 &&
+            cardValues[2] == 8 &&
+            cardValues[3] == 9 &&
+            cardValues[4] == 10) {
           return success;
-        } else if (cardValues[4] == 10) {
-          // A, 7, 8, 9, 10
+        } else if (cardValues[0] == 1 &&
+            cardValues[1] == 2 &&
+            cardValues[2] == 8 &&
+            cardValues[3] == 9 &&
+            cardValues[4] == 10) {
+          return success;
+        } else if (cardValues[0] == 1 &&
+            cardValues[1] == 2 &&
+            cardValues[2] == 3 &&
+            cardValues[3] == 9 &&
+            cardValues[4] == 10) {
+          return success;
+        } else if (cardValues[0] == 1 &&
+            cardValues[1] == 2 &&
+            cardValues[2] == 3 &&
+            cardValues[3] == 4 &&
+            cardValues[4] == 10) {
+          return success;
+        } else if (cardValues[0] == 1 &&
+            cardValues[1] == 2 &&
+            cardValues[2] == 3 &&
+            cardValues[3] == 4 &&
+            cardValues[4] == 5) {
+          return success;
+        } else {
+          return invalidCardCombo;
         }
-        return invalidCardCombo; // There is an ace
       }
     }
   }

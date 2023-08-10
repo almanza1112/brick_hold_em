@@ -48,6 +48,22 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   late DatabaseReference playerCardCount;
 
+  // Create lists for the selction of the brick card. Must be in exact
+  // same order as the children of ListWheelScrollView
+  List<String> cardSuitsList = ['spades', 'clubs', 'hearts', 'diamonds'];
+  List<String> cardNumbersList = [
+    'Ace',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '10'
+  ];
+
   // DatabaseReference cardsInHandListener = FirebaseDatabase.instance
   //     .ref('tables/1/cards/playerCards/32Zp41SqjzStoba7J6Tu2DYmk7E3/hand');
 
@@ -442,23 +458,6 @@ Widget playerCards() {
     String cardName = cardKey.cardName!;
     var _cardKey = ValueKey(cardKey);
 
-    // Create lists for the selction of the brick card. Must be in exact
-    // same order as the children of ListWheelScrollView
-    List<String> cardSuitsList = ['spades', 'clubs', 'hearts', 'diamonds'];
-    List<String> cardNumbersList = [
-      'Ace',
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      '10'
-    ];
-
     return SizedBox(
       key: _cardKey,
       width: handCardWidth,
@@ -497,16 +496,21 @@ Widget playerCards() {
                                   child: SizedBox(
                                     height: 150,
                                     child: ListWheelScrollView(
+                                        controller: FixedExtentScrollController(
+                                            initialItem: ref.read(
+                                                brickCardSuitPositionProvider)),
                                         itemExtent: 30,
                                         magnification: 1.8,
                                         //squeeze: 1.1,
                                         //offAxisFraction: .3,
+
                                         useMagnifier: true,
                                         onSelectedItemChanged: (int value) {
                                           ref
-                                              .read(brickCardSuitProvider
-                                                  .notifier)
-                                              .state = cardSuitsList[value];
+                                              .read(
+                                                  brickCardSuitPositionProvider
+                                                      .notifier)
+                                              .state = value;
                                         },
                                         children: const [
                                           Text("Spade"),
@@ -521,6 +525,9 @@ Widget playerCards() {
                                     height: 150,
                                     child: Center(
                                       child: ListWheelScrollView(
+                                          controller: FixedExtentScrollController(
+                                              initialItem: ref.read(
+                                                  brickCardNumberPositionProvider)),
                                           itemExtent: 30,
                                           magnification: 1.8,
                                           //squeeze: 1.1,
@@ -532,23 +539,14 @@ Widget playerCards() {
                                           ),
                                           onSelectedItemChanged: (int value) {
                                             ref
-                                                .read(brickCardNumberProvider
-                                                    .notifier)
-                                                .state = cardNumbersList[value];
+                                                .read(
+                                                    brickCardNumberPositionProvider
+                                                        .notifier)
+                                                .state = value;
                                           },
-                                          children: const [
-                                            Text("A"),
-                                            Text("1"),
-                                            Text("2"),
-                                            Text("3"),
-                                            Text("4"),
-                                            Text("5"),
-                                            Text("6"),
-                                            Text("7"),
-                                            Text("8"),
-                                            Text("9"),
-                                            Text("10"),
-                                          ]),
+                                          children: cardNumbersList
+                                              .map((e) => Text(e))
+                                              .toList()),
                                     ),
                                   ),
                                 ),
@@ -566,7 +564,7 @@ Widget playerCards() {
 
                                 // Obtain selected brick cards name
                                 String newCardName =
-                                    '${ref.read(brickCardSuitProvider)}${ref.read(brickCardNumberProvider)}';
+                                    '${cardSuitsList[ref.read(brickCardSuitPositionProvider)]}${cardNumbersList[ref.read(brickCardNumberPositionProvider)]}';
 
                                 // Create widget for new card
                                 Widget brickCard = card(
@@ -622,10 +620,134 @@ Widget playerCards() {
           tappedCards[pos],
           GestureDetector(
             onTap: () {
+              // Get key of the tapped card
+              ValueKey<CardKey> t = tappedCards[pos].key as ValueKey<CardKey>;
+
+              late Widget newCard;
+
+              // Check if it is a Brick card
+              if (t.value.isBrick!) {
+                // If it is than make the new card Brick
+                newCard = card(t.value.copyWith(cardName: 'brick'));
+              } else {
+                // If it isn't then its a regular card, proceed as normal
+                newCard = tappedCards[pos];
+              }
+
               setState(() {
-                cardWidgetsBuilderList.add(tappedCards[pos]);
+                cardWidgetsBuilderList.add(newCard);
                 tappedCards.removeAt(pos);
               });
+            },
+            onLongPress: () {
+              ValueKey<CardKey> theTappedCard =
+                  tappedCards[pos].key as ValueKey<CardKey>;
+              if (theTappedCard.value.isBrick!) {
+                showModalBottomSheet(
+                    context: context,
+                    builder: (_) => Container(
+                        color: Colors.white,
+                        height: 300,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            const Center(
+                                child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                "Select Suit and Value",
+                                style: TextStyle(fontSize: 18),
+                              ),
+                            )),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 150,
+                                    child: ListWheelScrollView(
+                                        controller: FixedExtentScrollController(
+                                            initialItem: ref.read(
+                                                brickCardSuitPositionProvider)),
+                                        itemExtent: 30,
+                                        magnification: 1.8,
+                                        //squeeze: 1.1,
+                                        //offAxisFraction: .3,
+
+                                        useMagnifier: true,
+                                        onSelectedItemChanged: (int value) {
+                                          ref
+                                              .read(
+                                                  brickCardSuitPositionProvider
+                                                      .notifier)
+                                              .state = value;
+                                        },
+                                        children: const [
+                                          Text("Spade"),
+                                          Text("Club"),
+                                          Text("Heart"),
+                                          Text("Diamond"),
+                                        ]),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 150,
+                                    child: Center(
+                                      child: ListWheelScrollView(
+                                          controller: FixedExtentScrollController(
+                                              initialItem: ref.read(
+                                                  brickCardNumberPositionProvider)),
+                                          itemExtent: 30,
+                                          magnification: 1.8,
+                                          //squeeze: 1.1,
+                                          //offAxisFraction: -0.3,
+                                          useMagnifier: true,
+                                          physics: const BouncingScrollPhysics(
+                                            parent:
+                                                AlwaysScrollableScrollPhysics(),
+                                          ),
+                                          onSelectedItemChanged: (int value) {
+                                            ref
+                                                .read(
+                                                    brickCardNumberPositionProvider
+                                                        .notifier)
+                                                .state = value;
+                                          },
+                                          children: cardNumbersList
+                                              .map((e) => Text(e))
+                                              .toList()),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            ElevatedButton(
+                              child: const Text("Confirm"),
+                              onPressed: () {
+                                // Handle confirmation logic here
+
+                                // Get key of card
+                                ValueKey<CardKey> t =
+                                    tappedCards[pos].key as ValueKey<CardKey>;
+                                String newCardName =
+                                    '${cardSuitsList[ref.read(brickCardSuitPositionProvider)]}${cardNumbersList[ref.read(brickCardNumberPositionProvider)]}';
+
+                                setState(
+                                  () {
+                                    isStateChanged = true;
+                                    tappedCards[pos] = card(CardKey(
+                                        position: t.value.position,
+                                        cardName: newCardName,
+                                        isBrick: t.value.isBrick));
+                                  },
+                                );
+
+                                Navigator.of(context).pop(); // Close the modal
+                              },
+                            ),
+                          ],
+                        )));
+              }
             },
           )
         ],
