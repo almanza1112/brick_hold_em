@@ -1,22 +1,19 @@
-
-import 'package:flutter/cupertino.dart';
-
 class CardKey {
   int? position;
   String? cardName;
-  Matrix4? cardXY;
+  bool? isBrick;
 
   CardKey(
-      {required this.position, required this.cardName, this.cardXY});
+      {required this.position, required this.cardName, required this.isBrick});
 
-  CardKey copyWith({int? position, String? cardName, Matrix4? cardXY}) {
+  CardKey copyWith({int? position, String? cardName}) {
     return CardKey(
         position: position ?? this.position,
         cardName: cardName ?? this.cardName,
-        cardXY: cardXY ?? this.cardXY);
+        isBrick: isBrick ?? this.isBrick);
   }
 
   @override
   String toString() =>
-      'CardKeys(position: $position, cardName: $cardName, cardXY: $cardXY)';
+      'CardKeys(position: $position, cardName: $cardName)';
 }
