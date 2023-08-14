@@ -20,8 +20,8 @@ class GamePlayers extends ConsumerStatefulWidget {
 class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
   double imageRadius = 30;
   TextStyle chipsText = const TextStyle(fontSize: 10, color: Colors.amber);
-  TextStyle playerNameStyle =
-      const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold);
+  TextStyle playerNameStyle = const TextStyle(
+      fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold);
 
   DatabaseReference playersRef =
       FirebaseDatabase.instance.ref('tables/1/players');
@@ -83,7 +83,8 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
 
               ref.read(playerPositionProvider.notifier).state = playerKey;
 
-              ref.read(otherPlayersInformationProvider.notifier).state = otherPlayersList;
+              ref.read(otherPlayersInformationProvider.notifier).state =
+                  otherPlayersList;
             });
 
             List<Player> playersList = <Player>[];
@@ -199,15 +200,8 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                             width: 25,
                           ),
                           Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "${player.cardCount!}",
-                              style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.amberAccent,
-                                  fontWeight: FontWeight.w700),
-                            ),
-                          )
+                              alignment: Alignment.center,
+                              child: streamedCardCount(player))
                         ],
                       )),
                 ),
@@ -231,9 +225,15 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      const Icon(Icons.currency_exchange, size: 8, color: Colors.amber,),
-                      const SizedBox(width: 2,),
-                      Text(player.chips.toString(), style: chipsText,)
+                      const Icon(
+                        Icons.currency_exchange,
+                        size: 8,
+                        color: Colors.amber,
+                      ),
+                      const SizedBox(
+                        width: 2,
+                      ),
+                      streamedChipCount(player)
                     ],
                   ),
                 if (!playerDetailsVisible)
@@ -249,4 +249,51 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
     );
   }
 
+  Widget streamedCardCount(Player player) {
+    return StreamBuilder(
+        stream: FirebaseDatabase.instance
+            .ref('tables/1/cards/playerCards/${player.uid}/cardCount')
+            .onValue,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            // TODO: do something here, show error??
+          }
+
+          if (snapshot.hasData) {
+            var data = snapshot.data!.snapshot.value;
+
+            return Text(
+              "$data",
+              style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.amberAccent,
+                  fontWeight: FontWeight.w700),
+            );
+          } else {
+            return const CircularProgressIndicator();
+          }
+        });
+  }
+
+  Widget streamedChipCount(Player player) {
+    return StreamBuilder(
+        stream: FirebaseDatabase.instance.ref('tables/1/chips/${player.uid}/chipCount').onValue,
+        builder: (context, snapshot) {
+          
+          if (snapshot.hasError) {
+            // TODO: show error
+          }
+
+          if (snapshot.hasData) {
+            var data = snapshot.data!.snapshot.value;
+
+            return Text(
+              data.toString(),
+              style: chipsText,
+            );
+          } else {
+            return const Text("loading...");
+          }
+        });
+  }
 }

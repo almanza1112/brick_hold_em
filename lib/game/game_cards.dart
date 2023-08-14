@@ -454,7 +454,6 @@ Widget playerCards() {
 
   // TODO: Make into its on class for better functionality
   Widget card(CardKey cardKey) {
-    print("card check");
     String cardName = cardKey.cardName!;
     var _cardKey = ValueKey(cardKey);
 
@@ -818,15 +817,34 @@ Widget playerCards() {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    ElevatedButton(
-                      onPressed: passPlay,
-                      child: const Text("Pass"),
-                    ),
-                    ElevatedButton(
-                        onPressed: playButton, child: const Text("Play")),
-                    ElevatedButton(
+                    IconButton(
                         onPressed: shuffleHand,
-                        child: const Icon(Icons.shuffle))
+                        icon: const Icon(
+                          Icons.shuffle,
+                          color: Colors.amber,
+                          size: 36,
+                        )),
+                    IconButton(
+                        onPressed: passPlay,
+                        icon: const Icon(
+                          Icons.check,
+                          color: Colors.amber,
+                          size: 36,
+                        )),
+                    IconButton(
+                        onPressed: playButton,
+                        icon: const Icon(
+                          Icons.play_arrow,
+                          color: Colors.amber,
+                          size: 36,
+                        )),
+                    IconButton(
+                        onPressed: bet,
+                        icon: const Icon(
+                          Icons.paid,
+                          color: Colors.amber,
+                          size: 36,
+                        )),
                   ],
                 ),
               ),
@@ -837,11 +855,22 @@ Widget playerCards() {
                 right: rightPosition,
                 bottom: 0,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    ElevatedButton(
+                    IconButton(
                         onPressed: shuffleHand,
-                        child: const Icon(Icons.shuffle))
+                        icon: const Icon(
+                          Icons.shuffle,
+                          color: Colors.amber,
+                          size: 36,
+                        )),
+                    IconButton(
+                        onPressed: bet,
+                        icon: const Icon(
+                          Icons.paid,
+                          color: Colors.amber,
+                          size: 36,
+                        )),
                   ],
                 ));
           }
@@ -939,6 +968,102 @@ Widget playerCards() {
     }
   }
 
+  void bet() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      transitionDuration: const Duration(milliseconds: 200),
+      transitionBuilder: (BuildContext context, Animation<double> animation,
+          Animation<double> secondaryAnimation, Widget child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1, 0.0),
+            end: const Offset(.5, 0),
+          ).animate(animation),
+          child: child,
+        );
+      },
+      pageBuilder: (BuildContext context, Animation<double> animation,
+          Animation<double> secondaryAnimation) {
+        return Container(
+          color: Colors.green,
+          alignment: Alignment.centerLeft,
+          child: FractionallySizedBox(
+            widthFactor: .5,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  //mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    const Center(
+                        child: Text(
+                      'Bet',
+                      style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                          decoration: TextDecoration.none),
+                    )),
+                    const Expanded(child: SizedBox.shrink()),
+                    RotatedBox(
+                      quarterTurns: 3,
+                      child: Material(
+                        color: Colors.green,
+                        child: Slider(
+                            max: 100,
+                            thumbColor: Colors.amber,
+                            activeColor: Colors.amber,
+                            inactiveColor: Colors.white,
+                            value: 0,
+                            onChanged: (value) {
+                              ref
+                                  .read(chipsSliderValueProvider.notifier)
+                                  .state = value;
+                            }),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber),
+                        onPressed: () {},
+                        child: const Text(
+                          'RAISE',
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        )),
+                          ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber),
+                        onPressed: () {},
+                        child: const Text(
+                          'CALL',
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        )),
+                        ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red),
+                        onPressed: foldHand,
+                        child: const Text(
+                          'FOLD',
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ))
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   passPlay() async {
     // Check if player added card from deck already
     if (ref.read(didPlayerAddCardThisTurnProvider) == false) {
@@ -1004,6 +1129,8 @@ Widget playerCards() {
       cardWidgetsBuilderList.shuffle();
     });
   }
+
+  void foldHand() {}
 
   ranOutOfTime() async {
     await addCard();

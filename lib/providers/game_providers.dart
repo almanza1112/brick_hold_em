@@ -42,4 +42,6 @@ final brickCardSuitPositionProvider = StateProvider<int>((ref) => 0);
 
 final brickCardNumberPositionProvider = StateProvider<int>((ref) => 0);
 
+final chipsSliderValueProvider = StateProvider<double>((ref) => 0);
+
 
