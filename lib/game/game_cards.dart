@@ -46,6 +46,9 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   DatabaseReference movesRef = FirebaseDatabase.instance.ref('tables/1/moves');
 
+  DatabaseReference betsRef =
+      FirebaseDatabase.instance.ref('tables/1/chips/bets');
+
   late DatabaseReference playerCardCount;
 
   // Create lists for the selction of the brick card. Must be in exact
@@ -839,7 +842,7 @@ Widget playerCards() {
                           size: 36,
                         )),
                     IconButton(
-                        onPressed: bet,
+                        onPressed: betModal,
                         icon: const Icon(
                           Icons.paid,
                           color: Colors.amber,
@@ -865,7 +868,7 @@ Widget playerCards() {
                           size: 36,
                         )),
                     IconButton(
-                        onPressed: bet,
+                        onPressed: betModal,
                         icon: const Icon(
                           Icons.paid,
                           color: Colors.amber,
@@ -944,7 +947,7 @@ Widget playerCards() {
 
       // update faceUPCard and player's hand
       await faceUpCardRef.update({
-        'faceUpCard': card,
+        //'faceUpCard': card,
         'playerCards/$uid/hand': cardsInHand
       }).then((value) async {
         Future.delayed(const Duration(milliseconds: 500), () {
@@ -968,100 +971,135 @@ Widget playerCards() {
     }
   }
 
-  void bet() {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '',
-      transitionDuration: const Duration(milliseconds: 200),
-      transitionBuilder: (BuildContext context, Animation<double> animation,
-          Animation<double> secondaryAnimation, Widget child) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(1, 0.0),
-            end: const Offset(.5, 0),
-          ).animate(animation),
-          child: child,
-        );
-      },
-      pageBuilder: (BuildContext context, Animation<double> animation,
-          Animation<double> secondaryAnimation) {
-        return Container(
-          color: Colors.green,
-          alignment: Alignment.centerLeft,
-          child: FractionallySizedBox(
-            widthFactor: .5,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  //mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    const Center(
-                        child: Text(
-                      'Bet',
-                      style: TextStyle(
-                          fontSize: 24,
-                          color: Colors.white,
-                          decoration: TextDecoration.none),
-                    )),
-                    const Expanded(child: SizedBox.shrink()),
-                    RotatedBox(
-                      quarterTurns: 3,
-                      child: Material(
-                        color: Colors.green,
-                        child: Slider(
-                            max: 100,
-                            thumbColor: Colors.amber,
-                            activeColor: Colors.amber,
-                            inactiveColor: Colors.white,
-                            value: 0,
-                            onChanged: (value) {
-                              ref
-                                  .read(chipsSliderValueProvider.notifier)
-                                  .state = value;
-                            }),
+  double currentSliderValue = 200;
+
+  void betModal() {
+    showModalBottomSheet(
+        context: context,
+        builder: (_) => Container(
+              color: Colors.green,
+              child: Material(
+                color: Colors.green,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    //mainAxisAlignment: MainAxisAlignment.center,
+                    //crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      const Center(
+                          child: Text(
+                        'Bet',
+                        style: TextStyle(
+                            fontSize: 24,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.none),
+                      )),
+                      const Expanded(child: SizedBox.shrink()),
+                      StatefulBuilder(builder: (context, setState) {
+                        return Column(
+                          children: [
+                            Slider(
+                                max: 1000,
+                                thumbColor: Colors.amber,
+                                activeColor: Colors.amber,
+                                inactiveColor: Colors.white,
+                                value: currentSliderValue,
+                                onChanged: (value) {
+                                  setState(() {
+                                    currentSliderValue = value;
+                                  });
+                                }),
+                            Text(currentSliderValue.round().toString())
+                          ],
+                        );
+                      }),
+                      const SizedBox(
+                        height: 36,
                       ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amber),
-                        onPressed: () {},
-                        child: const Text(
-                          'RAISE',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        )),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
                           ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amber),
-                        onPressed: () {},
-                        child: const Text(
-                          'CALL',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        )),
-                        ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red),
-                        onPressed: foldHand,
-                        child: const Text(
-                          'FOLD',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ))
-                  ],
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  shape: const CircleBorder(),
+                                  padding: const EdgeInsets.all(24)),
+                              onPressed: foldHand,
+                              child: const Text(
+                                'FOLD',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              )),
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.amber,
+                                  shape: const CircleBorder(),
+                                  padding: const EdgeInsets.all(24)),
+                              onPressed: raiseBet,
+                              child: const Text(
+                                'RAISE',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              )),
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.amber,
+                                  shape: const CircleBorder(),
+                                  padding: const EdgeInsets.all(24)),
+                              onPressed: callBet,
+                              child: const Text(
+                                'CALL',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              )),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        );
-      },
-    );
+            ));
+  }
+
+  void raiseBet() async {
+    var body = {
+      'uid': uid,
+      'bet': currentSliderValue.round().toString(),
+      'position': ref.read(playerPositionProvider).toString()
+    };
+
+    http.Response response = await http
+        .post(Uri.parse('${globals.END_POINT}/table/raiseBet'), body: body);
+
+    if (response.statusCode == 201) {
+      // Udpate UI
+    } else {
+      print("error folding hand");
+      print('statusCode: ${response.statusCode}');
+    }
+  }
+
+  void callBet() async {}
+
+  void foldHand() async {
+    var body = {
+      'uid': uid,
+      'position': ref.read(playerPositionProvider).toString()
+    };
+
+    http.Response response = await http
+        .post(Uri.parse('${globals.END_POINT}/table/foldhand'), body: body);
+
+    if (response.statusCode == 201) {
+      // Update UI
+    } else {
+      print("error folding hand");
+      print('statusCode: ${response.statusCode}');
+    }
   }
 
   passPlay() async {
@@ -1129,8 +1167,6 @@ Widget playerCards() {
       cardWidgetsBuilderList.shuffle();
     });
   }
-
-  void foldHand() {}
 
   ranOutOfTime() async {
     await addCard();
