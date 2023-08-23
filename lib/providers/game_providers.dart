@@ -44,4 +44,12 @@ final brickCardNumberPositionProvider = StateProvider<int>((ref) => 0);
 
 final chipsValueProvider = StateProvider<double>((ref) => 0);
 
+final isThereABetProvider = StateProvider<bool>((ref) => false);
+
+final typeOfBetProvider = StateProvider<String>((ref) => "raise");
+
+final doYouNeedToCallProvider = StateProvider<bool>((ref) => false);
+
+final toCallAmmount = StateProvider<String>((ref) => "0");
+
 

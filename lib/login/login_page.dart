@@ -351,6 +351,7 @@ class LoginPageState extends ConsumerState {
     final GoogleSignInAccount? googleUser =
         await GoogleSignIn(scopes: <String>["email"]).signIn();
 
+
     // Check if email is already being used with correct authentication method
     Map result = await isEmailUsed(googleUser!.email, "google.com");
 
@@ -423,10 +424,14 @@ class LoginPageState extends ConsumerState {
   }
 
   Future<Map> isEmailUsed(String email, String providerID) async {
+    print("Sign-in Info : $email and $providerID");
     http.Response response = await http.get(Uri.parse(
         '${globals.END_POINT}/sign_in/$email?providerID=$providerID'));
 
     Map data = jsonDecode(response.body);
+
+        print("here part 2");
+
 
     return data;
   }
