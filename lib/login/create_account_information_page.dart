@@ -184,8 +184,6 @@ class _CreateAccountInformationPageState
   }
 
   Widget nextButton() {
-                    print(globals.END_POINT);
-
     return Padding(
       padding: const EdgeInsets.all(30.0),
       child: ElevatedButton(
@@ -244,7 +242,7 @@ class _CreateAccountInformationPageState
 
   Future<Map> isEmailUsed(String email) async {
     http.Response response = await http.get(
-        Uri.parse('https://brick-hold-em-api.onrender.com/account/$email'));
+        Uri.parse('${globals.END_POINT}/account/$email'));
 
     Map data = jsonDecode(response.body);
 

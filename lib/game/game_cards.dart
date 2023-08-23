@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:brick_hold_em/game/card_rules.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -46,8 +48,8 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   DatabaseReference movesRef = FirebaseDatabase.instance.ref('tables/1/moves');
 
-  DatabaseReference betsRef =
-      FirebaseDatabase.instance.ref('tables/1/chips/bets');
+  DatabaseReference toCallRef =
+      FirebaseDatabase.instance.ref('tables/1/betting/toCall');
 
   late DatabaseReference playerCardCount;
 
@@ -75,6 +77,16 @@ class GameCardsPageState extends ConsumerState<GameCards> {
     _cardsSnapshot = cardsSnapshot();
     playerCardCount =
         FirebaseDatabase.instance.ref('tables/1/cards/playerCards/$uid/hand');
+
+    // toCallRef.onValue.listen((event) {
+    //   final data = event.snapshot.value as Map<Object?, Object?>;
+    //   print("DATA: ${data['didAFullCircle']}");
+
+    //   ref.read(doYouNeedToCallProvider.notifier).state =
+    //       data['didAFullCircle'] as bool;
+
+    //   print("provider: ${ref.read(doYouNeedToCallProvider)}");
+    // });
     super.initState();
   }
 
@@ -835,19 +847,13 @@ Widget playerCards() {
                           size: 36,
                         )),
                     IconButton(
-                        onPressed: playButton,
+                        onPressed: play,
                         icon: const Icon(
                           Icons.play_arrow,
                           color: Colors.amber,
                           size: 36,
                         )),
-                    IconButton(
-                        onPressed: betModal,
-                        icon: const Icon(
-                          Icons.paid,
-                          color: Colors.amber,
-                          size: 36,
-                        )),
+                    betButton()
                   ],
                 ),
               ),
@@ -867,22 +873,16 @@ Widget playerCards() {
                           color: Colors.amber,
                           size: 36,
                         )),
-                    IconButton(
-                        onPressed: betModal,
-                        icon: const Icon(
-                          Icons.paid,
-                          color: Colors.amber,
-                          size: 36,
-                        )),
+                    betButton()
                   ],
                 ));
           }
         },
         error: ((error, stackTrace) => Text(error.toString())),
-        loading: () => const CircularProgressIndicator());
+        loading: () => const Center(child: CircularProgressIndicator()));
   }
 
-  playButton() async {
+  play() async {
     // Get faceUpCard from the StreamProvider = faceUpCardProvider
     final faceUpCardRefOnce = ref.read(faceUpCardProvider);
     final map =
@@ -909,20 +909,73 @@ Widget playerCards() {
     final cardRules = CardRules(cards: totalCardsBeingPlayed);
     var result = cardRules.play();
 
-    // It is a valid hand
+    // It is a valid play
     if (result == "success") {
-      DatabaseReference dbMoves =
-          FirebaseDatabase.instance.ref('tables/1/moves');
-      DatabaseReference newMoves = dbMoves.push();
+      // Makes tapped cards on table animate to discard pile
+      ref.read(isPlayButtonSelectedProvider.notifier).state = true;
 
-      var update = {"uid": uid, "move": cardsBeingPlayed};
+      // There is at least one card in hand
+      if (cardWidgetsBuilderList.isNotEmpty) {
+        // Create list of cards that are in hand that will be sent to server
+        List<String> cardsInHand = <String>[];
 
-      await newMoves.set(update).then((value) {
-        // Makes tapped cards on table animate to discard pile
-        ref.read(isPlayButtonSelectedProvider.notifier).state = true;
+        // Loop through current cards in hand list
+        for (int i = 0; i < cardWidgetsBuilderList.length; i++) {
+          // Get key of each card
+          ValueKey<CardKey> t =
+              cardWidgetsBuilderList[i].key! as ValueKey<CardKey>;
 
-        setFaceUpCardAndHand(cardsBeingPlayed.last);
-      });
+          // Add each card name into list
+          cardsInHand.add(t.value.cardName!);
+        }
+
+        // Create post body
+        var body = {
+          'uid': uid,
+          'move': cardsBeingPlayed.toString(),
+          'cardsInHand': cardsInHand.toString(),
+          'position': ref.read(playerPositionProvider).toString(),
+          'isThereABet': ref.read(isThereABetProvider).toString()
+        };
+
+        // Check if you need to call or raise
+        if (ref.read(doYouNeedToCallProvider)) {
+          // Check if there is a bet pending with play
+          if (ref.read(isThereABetProvider) == true) {
+            var bet = {
+              'type': ref.read(typeOfBetProvider),
+              'amount': currentSliderValue.round().toString()
+            };
+
+            body['bet'] = jsonEncode(bet);
+
+            sendPlay(body);
+          } else {
+            // There is no bet or call made, prompt user
+            const snackBar = SnackBar(
+              content: Text('You need to either call or raise'),
+            );
+
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+        } else {
+          // Check if there is a bet pending with play
+          if (ref.read(isThereABetProvider) == true) {
+            var bet = {
+              'type': ref.read(typeOfBetProvider),
+              'amount': currentSliderValue.round().toString()
+            };
+
+            body['bet'] = jsonEncode(bet);
+          }
+          sendPlay(body);
+        }
+      } else {
+        // No cards left, you are the winner
+        playerCardCount.remove().then((value) {
+          print("removed success");
+        });
+      }
     } else {
       // TODO: make this more visibly known to the user that it isnt a valid hand
       // It is not a valid hand, show user that it isnt
@@ -931,44 +984,69 @@ Widget playerCards() {
     }
   }
 
-  // TODO: is this optimal? Updating the hand? not important
-  setFaceUpCardAndHand(String card) async {
-    // There is at least one card
-    if (cardWidgetsBuilderList.isNotEmpty) {
-      List<String> cardsInHand = <String>[];
-      for (int i = 0; i < cardWidgetsBuilderList.length; i++) {
-        ValueKey<CardKey> t =
-            cardWidgetsBuilderList[i].key! as ValueKey<CardKey>;
-        cardsInHand.add(t.value.cardName!);
-      }
+  void sendPlay(var body) async {
+    // Send post request
+    http.Response playCardsResponse = await http
+        .post(Uri.parse("${globals.END_POINT}/table/playCards"), body: body);
 
-      DatabaseReference faceUpCardRef =
-          FirebaseDatabase.instance.ref('tables/1/cards');
+    if (playCardsResponse.statusCode == 201) {
+      // Success
 
-      // update faceUPCard and player's hand
-      await faceUpCardRef.update({
-        //'faceUpCard': card,
-        'playerCards/$uid/hand': cardsInHand
-      }).then((value) async {
-        Future.delayed(const Duration(milliseconds: 500), () {
-          ref.read(isPlayButtonSelectedProvider.notifier).state = false;
-          setState(() {
-            tappedCards.clear();
-          });
+      // Reset provider
+      ref.read(isThereABetProvider.notifier).state = false;
+
+      // Update UI
+      Future.delayed(const Duration(milliseconds: 500), () {
+        ref.read(isPlayButtonSelectedProvider.notifier).state = false;
+        setState(() {
+          tappedCards.clear();
         });
-        http.Response response =
-            await http.get(Uri.parse("${globals.END_POINT}/table/passturn"));
-
-        if (response.statusCode == 500) {
-          // TODO: show error
-        }
       });
     } else {
-      // No cards left, you are the winner
-      playerCardCount.remove().then((value) {
-        print("removed success");
-      });
+      // There is an error
     }
+  }
+
+  // Okay so the only reason I am making a separate widget function for the bet button instead
+  // of just using a tenary operation inside the color and just calling ref.read(doYouNeedToCallProvider)
+  // is because this way it GUARANTEES that the button changes.
+  // Biggest concern was buttons() resolving before the provider could update itself.
+  Widget betButton() {
+    return StreamBuilder(
+        stream: toCallRef.onValue,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            // TODO: Show errror
+          }
+
+          if (snapshot.hasData) {
+            final data = snapshot.data!.snapshot.value as Map<Object?, Object?>;
+
+            bool didAFullCircle = data['didAFullCircle'] as bool;
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(doYouNeedToCallProvider.notifier).state =
+                  !didAFullCircle;
+
+              if (didAFullCircle == false) {
+                ref.read(toCallAmmount.notifier).state =
+                    data['amount'] as String;
+              }
+            });
+
+            return IconButton(
+                onPressed: betModal,
+                icon: Icon(
+                  Icons.paid,
+                  color: didAFullCircle ? Colors.amber : Colors.blue,
+                  size: 36,
+                ));
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        });
   }
 
   double currentSliderValue = 200;
@@ -996,6 +1074,17 @@ Widget playerCards() {
                             decoration: TextDecoration.none),
                       )),
                       const Expanded(child: SizedBox.shrink()),
+                      if (ref.read(doYouNeedToCallProvider))
+                        Center(
+                          child: Text(
+                            '${ref.read(toCallAmmount)} to call',
+                            style: const TextStyle(
+                                fontSize: 18, color: Colors.white),
+                          ),
+                        ),
+                      const SizedBox(
+                        height: 36,
+                      ),
                       StatefulBuilder(builder: (context, setState) {
                         return Column(
                           children: [
@@ -1015,7 +1104,7 @@ Widget playerCards() {
                         );
                       }),
                       const SizedBox(
-                        height: 36,
+                        height: 54,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1058,6 +1147,9 @@ Widget playerCards() {
                               )),
                         ],
                       ),
+                      const SizedBox(
+                        height: 12,
+                      )
                     ],
                   ),
                 ),
@@ -1065,25 +1157,19 @@ Widget playerCards() {
             ));
   }
 
-  void raiseBet() async {
-    var body = {
-      'uid': uid,
-      'bet': currentSliderValue.round().toString(),
-      'position': ref.read(playerPositionProvider).toString()
-    };
-
-    http.Response response = await http
-        .post(Uri.parse('${globals.END_POINT}/table/raiseBet'), body: body);
-
-    if (response.statusCode == 201) {
-      // Udpate UI
-    } else {
-      print("error folding hand");
-      print('statusCode: ${response.statusCode}');
-    }
+  void raiseBet() {
+    ref.read(isThereABetProvider.notifier).state = true;
+    ref.read(typeOfBetProvider.notifier).state = "raise";
+    Navigator.pop(context);
   }
 
-  void callBet() async {}
+  void callBet() {
+    double amount = double.parse(ref.read(toCallAmmount));
+    ref.read(chipsValueProvider.notifier).state = amount;
+    ref.read(isThereABetProvider.notifier).state = true;
+    ref.read(typeOfBetProvider.notifier).state = "call";
+    Navigator.pop(context);
+  }
 
   void foldHand() async {
     var body = {
