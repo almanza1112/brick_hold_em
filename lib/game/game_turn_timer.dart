@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:brick_hold_em/game/turn_player_progress_indicator.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:brick_hold_em/game/progress_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -46,7 +47,7 @@ class GameTurnTimerState extends ConsumerState {
   }
 
   Widget turnPlayerTimer() {
-    int countdown = 30;
+    double countdown = 30;
 
     final liveTurnPlayer = ref.watch(turnPlayerProvider);
 
@@ -66,7 +67,7 @@ class GameTurnTimerState extends ConsumerState {
             });
 
             return Positioned(
-              top: 40,
+              bottom: 0,
               left: 0,
               right: 0,
               child: StatefulBuilder(builder: (context, setState) {
@@ -90,10 +91,7 @@ class GameTurnTimerState extends ConsumerState {
 
                 return Column(
                   children: [
-                    Text(
-                      "IT'S YOUR TURN",
-                      style: turnPlayerTextStyle,
-                    ),
+                    const TurnPlayerProgressIndicator(),
                     Text(
                       "$countdown",
                       style: turnPlayerTextStyle,
