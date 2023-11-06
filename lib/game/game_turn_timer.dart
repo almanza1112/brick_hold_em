@@ -47,7 +47,7 @@ class GameTurnTimerState extends ConsumerState {
   }
 
   Widget turnPlayerTimer() {
-    double countdown = 30;
+    int countdown = 30;
 
     final liveTurnPlayer = ref.watch(turnPlayerProvider);
 
@@ -89,12 +89,14 @@ class GameTurnTimerState extends ConsumerState {
                   //ranOutOfTime();
                 }
 
-                return Column(
+                return Stack(
                   children: [
                     const TurnPlayerProgressIndicator(),
-                    Text(
-                      "$countdown",
-                      style: turnPlayerTextStyle,
+                    Center(
+                      child: Text(
+                        "$countdown",
+                        style: turnPlayerTextStyle,
+                      ),
                     )
                   ],
                 );

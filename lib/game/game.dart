@@ -41,80 +41,87 @@ class GamePageState extends ConsumerState<GamePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green[700],
-      body: Stack(
-        children: [
-          const GameCards(),
-          if (ref.read(isThereAWinnerProvider) == false) const GameTurnTimer(),
-          const GamePlayers(),
-          GameSideMenu(),
-          // IgnorePointer(
-          //   child: Hero(
-          //     tag: 'videoPlayer',
-          //     child: widget.controller.value.isInitialized
-          //         ? VideoPlayer(widget.controller)
-          //         : const SizedBox.shrink(),
-          //   ),
-          // ),
-          Center(
-            child: StreamBuilder(
-                stream: winnerRef.onValue,
-                builder: ((context, snapshot) {
-                  if (snapshot.hasError) {
-                    return const Text("Error");
-                  }
-
-                  if (snapshot.hasData) {
-                    final data = snapshot.data!.snapshot.value;
-
-                    if (data == "none") {
-                      // There is no winner
-
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        ref.read(isThereAWinnerProvider.notifier).state = false;
-                      });
-
-                      return const SizedBox.shrink();
-                    } else {
-                      // There is a winner
-
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        ref.read(isThereAWinnerProvider.notifier).state = true;
-                      });
-                      
-                      if (data == uid) {
-                        // You are the winner
-                        return BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                            child: const Text(
-                              "YOU WON!",
-                              style: TextStyle(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.amber),
-                            ));
-                      } else {
-                        // Another player is the winner
-                        final otherPlayersList =
-                            ref.read(otherPlayersInformationProvider);
-                        late Player winningPlayer;
-                        for (var player in otherPlayersList) {
-                          if (data == winningPlayer.uid) {
-                            winningPlayer = player;
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        
+        child: Container(
+          color: Colors.green[700],
+          child: Stack(
+            
+            children: [
+              const GameCards(),
+              if (ref.read(isThereAWinnerProvider) == false) const GameTurnTimer(),
+              const GamePlayers(),
+              GameSideMenu(),
+              // IgnorePointer(
+              //   child: Hero(
+              //     tag: 'videoPlayer',
+              //     child: widget.controller.value.isInitialized
+              //         ? VideoPlayer(widget.controller)
+              //         : const SizedBox.shrink(),
+              //   ),
+              // ),
+              Center(
+                child: StreamBuilder(
+                    stream: winnerRef.onValue,
+                    builder: ((context, snapshot) {
+                      if (snapshot.hasError) {
+                        return const Text("Error");
+                      }
+              
+                      if (snapshot.hasData) {
+                        final data = snapshot.data!.snapshot.value;
+              
+                        if (data == "none") {
+                          // There is no winner
+              
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            ref.read(isThereAWinnerProvider.notifier).state = false;
+                          });
+              
+                          return const SizedBox.shrink();
+                        } else {
+                          // There is a winner
+              
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            ref.read(isThereAWinnerProvider.notifier).state = true;
+                          });
+                          
+                          if (data == uid) {
+                            // You are the winner
+                            return BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                                child: const Text(
+                                  "YOU WON!",
+                                  style: TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.amber),
+                                ));
+                          } else {
+                            // Another player is the winner
+                            final otherPlayersList =
+                                ref.read(otherPlayersInformationProvider);
+                            late Player winningPlayer;
+                            for (var player in otherPlayersList) {
+                              if (data == winningPlayer.uid) {
+                                winningPlayer = player;
+                              }
+                            }
+              
+                            return BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                child: const Text("THEY WON"));
                           }
                         }
-
-                        return BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                            child: const Text("THEY WON"));
+                      } else {
+                        return const CircularProgressIndicator();
                       }
-                    }
-                  } else {
-                    return const CircularProgressIndicator();
-                  }
-                })),
-          )
-        ],
+                    })),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }

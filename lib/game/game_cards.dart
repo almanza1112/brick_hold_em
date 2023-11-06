@@ -4,6 +4,7 @@ import 'package:brick_hold_em/game/card_rules.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -30,6 +31,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   double handCardHeight = 70;
   double tableCardWidth = 40;
   double tableCardHeight = 56;
+  final double tableCardsYPos = 350;
 
   final uid = FirebaseAuth.instance.currentUser!.uid;
   List<Widget> tappedCards = <Widget>[];
@@ -94,16 +96,20 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   Widget build(BuildContext context) {
     print('build game_cards');
     return SafeArea(
-      child: Stack(
-        children: [
-          playerCards(),
-          fiveCardBorders(),
-          faceUpCard(),
-          deck(),
-          buttons(),
-        ],
+      child: LayoutBuilder(
+        builder: ((BuildContext context, BoxConstraints constraints) {
+          return Stack(
+            children: [
+              playerCards(),
+              fiveCardBorders(constraints),
+              faceUpCard(constraints),
+              deck(constraints),
+              buttons(),
+            ],
+          );
+        }
       ),
-    );
+    ));
   }
 
   Widget playerCards() {
@@ -111,7 +117,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
       child: Stack(children: [
         Positioned(
           right: 0,
-          bottom: 50,
+          bottom: 100,
           left: 0,
           child: FutureBuilder<List<String>>(
               future: _cardsSnapshot,
@@ -235,66 +241,68 @@ Widget playerCards() {
 
    */
 
-  Widget deck() {
-    return Center(
-        child: GestureDetector(
-            onTap: () {
-              // Make sure it is players turn and if player has not drawn a card yet
-              if (ref.read(didPlayerAddCardThisTurnProvider) == false &&
-                  ref.read(isPlayersTurnProvider) == true) {
-                addCard();
-              }
-            },
-            child: Container(
-              width: tableCardWidth,
-              height: tableCardHeight,
-              color: Colors.blueAccent,
-              child: Stack(
-                children: [
-                  Image.asset(
-                    "assets/images/backside.png",
-                    fit: BoxFit.cover,
-                    width: tableCardWidth,
-                    height: tableCardHeight,
-                  ),
-                  Center(
-                    child: StreamBuilder(
-                        stream: deckCountListener.onValue,
-                        builder: ((context, snapshot) {
-                          if (snapshot.hasError) {
-                            return const CircularProgressIndicator();
-                          }
-
-                          if (snapshot.hasData) {
-                            int count = (snapshot.data!).snapshot.value as int;
-
-                            return Text(
-                              "$count",
-                              style: const TextStyle(
-                                  color: Colors.amberAccent,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800),
-                            );
-                          } else {
-                            return const Text("n");
-                          }
-                        })),
-                  )
-                ],
-              ),
-            )));
+  Widget deck(var constraints) {
+    return Positioned(
+      top: tableCardsYPos,
+      left: (constraints.constrainWidth() / 2) - ((tableCardWidth * 3) + 15),
+      child: GestureDetector(
+          onTap: () {
+            // Make sure it is players turn and if player has not drawn a card yet
+            if (ref.read(didPlayerAddCardThisTurnProvider) == false &&
+                ref.read(isPlayersTurnProvider) == true) {
+              addCard();
+            }
+          },
+          child: Container(
+            width: tableCardWidth,
+            height: tableCardHeight,
+            color: Colors.blueAccent,
+            child: Stack(
+              children: [
+                Image.asset(
+                  "assets/images/backside.png",
+                  fit: BoxFit.cover,
+                  width: tableCardWidth,
+                  height: tableCardHeight,
+                ),
+                Center(
+                  child: StreamBuilder(
+                      stream: deckCountListener.onValue,
+                      builder: ((context, snapshot) {
+                        if (snapshot.hasError) {
+                          return const CircularProgressIndicator();
+                        }
+    
+                        if (snapshot.hasData) {
+                          int count = (snapshot.data!).snapshot.value as int;
+    
+                          return Text(
+                            "$count",
+                            style: const TextStyle(
+                                color: Colors.amberAccent,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800),
+                          );
+                        } else {
+                          return const Text("n");
+                        }
+                      })),
+                )
+              ],
+            ),
+          )),
+    );
   }
 
-  Widget fiveCardBorders() {
-    return SafeArea(child: LayoutBuilder(
-        builder: ((BuildContext context, BoxConstraints constraints) {
+  Widget fiveCardBorders(var constraints) {
+    
       return Stack(
         children: [
           // Red dot posiition 1
           Positioned(
-              top: (constraints.constrainHeight() / 2) + 50,
+              top: tableCardsYPos,
               left: (constraints.constrainWidth() / 2) -
-                  ((tableCardWidth * 2.5) + 10),
+                  ((tableCardWidth * 2) + 10),
               child: const SizedBox(
                   height: 70,
                   width: 50,
@@ -308,9 +316,9 @@ Widget playerCards() {
 
           // Red dot posiition 2
           Positioned(
-              top: (constraints.constrainHeight() / 2) + 50,
+              top: tableCardsYPos,
               left: (constraints.constrainWidth() / 2) -
-                  ((tableCardWidth * 1.5) + 5),
+                  ((tableCardWidth * 1) + 5),
               child: const SizedBox(
                   height: 70,
                   width: 50,
@@ -324,8 +332,8 @@ Widget playerCards() {
 
           // Red dot posiition 3
           Positioned(
-              top: (constraints.constrainHeight() / 2) + 50,
-              left: (constraints.constrainWidth() / 2) - (tableCardWidth / 2),
+              top: tableCardsYPos,
+              left: (constraints.constrainWidth() / 2),
               child: const SizedBox(
                   height: 70,
                   width: 50,
@@ -339,9 +347,9 @@ Widget playerCards() {
 
           // Red dot posiition 4
           Positioned(
-              top: (constraints.constrainHeight() / 2) + 50,
+              top: tableCardsYPos,
               left: (constraints.constrainWidth() / 2) +
-                  ((tableCardWidth / 2) + 5),
+                  ((tableCardWidth * 1) + 5),
               child: const SizedBox(
                   height: 70,
                   width: 50,
@@ -355,9 +363,9 @@ Widget playerCards() {
 
           // Red dot posiition 5
           Positioned(
-              top: (constraints.constrainHeight() / 2) + 50,
+              top: tableCardsYPos,
               left: (constraints.constrainWidth() / 2) +
-                  ((tableCardWidth * 1.5) + 10),
+                  ((tableCardWidth * 2) + 10),
               child: const SizedBox(
                   height: 70,
                   width: 50,
@@ -371,7 +379,7 @@ Widget playerCards() {
 
           // Card position #1 (faceUpCard)
           Positioned(
-              top: (constraints.constrainHeight() / 2) + 50,
+              top: tableCardsYPos,
               left: (constraints.constrainWidth() / 2) -
                   ((tableCardWidth * 2.5) + 10),
               child: Container(
@@ -383,12 +391,12 @@ Widget playerCards() {
 
           // Card position #2
           AnimatedPositioned(
-              top: (constraints.constrainHeight() / 2) + 50,
+              top: tableCardsYPos,
               left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
                       ((tableCardWidth * 2.5) + 10)
                   : (constraints.constrainWidth() / 2) -
-                      ((tableCardWidth * 1.5) + 5),
+                      ((tableCardWidth * 1) + 5),
               duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
@@ -401,11 +409,11 @@ Widget playerCards() {
 
           // Card position #3
           AnimatedPositioned(
-              top: (constraints.constrainHeight() / 2) + 50,
+              top: tableCardsYPos,
               left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
                       ((tableCardWidth * 2.5) + 10)
-                  : (constraints.constrainWidth() / 2) - (tableCardWidth / 2),
+                  : (constraints.constrainWidth() / 2),
               duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
@@ -418,12 +426,12 @@ Widget playerCards() {
 
           // Card position #4
           AnimatedPositioned(
-              top: (constraints.constrainHeight() / 2) + 50,
+              top: tableCardsYPos,
               left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
                       ((tableCardWidth * 2.5) + 10)
                   : (constraints.constrainWidth() / 2) +
-                      ((tableCardWidth / 2) + 5),
+                      ((tableCardWidth * 1) + 5),
               duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
@@ -436,12 +444,12 @@ Widget playerCards() {
 
           //Card position #5
           AnimatedPositioned(
-              top: (constraints.constrainHeight() / 2) + 50,
+              top: tableCardsYPos,
               left: ref.read(isPlayButtonSelectedProvider)
                   ? (constraints.constrainWidth() / 2) -
                       ((tableCardWidth * 2.5) + 10)
                   : (constraints.constrainWidth() / 2) +
-                      ((tableCardWidth * 1.5) + 10),
+                      ((tableCardWidth * 2) + 10),
               duration: tableCardAnimationDuration,
               child: Container(
                 //margin: const EdgeInsets.all(15.0),
@@ -453,7 +461,7 @@ Widget playerCards() {
               )),
         ],
       );
-    })));
+    
   }
 
   Future<List<String>> cardsSnapshot() async {
@@ -771,22 +779,20 @@ Widget playerCards() {
     }
   }
 
-  Widget faceUpCard() {
-    return SafeArea(child: LayoutBuilder(
-        builder: ((BuildContext context, BoxConstraints constraints) {
-      constrainWidth = constraints.constrainWidth();
-      constrainHeight = constraints.constrainHeight();
+  Widget faceUpCard(var constraints) {
+      // commented out since position will be relative to top of the screen and not the center
+      //constrainHeight = constraints.constrainHeight();
       return Stack(
         children: [
           Positioned(
-              top: (constraints.constrainHeight() / 2) + 50,
+              //top: (constraints.constrainHeight() / 2) + 50,
+              top: tableCardsYPos,
               left: (constraints.constrainWidth() / 2) -
-                  ((tableCardWidth * 2.5) + 10),
+                  ((tableCardWidth * 2) + 10),
               child: GestureDetector(
                   onTap: getPreviousMove, child: faceUpCardImage()))
         ],
       );
-    })));
   }
 
   Widget faceUpCardImage() {
@@ -824,7 +830,7 @@ Widget playerCards() {
           final turnPlayerUid = event.snapshot.value;
           if (turnPlayerUid == playerPosition) {
             return Positioned(
-              bottom: 0,
+              bottom: 40,
               left: leftPosition,
               right: rightPosition,
               child: Padding(
@@ -952,8 +958,16 @@ Widget playerCards() {
             sendPlay(body);
           } else {
             // There is no bet or call made, prompt user
-            const snackBar = SnackBar(
+            var snackBar = SnackBar(
               content: Text('You need to either call or raise'),
+              dismissDirection: DismissDirection.up,
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.only(
+                bottom: MediaQuery.of(context).size.height - 130,
+                left: 10,
+                right: 10,
+
+              ),
             );
 
             ScaffoldMessenger.of(context).showSnackBar(snackBar);

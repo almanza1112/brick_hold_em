@@ -246,11 +246,11 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                       streamedChipCount(player)
                     ],
                   ),
-                if (!playerDetailsVisible)
-                  const Text(
-                    "Waiting..",
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  )
+                // if (!playerDetailsVisible)
+                //   const Text(
+                //     "Waiting..",
+                //     style: TextStyle(color: Colors.white, fontSize: 12),
+                //   )
               ],
             ),
           ),

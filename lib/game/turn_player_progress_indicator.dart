@@ -22,7 +22,6 @@ class _TurnPlayerProgressIndicatorState
     )..addListener(() {
         setState(() {});
       });
-    controller.repeat(reverse: false);
     super.initState();
   }
 
@@ -32,11 +31,21 @@ class _TurnPlayerProgressIndicatorState
     super.dispose();
   }
 
+    @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller.forward(); // Start the animation when the widget is first built
+  }
+
   @override
   Widget build(BuildContext context) {
     return LinearProgressIndicator(
       value: controller.value,
       semanticsLabel: 'Linear progress indicator',
+      valueColor:
+          AlwaysStoppedAnimation<Color>(Colors.blue), // Customize the color
+      backgroundColor: Colors.grey, // Customize the background color
+      minHeight: 30, // Adjust the height to make it thicker
     );
   }
 }
