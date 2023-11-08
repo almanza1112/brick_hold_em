@@ -44,91 +44,67 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(children: [
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        Positioned(
-          bottom: 0,
-          child: Container(
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: const Icon(
-                            Icons.close,
-                            color: Colors.white,
-                          )),
-                    ),
-                    Center(
-                      child: CircleAvatar(
-                        backgroundImage: NetworkImage(widget.player.photoURL),
-                        radius: 60,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20, bottom: 20),
-                      child: Center(
-                          child: Text(
-                        widget.player.name!,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 20),
+    return SingleChildScrollView(
+      child: Container(
+          color: Colors.blue,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8, right: 8, bottom: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white,
                       )),
+                ),
+                Center(
+                  child: CircleAvatar(
+                    backgroundImage: NetworkImage(widget.player.photoURL),
+                    radius: 60,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20, bottom: 20),
+                  child: Center(
+                      child: Text(
+                    widget.player.name!,
+                    style: const TextStyle(color: Colors.white, fontSize: 20),
+                  )),
+                ),
+                //const Expanded(child: SizedBox.shrink()),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment
+                      .spaceEvenly, // use whichever suits your need
+    
+                  children: [
+                    Expanded(flex: 1, child: friendStatusOnButton()),
+                    const SizedBox(
+                      width: 10,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12, right: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment
-                            .spaceEvenly, // use whichever suits your need
-
-                        children: [
-                          Expanded(flex: 1, child: friendStatusOnButton()),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  reportPlayer();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey[100]),
-                                child: Text(
-                                  'REPORT',
-                                  style: reportButtonTextStyle,
-                                )),
-                          ),
-                        ],
-                      ),
+                    Expanded(
+                      flex: 1,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            reportPlayer();
+                          },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey[100]),
+                          child: Text(
+                            'REPORT',
+                            style: reportButtonTextStyle,
+                          )),
                     ),
                   ],
                 ),
-              )),
-        ),
-      ]),
+              ],
+            ),
+          )),
     );
   }
 

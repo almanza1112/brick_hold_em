@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:animations/animations.dart';
 import 'package:brick_hold_em/game/player.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,7 +12,6 @@ import 'package:video_player/video_player.dart';
 import 'package:brick_hold_em/game/game_cards.dart';
 import 'package:brick_hold_em/game/game_players.dart';
 
-import 'game_sidemenu.dart';
 import 'game_turn_timer.dart';
 
 class GamePage extends ConsumerStatefulWidget {
@@ -30,6 +30,8 @@ class GamePageState extends ConsumerState<GamePage> {
       FirebaseDatabase.instance.ref('tables/1/winner');
   final uid = FirebaseAuth.instance.currentUser!.uid;
 
+  TextStyle menuTextStyle = TextStyle(color: Colors.grey[800]);
+
   @override
   void initState() {
     Future.delayed(const Duration(seconds: 2)).then((val) {
@@ -42,17 +44,19 @@ class GamePageState extends ConsumerState<GamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      drawer: menu(),
+      endDrawer: chat(),
       body: SafeArea(
-        
         child: Container(
           color: Colors.green[700],
           child: Stack(
-            
             children: [
               const GameCards(),
-              if (ref.read(isThereAWinnerProvider) == false) const GameTurnTimer(),
+              if (ref.read(isThereAWinnerProvider) == false)
+                const GameTurnTimer(),
               const GamePlayers(),
-              GameSideMenu(),
+              drawerButton(),
+              endDrawerButton(),
               // IgnorePointer(
               //   child: Hero(
               //     tag: 'videoPlayer',
@@ -68,25 +72,27 @@ class GamePageState extends ConsumerState<GamePage> {
                       if (snapshot.hasError) {
                         return const Text("Error");
                       }
-              
+
                       if (snapshot.hasData) {
                         final data = snapshot.data!.snapshot.value;
-              
+
                         if (data == "none") {
                           // There is no winner
-              
+
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            ref.read(isThereAWinnerProvider.notifier).state = false;
+                            ref.read(isThereAWinnerProvider.notifier).state =
+                                false;
                           });
-              
+
                           return const SizedBox.shrink();
                         } else {
                           // There is a winner
-              
+
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            ref.read(isThereAWinnerProvider.notifier).state = true;
+                            ref.read(isThereAWinnerProvider.notifier).state =
+                                true;
                           });
-                          
+
                           if (data == uid) {
                             // You are the winner
                             return BackdropFilter(
@@ -108,7 +114,7 @@ class GamePageState extends ConsumerState<GamePage> {
                                 winningPlayer = player;
                               }
                             }
-              
+
                             return BackdropFilter(
                                 filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                                 child: const Text("THEY WON"));
@@ -131,5 +137,119 @@ class GamePageState extends ConsumerState<GamePage> {
     if (mounted) {
       super.setState(fn);
     }
+  }
+
+  Widget drawerButton() {
+    return Builder(builder: (context) {
+      return IconButton(
+          onPressed: () {
+            Scaffold.of(context).openDrawer();
+          },
+          color: Colors.white,
+          icon: const Icon(Icons.menu));
+    });
+  }
+
+  Widget endDrawerButton() {
+    return Positioned(
+      right: 0,
+      child: Builder(
+          builder: (context) => IconButton(
+              onPressed: () => Scaffold.of(context).openEndDrawer(),
+              icon: const Icon(
+                Icons.chat_rounded,
+                color: Colors.white,
+              ))),
+    );
+  }
+
+  Widget menu() {
+    return Drawer(
+      backgroundColor: Colors.amber,
+      child: ListView(
+        children: <Widget>[
+          ListTile(
+            contentPadding:
+                const EdgeInsets.only(left: 12, top: 16, bottom: 16),
+            title: Text(
+              "MENU",
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800]),
+            ),
+            trailing: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.close, color: Colors.grey[800]),
+            ),
+          ),
+
+          // Exit Table
+          ListTile(
+            title: Text(
+              "Exit Table",
+              style: menuTextStyle,
+            ),
+            leading: Icon(
+              Icons.exit_to_app,
+              color: Colors.grey[800],
+            ),
+            minLeadingWidth: 12,
+            onTap: () {},
+          ),
+
+          // Buy Chips
+          ListTile(
+            title: Text(
+              "Buy Chips",
+              style: menuTextStyle,
+            ),
+            leading: Icon(Icons.money, color: Colors.grey[800]),
+            minLeadingWidth: 12,
+            onTap: () {},
+          ),
+
+          // Invite Friends
+          ListTile(
+            title: Text(
+              "Invite Friends",
+              style: menuTextStyle,
+            ),
+            leading: Icon(Icons.group, color: Colors.grey[800]),
+            minLeadingWidth: 12,
+            onTap: () {},
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget chat() {
+    return Drawer(
+      backgroundColor: Colors.black,
+      child: ListView(
+        children: <Widget>[
+          ListTile(
+            title: Text(
+              "CHAT",
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
+            ),
+          ),
+          //Expanded(child: child)
+        ],
+      ),
+    );
+  }
+
+  removePlayer() async {
+    var uid = FirebaseAuth.instance.currentUser!.uid;
+    DatabaseReference database =
+        FirebaseDatabase.instance.ref('tables/1/players/$uid');
+    database.remove();
   }
 }

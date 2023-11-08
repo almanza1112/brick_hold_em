@@ -6,8 +6,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'player_profile_page_builder.dart';
-
 class GamePlayers extends ConsumerStatefulWidget {
   const GamePlayers({
     Key? key,
@@ -46,25 +44,26 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                   child: Text("Error returning stream of players data"),
                 );
               }
-          
+
               if (snapshot.hasData) {
                 List<Player> otherPlayersList = [];
                 List<int> otherPlayersKeys = [];
                 late int playerKey;
-          
+
                 // Loop through each child from list returned and assign keys
                 for (final child in snapshot.data!.snapshot.children) {
-                  final childObj = Map<String, dynamic>.from(child.value as Map);
+                  final childObj =
+                      Map<String, dynamic>.from(child.value as Map);
                   if (childObj['uid'] != uid) {
                     final data = Player.fromMap(childObj);
                     otherPlayersList.add(data);
-          
+
                     otherPlayersKeys.add(int.parse(child.key.toString()));
                   } else {
                     playerKey = int.parse(child.key.toString());
                   }
                 }
-          
+
                 // Make current player the center of the table and reassign
                 // rest of the other players keys
                 List<int> adjustedOtherPlayersKeys = [];
@@ -78,18 +77,19 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                     adjustedOtherPlayersKeys.add(difference);
                   }
                 }
-          
+
                 // Update the StateProvider
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  ref.read(otherPlayersAdjustedPositionsProvider.notifier).state =
-                      adjustedOtherPlayersKeys;
-          
+                  ref
+                      .read(otherPlayersAdjustedPositionsProvider.notifier)
+                      .state = adjustedOtherPlayersKeys;
+
                   ref.read(playerPositionProvider.notifier).state = playerKey;
-          
+
                   ref.read(otherPlayersInformationProvider.notifier).state =
                       otherPlayersList;
                 });
-          
+
                 List<Player> playersList = <Player>[];
                 Player noOne = Player(username: "", photoURL: "", uid: '');
                 for (int i = 0; i < 5; i++) {
@@ -100,10 +100,9 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                     playersList.add(noOne);
                   }
                 }
-          
+
                 return Stack(
                   children: [
-                    
                     // Bottom Right Player
                     Positioned(
                       bottom: 0,
@@ -117,18 +116,18 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                       right: 0,
                       child: player(playersList[1], 1),
                     ),
-                    
+
                     // Top Middle Player
                     Positioned(
                         top: 50,
                         left: 0,
                         right: 0,
                         child: player(playersList[2], 2)),
-                    
+
                     // Top Left Player
                     Positioned(
                         top: 180, left: 0, child: player(playersList[3], 3)),
-                    
+
                     // Bottom Left Player
                     Positioned(
                         left: 0, bottom: 0, child: player(playersList[4], 4)),
@@ -169,14 +168,10 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
     return GestureDetector(
       onTap: () {
         if (playerDetailsVisible) {
-          Navigator.push(
-            context,
-            PlayerProfilePageBuilder(
-              widget: PlayerProfilePage(
-                player: player,
-              ),
-            ),
-          );
+          showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (_) => PlayerProfilePage(player: player));
         }
       },
       child: Column(
@@ -287,9 +282,10 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
 
   Widget streamedChipCount(Player player) {
     return StreamBuilder(
-        stream: FirebaseDatabase.instance.ref('tables/1/chips/${player.uid}/chipCount').onValue,
+        stream: FirebaseDatabase.instance
+            .ref('tables/1/chips/${player.uid}/chipCount')
+            .onValue,
         builder: (context, snapshot) {
-          
           if (snapshot.hasError) {
             // TODO: show error
           }
