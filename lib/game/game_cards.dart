@@ -95,21 +95,20 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   @override
   Widget build(BuildContext context) {
     print('build game_cards');
-    return SafeArea(
-      child: LayoutBuilder(
-        builder: ((BuildContext context, BoxConstraints constraints) {
-          return Stack(
-            children: [
-              playerCards(),
-              fiveCardBorders(constraints),
-              faceUpCard(constraints),
-              deck(constraints),
-              buttons(),
-            ],
-          );
-        }
-      ),
-    ));
+    return LayoutBuilder(
+      builder: ((BuildContext context, BoxConstraints constraints) {
+        return Stack(
+          children: [
+            playerCards(),
+            fiveCardBorders(constraints),
+            faceUpCard(constraints),
+            deck(constraints),
+            buttons(),
+          ],
+        );
+      }
+    ),
+    );
   }
 
   Widget playerCards() {
@@ -1068,107 +1067,116 @@ Widget playerCards() {
   void betModal() {
     showModalBottomSheet(
         context: context,
-        builder: (_) => Container(
-              color: Colors.green,
-              child: Material(
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(20),
+          )
+        ),
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        builder: (_) => SingleChildScrollView(
+          child: Container(
                 color: Colors.green,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    //mainAxisAlignment: MainAxisAlignment.center,
-                    //crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      const Center(
-                          child: Text(
-                        'Bet',
-                        style: TextStyle(
-                            fontSize: 24,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.none),
-                      )),
-                      const Expanded(child: SizedBox.shrink()),
-                      if (ref.read(doYouNeedToCallProvider))
-                        Center(
-                          child: Text(
-                            '${ref.read(toCallAmmount)} to call',
-                            style: const TextStyle(
-                                fontSize: 18, color: Colors.white),
+                child: Material(
+                  color: Colors.green,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      //mainAxisAlignment: MainAxisAlignment.center,
+                      //crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const Center(
+                            child: Text(
+                          'Bet',
+                          style: TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.none),
+                        )),
+                        //const Expanded(child: SizedBox.shrink()),
+                        if (ref.read(doYouNeedToCallProvider))
+                          Center(
+                            child: Text(
+                              '${ref.read(toCallAmmount)} to call',
+                              style: const TextStyle(
+                                  fontSize: 18, color: Colors.white),
+                            ),
                           ),
+                        const SizedBox(
+                          height: 36,
                         ),
-                      const SizedBox(
-                        height: 36,
-                      ),
-                      StatefulBuilder(builder: (context, setState) {
-                        return Column(
-                          children: [
-                            Slider(
-                                max: 1000,
-                                thumbColor: Colors.amber,
-                                activeColor: Colors.amber,
-                                inactiveColor: Colors.white,
-                                value: currentSliderValue,
-                                onChanged: (value) {
-                                  setState(() {
-                                    currentSliderValue = value;
-                                  });
-                                }),
-                            Text(currentSliderValue.round().toString())
+                        StatefulBuilder(builder: (context, setState) {
+                          return Column(
+                            children: [
+                              Slider(
+                                  max: 1000,
+                                  thumbColor: Colors.amber,
+                                  activeColor: Colors.amber,
+                                  inactiveColor: Colors.white,
+                                  value: currentSliderValue,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      currentSliderValue = value;
+                                    });
+                                  }),
+                              Text(currentSliderValue.round().toString())
+                            ],
+                          );
+                        }),
+                        const SizedBox(
+                          height: 54,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    shape: const CircleBorder(),
+                                    padding: const EdgeInsets.all(24)),
+                                onPressed: foldHand,
+                                child: const Text(
+                                  'FOLD',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                )),
+                            ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.amber,
+                                    shape: const CircleBorder(),
+                                    padding: const EdgeInsets.all(24)),
+                                onPressed: raiseBet,
+                                child: const Text(
+                                  'RAISE',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                )),
+                            ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.amber,
+                                    shape: const CircleBorder(),
+                                    padding: const EdgeInsets.all(24)),
+                                onPressed: callBet,
+                                child: const Text(
+                                  'CALL',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                )),
                           ],
-                        );
-                      }),
-                      const SizedBox(
-                        height: 54,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  shape: const CircleBorder(),
-                                  padding: const EdgeInsets.all(24)),
-                              onPressed: foldHand,
-                              child: const Text(
-                                'FOLD',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.amber,
-                                  shape: const CircleBorder(),
-                                  padding: const EdgeInsets.all(24)),
-                              onPressed: raiseBet,
-                              child: const Text(
-                                'RAISE',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.amber,
-                                  shape: const CircleBorder(),
-                                  padding: const EdgeInsets.all(24)),
-                              onPressed: callBet,
-                              child: const Text(
-                                'CALL',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 12,
-                      )
-                    ],
+                        ),
+                        const SizedBox(
+                          height: 12,
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ));
+        ));
   }
 
   void raiseBet() {

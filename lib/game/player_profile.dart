@@ -77,7 +77,6 @@ class PlayerProfilePageState extends State<PlayerProfilePage> {
                     style: const TextStyle(color: Colors.white, fontSize: 20),
                   )),
                 ),
-                //const Expanded(child: SizedBox.shrink()),
                 Row(
                   mainAxisAlignment: MainAxisAlignment
                       .spaceEvenly, // use whichever suits your need

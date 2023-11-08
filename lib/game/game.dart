@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:animations/animations.dart';
+import 'package:brick_hold_em/game/game_chat.dart';
 import 'package:brick_hold_em/game/player.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -170,7 +171,7 @@ class GamePageState extends ConsumerState<GamePage> {
         children: <Widget>[
           ListTile(
             contentPadding:
-                const EdgeInsets.only(left: 12, top: 16, bottom: 16),
+                const EdgeInsets.only(left: 12, top: 4, bottom: 16),
             title: Text(
               "MENU",
               style: TextStyle(
@@ -227,23 +228,7 @@ class GamePageState extends ConsumerState<GamePage> {
   }
 
   Widget chat() {
-    return Drawer(
-      backgroundColor: Colors.black,
-      child: ListView(
-        children: <Widget>[
-          ListTile(
-            title: Text(
-              "CHAT",
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-          ),
-          //Expanded(child: child)
-        ],
-      ),
-    );
+    return const GameChat();
   }
 
   removePlayer() async {

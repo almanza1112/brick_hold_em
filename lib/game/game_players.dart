@@ -171,6 +171,11 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
           showModalBottomSheet(
               context: context,
               isScrollControlled: true,
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(
+                top: Radius.circular(20),
+              )),
+              clipBehavior: Clip.antiAliasWithSaveLayer,
               builder: (_) => PlayerProfilePage(player: player));
         }
       },
