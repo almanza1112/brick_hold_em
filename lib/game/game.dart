@@ -53,7 +53,7 @@ class GamePageState extends ConsumerState<GamePage> {
           child: Stack(
             children: [
               const GameCards(),
-              if (ref.read(isThereAWinnerProvider) == false)
+              //if (ref.read(isThereAWinnerProvider) == false)
                 const GameTurnTimer(),
               const GamePlayers(),
               drawerButton(),

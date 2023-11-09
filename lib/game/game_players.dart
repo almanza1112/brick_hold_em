@@ -33,111 +33,109 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SizedBox(
-        height: 550,
-        child: StreamBuilder(
-            stream: playersRef.onValue,
-            builder: ((context, snapshot) {
-              if (snapshot.hasError) {
-                return const Center(
-                  child: Text("Error returning stream of players data"),
-                );
+    return SizedBox(
+      height: 550,
+      child: StreamBuilder(
+          stream: playersRef.onValue,
+          builder: ((context, snapshot) {
+            if (snapshot.hasError) {
+              return const Center(
+                child: Text("Error returning stream of players data"),
+              );
+            }
+
+            if (snapshot.hasData) {
+              List<Player> otherPlayersList = [];
+              List<int> otherPlayersKeys = [];
+              late int playerKey;
+
+              // Loop through each child from list returned and assign keys
+              for (final child in snapshot.data!.snapshot.children) {
+                final childObj =
+                    Map<String, dynamic>.from(child.value as Map);
+                if (childObj['uid'] != uid) {
+                  final data = Player.fromMap(childObj);
+                  otherPlayersList.add(data);
+
+                  otherPlayersKeys.add(int.parse(child.key.toString()));
+                } else {
+                  playerKey = int.parse(child.key.toString());
+                }
               }
 
-              if (snapshot.hasData) {
-                List<Player> otherPlayersList = [];
-                List<int> otherPlayersKeys = [];
-                late int playerKey;
-
-                // Loop through each child from list returned and assign keys
-                for (final child in snapshot.data!.snapshot.children) {
-                  final childObj =
-                      Map<String, dynamic>.from(child.value as Map);
-                  if (childObj['uid'] != uid) {
-                    final data = Player.fromMap(childObj);
-                    otherPlayersList.add(data);
-
-                    otherPlayersKeys.add(int.parse(child.key.toString()));
-                  } else {
-                    playerKey = int.parse(child.key.toString());
-                  }
+              // Make current player the center of the table and reassign
+              // rest of the other players keys
+              List<int> adjustedOtherPlayersKeys = [];
+              for (int i = 0; i < otherPlayersKeys.length; i++) {
+                // You subtract by 1 since you to adjust for there only being positions
+                // 0-4 avaiable in the table
+                var difference = (otherPlayersKeys[i] - playerKey) - 1;
+                if (difference < 0) {
+                  adjustedOtherPlayersKeys.add(6 + difference);
+                } else {
+                  adjustedOtherPlayersKeys.add(difference);
                 }
-
-                // Make current player the center of the table and reassign
-                // rest of the other players keys
-                List<int> adjustedOtherPlayersKeys = [];
-                for (int i = 0; i < otherPlayersKeys.length; i++) {
-                  // You subtract by 1 since you to adjust for there only being positions
-                  // 0-4 avaiable in the table
-                  var difference = (otherPlayersKeys[i] - playerKey) - 1;
-                  if (difference < 0) {
-                    adjustedOtherPlayersKeys.add(6 + difference);
-                  } else {
-                    adjustedOtherPlayersKeys.add(difference);
-                  }
-                }
-
-                // Update the StateProvider
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  ref
-                      .read(otherPlayersAdjustedPositionsProvider.notifier)
-                      .state = adjustedOtherPlayersKeys;
-
-                  ref.read(playerPositionProvider.notifier).state = playerKey;
-
-                  ref.read(otherPlayersInformationProvider.notifier).state =
-                      otherPlayersList;
-                });
-
-                List<Player> playersList = <Player>[];
-                Player noOne = Player(username: "", photoURL: "", uid: '');
-                for (int i = 0; i < 5; i++) {
-                  int matchingIndex = adjustedOtherPlayersKeys.indexOf(i);
-                  if (matchingIndex != -1) {
-                    playersList.add(otherPlayersList[matchingIndex]);
-                  } else {
-                    playersList.add(noOne);
-                  }
-                }
-
-                return Stack(
-                  children: [
-                    // Bottom Right Player
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: player(playersList[0], 0),
-                    ),
-
-                    // Top Right Player
-                    Positioned(
-                      top: 180,
-                      right: 0,
-                      child: player(playersList[1], 1),
-                    ),
-
-                    // Top Middle Player
-                    Positioned(
-                        top: 50,
-                        left: 0,
-                        right: 0,
-                        child: player(playersList[2], 2)),
-
-                    // Top Left Player
-                    Positioned(
-                        top: 180, left: 0, child: player(playersList[3], 3)),
-
-                    // Bottom Left Player
-                    Positioned(
-                        left: 0, bottom: 0, child: player(playersList[4], 4)),
-                  ],
-                );
-              } else {
-                return const Text("something went wrong");
               }
-            })),
-      ),
+
+              // Update the StateProvider
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ref
+                    .read(otherPlayersAdjustedPositionsProvider.notifier)
+                    .state = adjustedOtherPlayersKeys;
+
+                ref.read(playerPositionProvider.notifier).state = playerKey;
+
+                ref.read(otherPlayersInformationProvider.notifier).state =
+                    otherPlayersList;
+              });
+
+              List<Player> playersList = <Player>[];
+              Player noOne = Player(username: "", photoURL: "", uid: '');
+              for (int i = 0; i < 5; i++) {
+                int matchingIndex = adjustedOtherPlayersKeys.indexOf(i);
+                if (matchingIndex != -1) {
+                  playersList.add(otherPlayersList[matchingIndex]);
+                } else {
+                  playersList.add(noOne);
+                }
+              }
+
+              return Stack(
+                children: [
+                  // Bottom Right Player
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: player(playersList[0], 0),
+                  ),
+
+                  // Top Right Player
+                  Positioned(
+                    top: 180,
+                    right: 0,
+                    child: player(playersList[1], 1),
+                  ),
+
+                  // Top Middle Player
+                  Positioned(
+                      top: 50,
+                      left: 0,
+                      right: 0,
+                      child: player(playersList[2], 2)),
+
+                  // Top Left Player
+                  Positioned(
+                      top: 180, left: 0, child: player(playersList[3], 3)),
+
+                  // Bottom Left Player
+                  Positioned(
+                      left: 0, bottom: 0, child: player(playersList[4], 4)),
+                ],
+              );
+            } else {
+              return const Text("something went wrong");
+            }
+          })),
     );
   }
 
@@ -206,7 +204,7 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                         children: [
                           Image.asset(
                             'assets/images/backside.png',
-                            height: 35,
+                            height: 35, // Must be same height as SizedBox below
                             width: 25,
                           ),
                           Align(
@@ -218,7 +216,7 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
             ],
           ),
           SizedBox(
-            height: 35,
+            height: 35, // Must be same height as Image.asset in stack above
             width: 100,
             child: Column(
               children: [

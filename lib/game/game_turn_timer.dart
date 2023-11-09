@@ -25,12 +25,7 @@ class GameTurnTimerState extends ConsumerState {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Stack(
-      children: <Widget>[
-        turnPlayerTimer(),
-      ],
-    ));
+    return turnPlayerTimer();
   }
 
   @override
@@ -119,16 +114,38 @@ class GameTurnTimerState extends ConsumerState {
             if (position < 0) {
               position = 6 + position;
             }
-            return Center(
-              child: SizedBox(
-                height: 450,
-                child: Stack(
-                  children: [
-                    ProgressIndicatorTurn(
-                      position: position as int,
-                    )
-                  ],
-                ),
+            return Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              top: 55,
+              child: Stack(
+                children: [
+                  SizedBox(
+                    // Got this number by subtracting 'top' num above with height of players sizedbox which is 550
+                    height: 495, 
+                    child: Stack(
+                      children: [
+                        ProgressIndicatorTurn(
+                          position: position as int,
+                        )
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                      bottom: 0,
+                      right: 0,
+                      left: 0,
+                      child: Container(
+                        height: 30,
+                        color: Colors.red,
+                        child: const Center(
+                            child: Text(
+                          "WAITING...",
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                        )),
+                      )),
+                ],
               ),
             );
           }

@@ -45,12 +45,14 @@ class ProgressIndicatorState extends State<ProgressIndicatorTurn>
     late double topNum, leftNum, rightNum;
     switch (widget.position) {
       case 0:
+        // Bottom right
         bottom = true;
         right = true;
         rightNum = 20;
         break;
 
       case 1:
+        // Top right
         top = true;
         right = true;
         topNum = 125;
@@ -58,6 +60,7 @@ class ProgressIndicatorState extends State<ProgressIndicatorTurn>
         break;
 
       case 2:
+        // Top center
         top = true;
         right = true;
         left = true;
@@ -67,6 +70,7 @@ class ProgressIndicatorState extends State<ProgressIndicatorTurn>
         break;
 
       case 3:
+        // Top left
         top = true;
         left = true;
         topNum = 125;
@@ -74,6 +78,7 @@ class ProgressIndicatorState extends State<ProgressIndicatorTurn>
         break;
 
       case 4:
+        // Bottom left
         bottom = true;
         left = true;
         leftNum = 20;
@@ -101,7 +106,7 @@ class ProgressIndicatorState extends State<ProgressIndicatorTurn>
         top: top ? topNum : null,
         right: right ? rightNum : null,
         left: left ? leftNum : null,
-        bottom: bottom ? 40 : null,
+        bottom: bottom ? 35 : null, // Must be same height as SizedBox in game_turn_timer
         child: SizedBox(
           height: 60,
           width: 60,

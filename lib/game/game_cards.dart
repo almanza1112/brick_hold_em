@@ -46,8 +46,9 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   DatabaseReference deckCountListener =
       FirebaseDatabase.instance.ref('tables/1/cards/dealer/deckCount');
-  
-  DatabaseReference potListener = FirebaseDatabase.instance.ref('tables/1/betting/pot');
+
+  DatabaseReference potListener =
+      FirebaseDatabase.instance.ref('tables/1/betting/pot');
 
   late DatabaseReference userChipCountListener;
 
@@ -110,6 +111,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
             faceUpCard(constraints),
             deck(constraints),
             buttons(),
+            animatedChipsToTable(constraints),
             userChips(constraints),
             tableChips(constraints),
           ],
@@ -785,32 +787,46 @@ Widget playerCards() {
 
   Widget tableChips(var constraints) {
     return Positioned(
-      top: 180,
-      left: (constraints.constrainWidth() /2) - (100 / 2),
-      child: SizedBox(
-        width: 100,
-        height: 100,
-        child: StreamBuilder(stream: potListener.onValue, builder: (((context, snapshot) {
+        top: 180,
+        left: (constraints.constrainWidth() / 2) - (100 / 2),
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: StreamBuilder(
+              stream: potListener.onValue,
+              builder: (((context, snapshot) {
+                if (snapshot.hasError) {
+                  return const CircularProgressIndicator();
+                }
 
-          if(snapshot.hasError){
-            return const CircularProgressIndicator();
-          }
-
-          if(snapshot.hasData){
-            var data = snapshot.data!.snapshot.value as Map<Object?, Object?>;
-            return Stack(
-              children: [
-                Center(child: Image.asset('assets/images/casino-chips.png', width: 50,)),
-                Center(child: Text("${data['pot1']}"),)
-              ],
-            );
-          } else {
-            return const Text('...');
-          }
-          
-        }))),
-      ));
+                if (snapshot.hasData) {
+                  var data =
+                      snapshot.data!.snapshot.value as Map<Object?, Object?>;
+                  return Stack(
+                    children: [
+                      Center(
+                          child: Image.asset(
+                        'assets/images/casino-chips.png',
+                        width: 50,
+                      )),
+                      Center(
+                        child: Text(
+                          "${data['pot1']}",
+                          style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white),
+                        ),
+                      )
+                    ],
+                  );
+                } else {
+                  return const Text('...');
+                }
+              }))),
+        ));
   }
+
   Widget faceUpCard(var constraints) {
     // commented out since position will be relative to top of the screen and not the center
     //constrainHeight = constraints.constrainHeight();
@@ -900,7 +916,7 @@ Widget playerCards() {
             return Positioned(
                 left: leftPosition,
                 right: rightPosition,
-                bottom: 0,
+                bottom: 40,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
@@ -987,6 +1003,7 @@ Widget playerCards() {
 
             body['bet'] = jsonEncode(bet);
 
+            startChipsAnimation();
             sendPlay(body);
           } else {
             // There is no bet or call made, prompt user
@@ -1004,6 +1021,8 @@ Widget playerCards() {
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
           }
         } else {
+          // You don't need to call or raise
+
           // Check if there is a bet pending with play
           if (ref.read(isThereABetProvider) == true) {
             var bet = {
@@ -1012,6 +1031,10 @@ Widget playerCards() {
             };
 
             body['bet'] = jsonEncode(bet);
+
+            // Since there is a bet user is making, start the 
+            // animation of the chips to table
+            startChipsAnimation();
           }
           sendPlay(body);
         }
@@ -1134,6 +1157,44 @@ Widget playerCards() {
             ],
           ),
         ));
+  }
+
+  double userChipsStartingPosYBottom = 190;
+  bool userChipsToTableVisibility = false;
+  Widget animatedChipsToTable(var constraints) {
+    return Visibility(
+      visible: userChipsToTableVisibility,
+      child: AnimatedPositioned(
+        left: (constraints.constrainWidth() / 2) - (50 / 2),
+        bottom: userChipsStartingPosYBottom,
+        duration: const Duration(milliseconds: 500),
+        onEnd: () {
+          setState(() {
+            userChipsToTableVisibility = false;
+          });
+          Future.delayed(const Duration(milliseconds: 100), () {
+            setState(() {
+              userChipsStartingPosYBottom = 190;
+            });
+          });
+        },
+        child: Image.asset(
+          'assets/images/casino-chips.png',
+          width: 50,
+        ),
+      ),
+    );
+  }
+
+  void startChipsAnimation() {
+    setState(() {
+      userChipsToTableVisibility = true;
+    });
+    Future.delayed(const Duration(milliseconds: 100), () {
+      setState(() {
+        userChipsStartingPosYBottom = 500;
+      });
+    });
   }
 
   void betModal() {
