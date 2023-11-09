@@ -4,7 +4,6 @@ import 'package:brick_hold_em/game/card_rules.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -47,6 +46,10 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   DatabaseReference deckCountListener =
       FirebaseDatabase.instance.ref('tables/1/cards/dealer/deckCount');
+  
+  DatabaseReference potListener = FirebaseDatabase.instance.ref('tables/1/betting/pot');
+
+  late DatabaseReference userChipCountListener;
 
   DatabaseReference movesRef = FirebaseDatabase.instance.ref('tables/1/moves');
 
@@ -80,6 +83,9 @@ class GameCardsPageState extends ConsumerState<GameCards> {
     playerCardCount =
         FirebaseDatabase.instance.ref('tables/1/cards/playerCards/$uid/hand');
 
+    userChipCountListener =
+        FirebaseDatabase.instance.ref('tables/1/chips/$uid/chipCount');
+
     // toCallRef.onValue.listen((event) {
     //   final data = event.snapshot.value as Map<Object?, Object?>;
     //   print("DATA: ${data['didAFullCircle']}");
@@ -104,10 +110,11 @@ class GameCardsPageState extends ConsumerState<GameCards> {
             faceUpCard(constraints),
             deck(constraints),
             buttons(),
+            userChips(constraints),
+            tableChips(constraints),
           ],
         );
-      }
-    ),
+      }),
     );
   }
 
@@ -271,10 +278,10 @@ Widget playerCards() {
                         if (snapshot.hasError) {
                           return const CircularProgressIndicator();
                         }
-    
+
                         if (snapshot.hasData) {
                           int count = (snapshot.data!).snapshot.value as int;
-    
+
                           return Text(
                             "$count",
                             style: const TextStyle(
@@ -294,173 +301,171 @@ Widget playerCards() {
   }
 
   Widget fiveCardBorders(var constraints) {
-    
-      return Stack(
-        children: [
-          // Red dot posiition 1
-          Positioned(
-              top: tableCardsYPos,
-              left: (constraints.constrainWidth() / 2) -
-                  ((tableCardWidth * 2) + 10),
-              child: const SizedBox(
-                  height: 70,
-                  width: 50,
-                  child: Center(
-                    child: Icon(
-                      Icons.circle_sharp,
-                      color: Colors.red,
-                      size: 12,
-                    ),
-                  ))),
-
-          // Red dot posiition 2
-          Positioned(
-              top: tableCardsYPos,
-              left: (constraints.constrainWidth() / 2) -
-                  ((tableCardWidth * 1) + 5),
-              child: const SizedBox(
-                  height: 70,
-                  width: 50,
-                  child: Center(
-                    child: Icon(
-                      Icons.circle_sharp,
-                      color: Colors.red,
-                      size: 12,
-                    ),
-                  ))),
-
-          // Red dot posiition 3
-          Positioned(
-              top: tableCardsYPos,
-              left: (constraints.constrainWidth() / 2),
-              child: const SizedBox(
-                  height: 70,
-                  width: 50,
-                  child: Center(
-                    child: Icon(
-                      Icons.circle_sharp,
-                      color: Colors.red,
-                      size: 12,
-                    ),
-                  ))),
-
-          // Red dot posiition 4
-          Positioned(
-              top: tableCardsYPos,
-              left: (constraints.constrainWidth() / 2) +
-                  ((tableCardWidth * 1) + 5),
-              child: const SizedBox(
-                  height: 70,
-                  width: 50,
-                  child: Center(
-                    child: Icon(
-                      Icons.circle_sharp,
-                      color: Colors.red,
-                      size: 12,
-                    ),
-                  ))),
-
-          // Red dot posiition 5
-          Positioned(
-              top: tableCardsYPos,
-              left: (constraints.constrainWidth() / 2) +
-                  ((tableCardWidth * 2) + 10),
-              child: const SizedBox(
-                  height: 70,
-                  width: 50,
-                  child: Center(
-                    child: Icon(
-                      Icons.circle_sharp,
-                      color: Colors.red,
-                      size: 12,
-                    ),
-                  ))),
-
-          // Card position #1 (faceUpCard)
-          Positioned(
-              top: tableCardsYPos,
-              left: (constraints.constrainWidth() / 2) -
-                  ((tableCardWidth * 2.5) + 10),
-              child: Container(
+    return Stack(
+      children: [
+        // Red dot posiition 1
+        Positioned(
+            top: tableCardsYPos,
+            left: (constraints.constrainWidth() / 2) -
+                ((tableCardWidth * 2) + 10),
+            child: const SizedBox(
                 height: 70,
                 width: 50,
-                // decoration: BoxDecoration(
-                //     border: Border.all(color: Colors.yellowAccent)),
-              )),
+                child: Center(
+                  child: Icon(
+                    Icons.circle_sharp,
+                    color: Colors.red,
+                    size: 12,
+                  ),
+                ))),
 
-          // Card position #2
-          AnimatedPositioned(
-              top: tableCardsYPos,
-              left: ref.read(isPlayButtonSelectedProvider)
-                  ? (constraints.constrainWidth() / 2) -
-                      ((tableCardWidth * 2.5) + 10)
-                  : (constraints.constrainWidth() / 2) -
-                      ((tableCardWidth * 1) + 5),
-              duration: tableCardAnimationDuration,
-              child: Container(
-                //margin: const EdgeInsets.all(15.0),
-                height: tableCardHeight,
-                width: tableCardWidth,
-                // decoration: BoxDecoration(
-                //     border: Border.all(color: Colors.yellowAccent)),
-                child: tableCard(0),
-              )),
+        // Red dot posiition 2
+        Positioned(
+            top: tableCardsYPos,
+            left:
+                (constraints.constrainWidth() / 2) - ((tableCardWidth * 1) + 5),
+            child: const SizedBox(
+                height: 70,
+                width: 50,
+                child: Center(
+                  child: Icon(
+                    Icons.circle_sharp,
+                    color: Colors.red,
+                    size: 12,
+                  ),
+                ))),
 
-          // Card position #3
-          AnimatedPositioned(
-              top: tableCardsYPos,
-              left: ref.read(isPlayButtonSelectedProvider)
-                  ? (constraints.constrainWidth() / 2) -
-                      ((tableCardWidth * 2.5) + 10)
-                  : (constraints.constrainWidth() / 2),
-              duration: tableCardAnimationDuration,
-              child: Container(
-                //margin: const EdgeInsets.all(15.0),
-                height: tableCardHeight,
-                width: tableCardWidth,
-                // decoration: BoxDecoration(
-                //     border: Border.all(color: Colors.yellowAccent)),
-                child: tableCard(1),
-              )),
+        // Red dot posiition 3
+        Positioned(
+            top: tableCardsYPos,
+            left: (constraints.constrainWidth() / 2),
+            child: const SizedBox(
+                height: 70,
+                width: 50,
+                child: Center(
+                  child: Icon(
+                    Icons.circle_sharp,
+                    color: Colors.red,
+                    size: 12,
+                  ),
+                ))),
 
-          // Card position #4
-          AnimatedPositioned(
-              top: tableCardsYPos,
-              left: ref.read(isPlayButtonSelectedProvider)
-                  ? (constraints.constrainWidth() / 2) -
-                      ((tableCardWidth * 2.5) + 10)
-                  : (constraints.constrainWidth() / 2) +
-                      ((tableCardWidth * 1) + 5),
-              duration: tableCardAnimationDuration,
-              child: Container(
-                //margin: const EdgeInsets.all(15.0),
-                height: tableCardHeight,
-                width: tableCardWidth,
-                // decoration: BoxDecoration(
-                //     border: Border.all(color: Colors.yellowAccent)),
-                child: tableCard(2),
-              )),
+        // Red dot posiition 4
+        Positioned(
+            top: tableCardsYPos,
+            left:
+                (constraints.constrainWidth() / 2) + ((tableCardWidth * 1) + 5),
+            child: const SizedBox(
+                height: 70,
+                width: 50,
+                child: Center(
+                  child: Icon(
+                    Icons.circle_sharp,
+                    color: Colors.red,
+                    size: 12,
+                  ),
+                ))),
 
-          //Card position #5
-          AnimatedPositioned(
-              top: tableCardsYPos,
-              left: ref.read(isPlayButtonSelectedProvider)
-                  ? (constraints.constrainWidth() / 2) -
-                      ((tableCardWidth * 2.5) + 10)
-                  : (constraints.constrainWidth() / 2) +
-                      ((tableCardWidth * 2) + 10),
-              duration: tableCardAnimationDuration,
-              child: Container(
-                //margin: const EdgeInsets.all(15.0),
-                height: tableCardHeight,
-                width: tableCardWidth,
-                //decoration: BoxDecoration(
-                //border: Border.all(color: Colors.yellowAccent)),
-                child: tableCard(3),
-              )),
-        ],
-      );
-    
+        // Red dot posiition 5
+        Positioned(
+            top: tableCardsYPos,
+            left: (constraints.constrainWidth() / 2) +
+                ((tableCardWidth * 2) + 10),
+            child: const SizedBox(
+                height: 70,
+                width: 50,
+                child: Center(
+                  child: Icon(
+                    Icons.circle_sharp,
+                    color: Colors.red,
+                    size: 12,
+                  ),
+                ))),
+
+        // Card position #1 (faceUpCard)
+        Positioned(
+            top: tableCardsYPos,
+            left: (constraints.constrainWidth() / 2) -
+                ((tableCardWidth * 2.5) + 10),
+            child: Container(
+              height: 70,
+              width: 50,
+              // decoration: BoxDecoration(
+              //     border: Border.all(color: Colors.yellowAccent)),
+            )),
+
+        // Card position #2
+        AnimatedPositioned(
+            top: tableCardsYPos,
+            left: ref.read(isPlayButtonSelectedProvider)
+                ? (constraints.constrainWidth() / 2) -
+                    ((tableCardWidth * 2.5) + 10)
+                : (constraints.constrainWidth() / 2) -
+                    ((tableCardWidth * 1) + 5),
+            duration: tableCardAnimationDuration,
+            child: Container(
+              //margin: const EdgeInsets.all(15.0),
+              height: tableCardHeight,
+              width: tableCardWidth,
+              // decoration: BoxDecoration(
+              //     border: Border.all(color: Colors.yellowAccent)),
+              child: tableCard(0),
+            )),
+
+        // Card position #3
+        AnimatedPositioned(
+            top: tableCardsYPos,
+            left: ref.read(isPlayButtonSelectedProvider)
+                ? (constraints.constrainWidth() / 2) -
+                    ((tableCardWidth * 2.5) + 10)
+                : (constraints.constrainWidth() / 2),
+            duration: tableCardAnimationDuration,
+            child: Container(
+              //margin: const EdgeInsets.all(15.0),
+              height: tableCardHeight,
+              width: tableCardWidth,
+              // decoration: BoxDecoration(
+              //     border: Border.all(color: Colors.yellowAccent)),
+              child: tableCard(1),
+            )),
+
+        // Card position #4
+        AnimatedPositioned(
+            top: tableCardsYPos,
+            left: ref.read(isPlayButtonSelectedProvider)
+                ? (constraints.constrainWidth() / 2) -
+                    ((tableCardWidth * 2.5) + 10)
+                : (constraints.constrainWidth() / 2) +
+                    ((tableCardWidth * 1) + 5),
+            duration: tableCardAnimationDuration,
+            child: Container(
+              //margin: const EdgeInsets.all(15.0),
+              height: tableCardHeight,
+              width: tableCardWidth,
+              // decoration: BoxDecoration(
+              //     border: Border.all(color: Colors.yellowAccent)),
+              child: tableCard(2),
+            )),
+
+        //Card position #5
+        AnimatedPositioned(
+            top: tableCardsYPos,
+            left: ref.read(isPlayButtonSelectedProvider)
+                ? (constraints.constrainWidth() / 2) -
+                    ((tableCardWidth * 2.5) + 10)
+                : (constraints.constrainWidth() / 2) +
+                    ((tableCardWidth * 2) + 10),
+            duration: tableCardAnimationDuration,
+            child: Container(
+              //margin: const EdgeInsets.all(15.0),
+              height: tableCardHeight,
+              width: tableCardWidth,
+              //decoration: BoxDecoration(
+              //border: Border.all(color: Colors.yellowAccent)),
+              child: tableCard(3),
+            )),
+      ],
+    );
   }
 
   Future<List<String>> cardsSnapshot() async {
@@ -778,20 +783,48 @@ Widget playerCards() {
     }
   }
 
+  Widget tableChips(var constraints) {
+    return Positioned(
+      top: 180,
+      left: (constraints.constrainWidth() /2) - (100 / 2),
+      child: SizedBox(
+        width: 100,
+        height: 100,
+        child: StreamBuilder(stream: potListener.onValue, builder: (((context, snapshot) {
+
+          if(snapshot.hasError){
+            return const CircularProgressIndicator();
+          }
+
+          if(snapshot.hasData){
+            var data = snapshot.data!.snapshot.value as Map<Object?, Object?>;
+            return Stack(
+              children: [
+                Center(child: Image.asset('assets/images/casino-chips.png', width: 50,)),
+                Center(child: Text("${data['pot1']}"),)
+              ],
+            );
+          } else {
+            return const Text('...');
+          }
+          
+        }))),
+      ));
+  }
   Widget faceUpCard(var constraints) {
-      // commented out since position will be relative to top of the screen and not the center
-      //constrainHeight = constraints.constrainHeight();
-      return Stack(
-        children: [
-          Positioned(
-              //top: (constraints.constrainHeight() / 2) + 50,
-              top: tableCardsYPos,
-              left: (constraints.constrainWidth() / 2) -
-                  ((tableCardWidth * 2) + 10),
-              child: GestureDetector(
-                  onTap: getPreviousMove, child: faceUpCardImage()))
-        ],
-      );
+    // commented out since position will be relative to top of the screen and not the center
+    //constrainHeight = constraints.constrainHeight();
+    return Stack(
+      children: [
+        Positioned(
+            //top: (constraints.constrainHeight() / 2) + 50,
+            top: tableCardsYPos,
+            left: (constraints.constrainWidth() / 2) -
+                ((tableCardWidth * 2) + 10),
+            child: GestureDetector(
+                onTap: getPreviousMove, child: faceUpCardImage()))
+      ],
+    );
   }
 
   Widget faceUpCardImage() {
@@ -965,7 +998,6 @@ Widget playerCards() {
                 bottom: MediaQuery.of(context).size.height - 130,
                 left: 10,
                 right: 10,
-
               ),
             );
 
@@ -1064,18 +1096,57 @@ Widget playerCards() {
 
   double currentSliderValue = 200;
 
+  double chipsImageWidth = 70;
+  Widget userChips(var constraints) {
+    return Positioned(
+        bottom: 190,
+        left: (constraints.constrainWidth() / 2) - (chipsImageWidth / 2),
+        child: SizedBox(
+          width: chipsImageWidth,
+          height: chipsImageWidth,
+          child: Stack(
+            children: [
+              Image.asset(
+                'assets/images/casino-chips.png',
+                width: chipsImageWidth,
+              ),
+              Center(
+                  child: StreamBuilder(
+                      stream: userChipCountListener.onValue,
+                      builder: (((context, snapshot) {
+                        if (snapshot.hasError) {
+                          return const CircularProgressIndicator();
+                        }
+
+                        if (snapshot.hasData) {
+                          int count = (snapshot.data!).snapshot.value as int;
+                          return Text(
+                            "$count",
+                            style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800),
+                          );
+                        } else {
+                          return const Text("...");
+                        }
+                      }))))
+            ],
+          ),
+        ));
+  }
+
   void betModal() {
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(20),
-          )
-        ),
+            borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        )),
         clipBehavior: Clip.antiAliasWithSaveLayer,
         builder: (_) => SingleChildScrollView(
-          child: Container(
+              child: Container(
                 color: Colors.green,
                 child: Material(
                   color: Colors.green,
@@ -1176,7 +1247,7 @@ Widget playerCards() {
                   ),
                 ),
               ),
-        ));
+            ));
   }
 
   void raiseBet() {
