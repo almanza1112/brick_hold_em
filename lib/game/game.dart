@@ -198,7 +198,11 @@ class GamePageState extends ConsumerState<GamePage> {
               color: Colors.grey[800],
             ),
             minLeadingWidth: 12,
-            onTap: () {},
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+
+            },
           ),
 
           // Buy Chips

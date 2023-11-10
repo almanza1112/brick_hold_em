@@ -22,7 +22,7 @@ String loggedInUserUsername = "loggedInUserUsername";
 // (fsk = Firestore Key Name)
 String fskUsername = "username";
 
-// Firebase: Realtime Database 
+// Firebase: Realtime Database
 const String RD_KEY_USERNAME = 'username';
 const String RD_KEY_PHOTOURL = 'photoURL';
 const String RD_KEY_UID = "uid";
@@ -45,4 +45,3 @@ String CF_DOC_PENDING_FRIEND_REQUESTS = 'pendingFriendRequests';
 // End point
 //String END_POINT = "https://brick-hold-em-api.onrender.com/";
 String END_POINT = "http://192.168.0.118:3000"; // for when local
-
