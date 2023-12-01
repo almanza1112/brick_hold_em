@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:brick_hold_em/game/bouncing_deck.dart';
 import 'package:brick_hold_em/game/bouncing_icon_button.dart';
 import 'package:brick_hold_em/game/card_rules.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -253,7 +254,7 @@ Widget playerCards() {
   Widget deck(var constraints) {
     return Positioned(
       top: tableCardsYPos,
-      left: (constraints.constrainWidth() / 2) - ((tableCardWidth * 3) + 15),
+      left: (constraints.constrainWidth() / 2) - ((tableCardWidth * 3) + 20),
       child: GestureDetector(
           onTap: () {
             // Make sure it is players turn and if player has not drawn a card yet
@@ -268,12 +269,17 @@ Widget playerCards() {
             color: Colors.blueAccent,
             child: Stack(
               children: [
-                Image.asset(
-                  "assets/images/backside.png",
-                  fit: BoxFit.cover,
-                  width: tableCardWidth,
-                  height: tableCardHeight,
-                ),
+                if (ref.read(didPlayerAddCardThisTurnProvider) == false &&
+                    ref.read(isPlayersTurnProvider) == true)
+                  BouncingDeck(width: tableCardWidth, height: tableCardHeight),
+                if (ref.read(didPlayerAddCardThisTurnProvider) == true ||
+                    ref.read(isPlayersTurnProvider) == false)
+                  Image.asset(
+                    "assets/images/backside.png",
+                    fit: BoxFit.cover,
+                    width: tableCardWidth,
+                    height: tableCardHeight,
+                  ),
                 Center(
                   child: StreamBuilder(
                       stream: deckCountListener.onValue,
@@ -1106,13 +1112,34 @@ Widget playerCards() {
                   size: 36,
                 ));
           } else {
-            final data = snapshot.data!.snapshot.value as Map<Object?, Object?>;
+            // There is a bet, now determine if it is a bet you just made and other players are
+            // just calling and if it hasnt made a full circle
+            final data = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
 
             bool didAFullCircle = data['didAFullCircle'] as bool;
 
+            late bool doYouNeedToCall;
+
+            // only show bouncing icon when a full circle was not complete
+            if (!didAFullCircle) {
+              // Did not do a full circle
+
+              // Check now if its your bet or not
+              if (data['uid'] == uid) {
+                doYouNeedToCall = false;
+              } else {
+                doYouNeedToCall = true;
+              }
+            } else {
+              // It did a full circle
+              doYouNeedToCall = false;
+            }
+
+            print("bet check");
+
             WidgetsBinding.instance.addPostFrameCallback((_) {
               ref.read(doYouNeedToCallProvider.notifier).state =
-                  !didAFullCircle;
+                  doYouNeedToCall;
 
               if (didAFullCircle == false) {
                 ref.read(toCallAmmount.notifier).state =
@@ -1120,14 +1147,24 @@ Widget playerCards() {
               }
             });
 
-            return GestureDetector(
-              onTap: betModal,
-              child: BouncingIcon(
-                icon: Icons.paid,
-                color: didAFullCircle ? Colors.amber : Colors.blue,
-                size: 36,
-              ),
-            );
+            if (doYouNeedToCall) {
+              return GestureDetector(
+                onTap: betModal,
+                child: BouncingIcon(
+                  icon: Icons.paid,
+                  color: didAFullCircle ? Colors.amber : Colors.blue,
+                  size: 36,
+                ),
+              );
+            } else {
+              return IconButton(
+                  onPressed: betModal,
+                  icon: const Icon(
+                    Icons.paid,
+                    color: Colors.amber,
+                    size: 36,
+                  ));
+            }
           }
         });
   }
