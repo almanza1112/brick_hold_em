@@ -46,7 +46,7 @@ final chipsValueProvider = StateProvider<double>((ref) => 0);
 
 final isThereABetProvider = StateProvider<bool>((ref) => false);
 
-final typeOfBetProvider = StateProvider<String>((ref) => "raise");
+final typeOfBetProvider = StateProvider<String>((ref) => "check");
 
 final doYouNeedToCallProvider = StateProvider<bool>((ref) => false);
 

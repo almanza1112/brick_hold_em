@@ -17,9 +17,6 @@ class GamePlayers extends ConsumerStatefulWidget {
 
 class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
   double imageRadius = 30;
-  TextStyle chipsText = const TextStyle(fontSize: 10, color: Colors.amber);
-  TextStyle playerNameStyle = const TextStyle(
-      fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold);
 
   DatabaseReference playersRef =
       FirebaseDatabase.instance.ref('tables/1/players');
@@ -90,7 +87,7 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
               });
 
               List<Player> playersList = <Player>[];
-              Player noOne = Player(username: "", photoURL: "", uid: '');
+              Player noOne = Player(username: "", photoURL: "", uid: '', folded: true);
               for (int i = 0; i < 5; i++) {
                 int matchingIndex = adjustedOtherPlayersKeys.indexOf(i);
                 if (matchingIndex != -1) {
@@ -141,6 +138,7 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
 
   // TODO : make this in to its own class
   Widget player(Player player, int position) {
+    bool isFolded = player.folded;
     bool left = false, right = false;
     switch (position) {
       case 0:
@@ -190,6 +188,11 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                         as ImageProvider,
                 radius: imageRadius,
               ),
+              if(isFolded)
+              CircleAvatar(
+                backgroundColor: const Color.fromRGBO(255, 255, 255, 0.5),
+                radius: imageRadius,
+              ),
               if (playerDetailsVisible)
                 Positioned(
                   bottom: bottom,
@@ -202,11 +205,13 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
+                          if(!isFolded)
                           Image.asset(
                             'assets/images/backside.png',
                             height: 35, // Must be same height as SizedBox below
                             width: 25,
                           ),
+                          if (!isFolded)
                           Align(
                               alignment: Alignment.center,
                               child: streamedCardCount(player))
@@ -224,7 +229,7 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                 if (playerDetailsVisible)
                   Text(
                     player.username,
-                    style: playerNameStyle,
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isFolded ? Colors.grey[400] : Colors.amber),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
@@ -233,10 +238,10 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      const Icon(
+                      Icon(
                         Icons.currency_exchange,
                         size: 8,
-                        color: Colors.amber,
+                        color: isFolded ? Colors.grey[400] : Colors.amber,
                       ),
                       const SizedBox(
                         width: 2,
@@ -298,7 +303,7 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
 
             return Text(
               data.toString(),
-              style: chipsText,
+              style: TextStyle(fontSize: 10, color: player.folded ? Colors.grey[400] : Colors.amber),
             );
           } else {
             return const Text("loading...");

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:brick_hold_em/game/bouncing_icon_button.dart';
 import 'package:brick_hold_em/game/card_rules.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -1032,7 +1033,7 @@ Widget playerCards() {
 
             body['bet'] = jsonEncode(bet);
 
-            // Since there is a bet user is making, start the 
+            // Since there is a bet user is making, start the
             // animation of the chips to table
             startChipsAnimation();
           }
@@ -1082,12 +1083,29 @@ Widget playerCards() {
   Widget betButton() {
     return StreamBuilder(
         stream: toCallRef.onValue,
-        builder: (context, snapshot) {
+        builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.hasError) {
             // TODO: Show errror
           }
 
-          if (snapshot.hasData) {
+          if (!snapshot.hasData ||
+              snapshot.data == null ||
+              snapshot.data!.snapshot.value == null) {
+            // The round or game just started OR there is no pot and there is nothing to be called.
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(doYouNeedToCallProvider.notifier).state = false;
+
+              ref.read(toCallAmmount.notifier).state = "0";
+            });
+            return IconButton(
+                onPressed: betModal,
+                icon: const Icon(
+                  Icons.paid,
+                  color: Colors.amber,
+                  size: 36,
+                ));
+          } else {
             final data = snapshot.data!.snapshot.value as Map<Object?, Object?>;
 
             bool didAFullCircle = data['didAFullCircle'] as bool;
@@ -1102,16 +1120,13 @@ Widget playerCards() {
               }
             });
 
-            return IconButton(
-                onPressed: betModal,
-                icon: Icon(
-                  Icons.paid,
-                  color: didAFullCircle ? Colors.amber : Colors.blue,
-                  size: 36,
-                ));
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
+            return GestureDetector(
+              onTap: betModal,
+              child: BouncingIcon(
+                icon: Icons.paid,
+                color: didAFullCircle ? Colors.amber : Colors.blue,
+                size: 36,
+              ),
             );
           }
         });
@@ -1198,6 +1213,7 @@ Widget playerCards() {
   }
 
   void betModal() {
+    final doYouNeedToCall = ref.read(doYouNeedToCallProvider);
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -1266,6 +1282,7 @@ Widget playerCards() {
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red,
                                     shape: const CircleBorder(),
+                                    elevation: 10.0,
                                     padding: const EdgeInsets.all(24)),
                                 onPressed: foldHand,
                                 child: const Text(
@@ -1278,6 +1295,7 @@ Widget playerCards() {
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.amber,
                                     shape: const CircleBorder(),
+                                    elevation: 10.0,
                                     padding: const EdgeInsets.all(24)),
                                 onPressed: raiseBet,
                                 child: const Text(
@@ -1290,11 +1308,12 @@ Widget playerCards() {
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.amber,
                                     shape: const CircleBorder(),
+                                    elevation: 10.0,
                                     padding: const EdgeInsets.all(24)),
-                                onPressed: callBet,
-                                child: const Text(
-                                  'CALL',
-                                  style: TextStyle(
+                                onPressed: doYouNeedToCall ? callBet : check,
+                                child: Text(
+                                  doYouNeedToCall ? "CALL" : "CHECK",
+                                  style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 )),
@@ -1325,21 +1344,44 @@ Widget playerCards() {
     Navigator.pop(context);
   }
 
+  void check() {
+    ref.read(typeOfBetProvider.notifier).state = "check";
+    Navigator.pop(context);
+  }
+
   void foldHand() async {
-    var body = {
-      'uid': uid,
-      'position': ref.read(playerPositionProvider).toString()
-    };
+    Navigator.pop(context);
+    showDialog(
+        context: context,
+        builder: ((context) => AlertDialog(
+              title: const Text("Fold Hand"),
+              content: const Text('Are you sure you want to fold?'),
+              actions: <Widget>[
+                TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("CANCEL")),
+                TextButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      var body = {
+                        'uid': uid,
+                        'position': ref.read(playerPositionProvider).toString()
+                      };
 
-    http.Response response = await http
-        .post(Uri.parse('${globals.END_POINT}/table/foldhand'), body: body);
+                      http.Response response = await http.post(
+                          Uri.parse('${globals.END_POINT}/table/foldhand'),
+                          body: body);
 
-    if (response.statusCode == 201) {
-      // Update UI
-    } else {
-      print("error folding hand");
-      print('statusCode: ${response.statusCode}');
-    }
+                      if (response.statusCode == 201) {
+                        // Update UI
+                      } else {
+                        print("error folding hand");
+                        print('statusCode: ${response.statusCode}');
+                      }
+                    },
+                    child: const Text("YES"))
+              ],
+            )));
   }
 
   passPlay() async {
