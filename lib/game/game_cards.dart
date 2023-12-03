@@ -1,7 +1,8 @@
 import 'dart:convert';
 
-import 'package:brick_hold_em/game/bouncing_deck.dart';
-import 'package:brick_hold_em/game/bouncing_icon_button.dart';
+import 'package:brick_hold_em/game/animations/bouncing_deck.dart';
+import 'package:brick_hold_em/game/animations/bouncing_icon_button.dart';
+import 'package:brick_hold_em/game/animations/bouncing_text.dart';
 import 'package:brick_hold_em/game/card_rules.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -89,15 +90,6 @@ class GameCardsPageState extends ConsumerState<GameCards> {
     userChipCountListener =
         FirebaseDatabase.instance.ref('tables/1/chips/$uid/chipCount');
 
-    // toCallRef.onValue.listen((event) {
-    //   final data = event.snapshot.value as Map<Object?, Object?>;
-    //   print("DATA: ${data['didAFullCircle']}");
-
-    //   ref.read(doYouNeedToCallProvider.notifier).state =
-    //       data['didAFullCircle'] as bool;
-
-    //   print("provider: ${ref.read(doYouNeedToCallProvider)}");
-    // });
     super.initState();
   }
 
@@ -408,7 +400,7 @@ Widget playerCards() {
             top: tableCardsYPos,
             left: ref.read(isPlayButtonSelectedProvider)
                 ? (constraints.constrainWidth() / 2) -
-                    ((tableCardWidth * 2.5) + 10)
+                    ((tableCardWidth * 2) + 10)
                 : (constraints.constrainWidth() / 2) -
                     ((tableCardWidth * 1) + 5),
             duration: tableCardAnimationDuration,
@@ -426,7 +418,7 @@ Widget playerCards() {
             top: tableCardsYPos,
             left: ref.read(isPlayButtonSelectedProvider)
                 ? (constraints.constrainWidth() / 2) -
-                    ((tableCardWidth * 2.5) + 10)
+                    ((tableCardWidth * 2) + 10)
                 : (constraints.constrainWidth() / 2),
             duration: tableCardAnimationDuration,
             child: Container(
@@ -443,7 +435,7 @@ Widget playerCards() {
             top: tableCardsYPos,
             left: ref.read(isPlayButtonSelectedProvider)
                 ? (constraints.constrainWidth() / 2) -
-                    ((tableCardWidth * 2.5) + 10)
+                    ((tableCardWidth * 2) + 10)
                 : (constraints.constrainWidth() / 2) +
                     ((tableCardWidth * 1) + 5),
             duration: tableCardAnimationDuration,
@@ -461,7 +453,7 @@ Widget playerCards() {
             top: tableCardsYPos,
             left: ref.read(isPlayButtonSelectedProvider)
                 ? (constraints.constrainWidth() / 2) -
-                    ((tableCardWidth * 2.5) + 10)
+                    ((tableCardWidth * 2) + 10)
                 : (constraints.constrainWidth() / 2) +
                     ((tableCardWidth * 2) + 10),
             duration: tableCardAnimationDuration,
@@ -869,7 +861,29 @@ Widget playerCards() {
 
   getPreviousMove() async {
     movesRef.limitToLast(1).get().then((snapshot) {
-      print(snapshot.value);
+      final map = snapshot.value as Map<dynamic, dynamic>;
+      final key = map.keys;
+      List<dynamic> move = map[key.first]['move'];
+      showDialog(context: context, builder: ((context) => AlertDialog(
+        title: const Text("Last Move"),
+        content: Container(
+          width: double.maxFinite,
+          height: 100,
+          child: ListView(
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            children: move.map((imageName) {
+              return Image.asset(
+                "assets/images/$imageName.png",
+                height: 56,
+                width: 40,
+              );
+            }).toList(),),
+        ),
+        actions: <Widget>[
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))
+        ],
+      )));
     });
   }
 
@@ -989,11 +1003,11 @@ Widget playerCards() {
           // Add each card name into list
           cardsInHand.add(t.value.cardName!);
         }
-
         // Create post body
         var body = {
           'uid': uid,
-          'move': cardsBeingPlayed.toString(),
+          'move': totalCardsBeingPlayed.toString(),
+          'cardsToDiscard': cardsBeingPlayed.toString(),
           'cardsInHand': cardsInHand.toString(),
           'position': ref.read(playerPositionProvider).toString(),
           'isThereABet': ref.read(isThereABetProvider).toString()
@@ -1141,7 +1155,7 @@ Widget playerCards() {
               ref.read(doYouNeedToCallProvider.notifier).state =
                   doYouNeedToCall;
 
-              if (didAFullCircle == false) {
+              if (doYouNeedToCall) {
                 ref.read(toCallAmmount.notifier).state =
                     data['amount'] as String;
               }
@@ -1195,6 +1209,13 @@ Widget playerCards() {
 
                         if (snapshot.hasData) {
                           int count = (snapshot.data!).snapshot.value as int;
+
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            double playerChipCount = count.toDouble();
+                            ref.read(playerChipCountProvider.notifier).state =
+                                playerChipCount;
+
+                          });
                           return Text(
                             "$count",
                             style: const TextStyle(
@@ -1251,6 +1272,9 @@ Widget playerCards() {
 
   void betModal() {
     final doYouNeedToCall = ref.read(doYouNeedToCallProvider);
+    final isFoldSelected = ref.read(isFoldSelectedProvider);
+    final isRaiseSelected = ref.read(isRaiseSelectedProvider);
+    final isCallCheckSelected = ref.read(isCallCheckSelectedProvider);
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -1267,35 +1291,43 @@ Widget playerCards() {
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: Column(
-                      //mainAxisAlignment: MainAxisAlignment.center,
-                      //crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
                         const Center(
                             child: Text(
-                          'Bet',
+                          'BET',
                           style: TextStyle(
                               fontSize: 24,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               decoration: TextDecoration.none),
                         )),
-                        //const Expanded(child: SizedBox.shrink()),
-                        if (ref.read(doYouNeedToCallProvider))
-                          Center(
-                            child: Text(
-                              '${ref.read(toCallAmmount)} to call',
-                              style: const TextStyle(
-                                  fontSize: 18, color: Colors.white),
+
+                        // To call
+                        if (doYouNeedToCall)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 36),
+                            child: Center(
+                              child: BouncingText(
+                                text: '${ref.read(toCallAmmount)} to call',
+                                textStyle: const TextStyle(
+                                    fontSize: 32,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
+
+                        // Padding between to call and slider
                         const SizedBox(
                           height: 36,
                         ),
+
+                        // Slider
                         StatefulBuilder(builder: (context, setState) {
                           return Column(
                             children: [
                               Slider(
-                                  max: 1000,
+                                  max: ref.read(playerChipCountProvider),
                                   thumbColor: Colors.amber,
                                   activeColor: Colors.amber,
                                   inactiveColor: Colors.white,
@@ -1317,7 +1349,7 @@ Widget playerCards() {
                           children: <Widget>[
                             ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
+                                    backgroundColor: Colors.amber,
                                     shape: const CircleBorder(),
                                     elevation: 10.0,
                                     padding: const EdgeInsets.all(24)),
@@ -1330,7 +1362,7 @@ Widget playerCards() {
                                 )),
                             ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.amber,
+                                    backgroundColor: isRaiseSelected ? Colors.red : Colors.amber,
                                     shape: const CircleBorder(),
                                     elevation: 10.0,
                                     padding: const EdgeInsets.all(24)),
@@ -1343,11 +1375,11 @@ Widget playerCards() {
                                 )),
                             ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.amber,
+                                    backgroundColor: isCallCheckSelected ? Colors.red : Colors.amber,
                                     shape: const CircleBorder(),
                                     elevation: 10.0,
                                     padding: const EdgeInsets.all(24)),
-                                onPressed: doYouNeedToCall ? callBet : check,
+                                onPressed: doYouNeedToCall ? callBet : checkBet,
                                 child: Text(
                                   doYouNeedToCall ? "CALL" : "CHECK",
                                   style: const TextStyle(
@@ -1368,21 +1400,40 @@ Widget playerCards() {
   }
 
   void raiseBet() {
+    // Raise is selected so unselect Fold and Check/Call
+    ref.read(isRaiseSelectedProvider.notifier).state = true;
+    ref.read(isCallCheckSelectedProvider.notifier).state = false;
+    ref.read(isFoldSelectedProvider.notifier).state = false;
+
     ref.read(isThereABetProvider.notifier).state = true;
     ref.read(typeOfBetProvider.notifier).state = "raise";
     Navigator.pop(context);
   }
 
   void callBet() {
+    // TODO: why is this here? what for?
     double amount = double.parse(ref.read(toCallAmmount));
     ref.read(chipsValueProvider.notifier).state = amount;
+
     ref.read(isThereABetProvider.notifier).state = true;
     ref.read(typeOfBetProvider.notifier).state = "call";
+
+    // Call is selected so unselect Fold and Raise
+    ref.read(isCallCheckSelectedProvider.notifier).state = true;
+    ref.read(isFoldSelectedProvider.notifier).state = false;
+    ref.read(isRaiseSelectedProvider.notifier).state = false;
+
     Navigator.pop(context);
   }
 
-  void check() {
+  void checkBet() {
     ref.read(typeOfBetProvider.notifier).state = "check";
+
+    // Check is selected so unselect Fold and Raise
+    ref.read(isCallCheckSelectedProvider.notifier).state = true;
+    ref.read(isFoldSelectedProvider.notifier).state = false;
+    ref.read(isRaiseSelectedProvider.notifier).state = false;
+
     Navigator.pop(context);
   }
 

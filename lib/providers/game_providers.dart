@@ -42,7 +42,12 @@ final brickCardSuitPositionProvider = StateProvider<int>((ref) => 0);
 
 final brickCardNumberPositionProvider = StateProvider<int>((ref) => 0);
 
+final playerChipCountProvider = StateProvider<double>((ref) => 0);
+
+// TODO: no idea why i made this or the thought behind it
 final chipsValueProvider = StateProvider<double>((ref) => 0);
+
+// BETTING
 
 final isThereABetProvider = StateProvider<bool>((ref) => false);
 
@@ -51,5 +56,12 @@ final typeOfBetProvider = StateProvider<String>((ref) => "check");
 final doYouNeedToCallProvider = StateProvider<bool>((ref) => false);
 
 final toCallAmmount = StateProvider<String>((ref) => "0");
+
+final isFoldSelectedProvider = StateProvider<bool>((ref) => false);
+
+final isRaiseSelectedProvider = StateProvider<bool>((ref) => false);
+
+final isCallCheckSelectedProvider = StateProvider<bool>((ref) => false);
+
 
 

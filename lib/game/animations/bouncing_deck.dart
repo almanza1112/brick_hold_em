@@ -37,7 +37,7 @@ class _BouncingDeckState extends State<BouncingDeck>
       builder: (context, child) {
         return Transform.scale(
           scale:
-              1.0 + 0.5 * _controller.value, // Adjust the amplitude as needed
+              1.0 + 0.3 * _controller.value, // Adjust the amplitude as needed
           child: Image.asset(
                   "assets/images/backside.png",
                   fit: BoxFit.cover,
