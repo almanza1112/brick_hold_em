@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../game/player.dart';
@@ -23,6 +24,8 @@ final winnerProvider = StreamProvider<DatabaseEvent>((ref){
 
   return winnerRef.onValue;
 });
+
+final refreshKeyProvider = StateProvider<UniqueKey>((ref) => UniqueKey());
 
 final isThereAWinnerProvider = StateProvider<bool>((ref) => false);
 

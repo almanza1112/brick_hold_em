@@ -25,7 +25,6 @@ class GameCards extends ConsumerStatefulWidget {
 }
 
 class GameCardsPageState extends ConsumerState<GameCards> {
-  late Future<List<String>> _cardsSnapshot;
   final onceRef = FirebaseDatabase.instance.ref();
   bool isStateChanged = false;
   var cardWidgetsBuilderList = <Widget>[];
@@ -52,6 +51,8 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   DatabaseReference potListener =
       FirebaseDatabase.instance.ref('tables/1/betting/pot');
+
+  
 
   late DatabaseReference userChipCountListener;
 
@@ -83,7 +84,6 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   @override
   void initState() {
-    _cardsSnapshot = cardsSnapshot();
     playerCardCount =
         FirebaseDatabase.instance.ref('tables/1/cards/playerCards/$uid/hand');
 
@@ -95,7 +95,6 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   @override
   Widget build(BuildContext context) {
-    print('build game_cards');
     return LayoutBuilder(
       builder: ((BuildContext context, BoxConstraints constraints) {
         return Stack(
@@ -115,18 +114,27 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   }
 
   Widget playerCards() {
+    final refreshKey = ref.watch(refreshKeyProvider);
+    // TODO: this is not optimal but a temporary patch
+    Future<DataSnapshot> handRef = FirebaseDatabase.instance
+        .ref(
+            'tables/1/cards/playerCards/${FirebaseAuth.instance.currentUser!.uid}/hand')
+        .get();
     return SafeArea(
+      key: refreshKey,
       child: Stack(children: [
         Positioned(
           right: 0,
           bottom: 100,
           left: 0,
-          child: FutureBuilder<List<String>>(
-              future: _cardsSnapshot,
+          child: FutureBuilder(
+              future: handRef,
               builder: ((context, snapshot) {
                 if (snapshot.hasData) {
-                  var cardsList = List<String>.from(snapshot.data as List);
-                   print("CARDLIST: $cardsList");
+                  var cardsList =
+                      List<String>.from(snapshot.data!.value as List);
+                  print("cardList: $cardsList");
+
                   // Not having the line below was causing an infinite loop
                   // cardWidgets has to be cleared
                   var cardWidgets = <Widget>[];
@@ -144,13 +152,10 @@ class GameCardsPageState extends ConsumerState<GameCards> {
                     cardWidgets.add(card(cardKey));
                   }
 
-
                   // Find out why this is here, i forget
                   if (!isStateChanged) {
                     cardWidgetsBuilderList = cardWidgets;
                   }
-
-                  print("infinite loop check");
 
                   return SizedBox(
                     height: 70,
@@ -274,7 +279,6 @@ Widget playerCards() {
                     width: tableCardWidth,
                     height: tableCardHeight,
                   ),
-                
                 Center(
                   child: StreamBuilder(
                       stream: deckCountListener.onValue,
@@ -470,17 +474,6 @@ Widget playerCards() {
             )),
       ],
     );
-  }
-
-  Future<List<String>> cardsSnapshot() async {
-    final snapshot =
-        await onceRef.child('tables/1/cards/playerCards/$uid/hand').get();
-    if (snapshot.exists) {
-      var cardsList = List<String>.from(snapshot.value as List);
-      return cardsList;
-    } else {
-      return [];
-    }
   }
 
   // TODO: Make into its on class for better functionality
@@ -867,26 +860,31 @@ Widget playerCards() {
       final map = snapshot.value as Map<dynamic, dynamic>;
       final key = map.keys;
       List<dynamic> move = map[key.first]['move'];
-      showDialog(context: context, builder: ((context) => AlertDialog(
-        title: const Text("Last Move"),
-        content: Container(
-          width: double.maxFinite,
-          height: 100,
-          child: ListView(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            children: move.map((imageName) {
-              return Image.asset(
-                "assets/images/$imageName.png",
-                height: 56,
-                width: 40,
-              );
-            }).toList(),),
-        ),
-        actions: <Widget>[
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))
-        ],
-      )));
+      showDialog(
+          context: context,
+          builder: ((context) => AlertDialog(
+                title: const Text("Last Move"),
+                content: Container(
+                  width: double.maxFinite,
+                  height: 100,
+                  child: ListView(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    children: move.map((imageName) {
+                      return Image.asset(
+                        "assets/images/$imageName.png",
+                        height: 56,
+                        width: 40,
+                      );
+                    }).toList(),
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("OK"))
+                ],
+              )));
     });
   }
 
@@ -1022,12 +1020,12 @@ Widget playerCards() {
           if (ref.read(isThereABetProvider) == true) {
             String typeOfBet = ref.read(typeOfBetProvider);
             late String amountOfBet;
-            
-            if(typeOfBet == "raise"){
-              amountOfBet = currentSliderValue.round().toString();
-            } 
 
-            if(typeOfBet == "call"){
+            if (typeOfBet == "raise") {
+              amountOfBet = currentSliderValue.round().toString();
+            }
+
+            if (typeOfBet == "call") {
               amountOfBet = ref.read(toCallAmmount);
             }
             var bet = {
@@ -1227,7 +1225,6 @@ Widget playerCards() {
                             double playerChipCount = count.toDouble();
                             ref.read(playerChipCountProvider.notifier).state =
                                 playerChipCount;
-
                           });
                           return Text(
                             "$count",
@@ -1375,7 +1372,9 @@ Widget playerCards() {
                                 )),
                             ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: isRaiseSelected ? Colors.red : Colors.amber,
+                                    backgroundColor: isRaiseSelected
+                                        ? Colors.red
+                                        : Colors.amber,
                                     shape: const CircleBorder(),
                                     elevation: 10.0,
                                     padding: const EdgeInsets.all(30)),
@@ -1388,7 +1387,9 @@ Widget playerCards() {
                                 )),
                             ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: isCallCheckSelected ? Colors.red : Colors.amber,
+                                    backgroundColor: isCallCheckSelected
+                                        ? Colors.red
+                                        : Colors.amber,
                                     shape: const CircleBorder(),
                                     elevation: 10.0,
                                     padding: const EdgeInsets.all(30)),

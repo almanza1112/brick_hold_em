@@ -52,7 +52,7 @@ class GamePageState extends ConsumerState<GamePage> {
           color: Colors.green[700],
           child: Stack(
             children: [
-              const GameCards(),
+              GameCards(),
               //if (ref.read(isThereAWinnerProvider) == false)
               const GameTurnTimer(),
               const GamePlayers(),
@@ -84,8 +84,12 @@ class GamePageState extends ConsumerState<GamePage> {
                             ref.read(isThereAWinnerProvider.notifier).state =
                                 false;
 
-                            setState(() { });
+                            ref.read(refreshKeyProvider.notifier).state = UniqueKey();
+                            print("it hit here");
+
+
                           });
+
 
                           return const SizedBox.shrink();
                         } else {
