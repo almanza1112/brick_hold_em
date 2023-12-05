@@ -54,7 +54,7 @@ class GamePageState extends ConsumerState<GamePage> {
             children: [
               const GameCards(),
               //if (ref.read(isThereAWinnerProvider) == false)
-                const GameTurnTimer(),
+              const GameTurnTimer(),
               const GamePlayers(),
               drawerButton(),
               endDrawerButton(),
@@ -83,6 +83,8 @@ class GamePageState extends ConsumerState<GamePage> {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             ref.read(isThereAWinnerProvider.notifier).state =
                                 false;
+
+                            setState(() { });
                           });
 
                           return const SizedBox.shrink();
@@ -111,14 +113,30 @@ class GamePageState extends ConsumerState<GamePage> {
                                 ref.read(otherPlayersInformationProvider);
                             late Player winningPlayer;
                             for (var player in otherPlayersList) {
-                              if (data == winningPlayer.uid) {
+                              if (data == player.uid) {
                                 winningPlayer = player;
                               }
                             }
 
                             return BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                                child: const Text("THEY WON"));
+                                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundImage: NetworkImage(winningPlayer.photoURL),
+                                      radius: 60,
+                                    ),
+                                    const SizedBox(height: 12,),
+                                    Text(
+                                      "${winningPlayer.username} won",
+                                      style: const TextStyle(
+                                          fontSize: 36,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.amber),
+                                    ),
+                                  ],
+                                ));
                           }
                         }
                       } else {
@@ -170,8 +188,7 @@ class GamePageState extends ConsumerState<GamePage> {
       child: ListView(
         children: <Widget>[
           ListTile(
-            contentPadding:
-                const EdgeInsets.only(left: 12, top: 4, bottom: 16),
+            contentPadding: const EdgeInsets.only(left: 12, top: 4, bottom: 16),
             title: Text(
               "MENU",
               style: TextStyle(
@@ -201,7 +218,6 @@ class GamePageState extends ConsumerState<GamePage> {
             onTap: () {
               Navigator.pop(context);
               Navigator.pop(context);
-
             },
           ),
 

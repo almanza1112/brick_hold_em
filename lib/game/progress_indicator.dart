@@ -32,7 +32,6 @@ class ProgressIndicatorState extends State<ProgressIndicatorTurn>
 
     colorTween =
         controller.drive(ColorTween(begin: Colors.black, end: Colors.red));
-    //controller.repeat(reverse: false);
     controller.forward();
 
     super.initState();
@@ -40,6 +39,7 @@ class ProgressIndicatorState extends State<ProgressIndicatorTurn>
 
   @override
   Widget build(BuildContext context) {
+    //print('position: ${widget.position}');
     
     bool top = false, bottom = false, right = false, left = false;
     late double topNum, leftNum, rightNum;

@@ -23,6 +23,9 @@ class GameTurnTimerState extends ConsumerState {
 
   Timer? _timer;
 
+    bool _isDisposed = false;
+
+
   @override
   Widget build(BuildContext context) {
     return turnPlayerTimer();
@@ -37,7 +40,8 @@ class GameTurnTimerState extends ConsumerState {
 
   @override
   void dispose() {
-    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    _timer?.cancel(); //
+        _isDisposed = true; // Set the flag when the widget is disposed
     super.dispose();
   }
 
@@ -51,9 +55,12 @@ class GameTurnTimerState extends ConsumerState {
           final turnPlayerPosition = event.snapshot.value as int;
           final playerPosition = ref.read(playerPositionProvider);
 
+          //print("playerPosition: ${playerPosition}");
+
           if (turnPlayerPosition == playerPosition) {
             // Update the StateProvider
             WidgetsBinding.instance.addPostFrameCallback((_) {
+              
               // Updating if it is the players turn to true
               ref.read(isPlayersTurnProvider.notifier).state = true;
 
@@ -73,11 +80,19 @@ class GameTurnTimerState extends ConsumerState {
 
                 if (countdown > 0) {
                   _timer = Timer(const Duration(seconds: 1), () {
-                    if (mounted) {
-                      setState(() {
-                        countdown--;
-                      });
+                      if (_isDisposed) {
+                      // Check if the widget is disposed before updating the state
+                      _timer?.cancel();
+                      return;
                     }
+                   setState(() {
+                      countdown--;
+                      // if (countdown <= 0) {
+                      //   // TODO: APPLY THIS LOGIC
+                      //   // ranOutOfTime();
+                      //   _timer?.cancel();
+                      // }
+                    });
                   });
                 } else {
                   // TODO: APPLY THIS LOGIC
@@ -110,6 +125,8 @@ class GameTurnTimerState extends ConsumerState {
 
             num position =
                 (turnPlayerPosition - ref.read(playerPositionProvider)) - 1;
+
+            //print("positionAfterSub: $position");
 
             if (position < 0) {
               position = 6 + position;

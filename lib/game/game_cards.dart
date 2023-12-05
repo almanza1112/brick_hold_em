@@ -126,7 +126,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
               builder: ((context, snapshot) {
                 if (snapshot.hasData) {
                   var cardsList = List<String>.from(snapshot.data as List);
-
+                   print("CARDLIST: $cardsList");
                   // Not having the line below was causing an infinite loop
                   // cardWidgets has to be cleared
                   var cardWidgets = <Widget>[];
@@ -144,6 +144,8 @@ class GameCardsPageState extends ConsumerState<GameCards> {
                     cardWidgets.add(card(cardKey));
                   }
 
+
+                  // Find out why this is here, i forget
                   if (!isStateChanged) {
                     cardWidgetsBuilderList = cardWidgets;
                   }
@@ -272,6 +274,7 @@ Widget playerCards() {
                     width: tableCardWidth,
                     height: tableCardHeight,
                   ),
+                
                 Center(
                   child: StreamBuilder(
                       stream: deckCountListener.onValue,
@@ -1017,9 +1020,19 @@ Widget playerCards() {
         if (ref.read(doYouNeedToCallProvider)) {
           // Check if there is a bet pending with play
           if (ref.read(isThereABetProvider) == true) {
+            String typeOfBet = ref.read(typeOfBetProvider);
+            late String amountOfBet;
+            
+            if(typeOfBet == "raise"){
+              amountOfBet = currentSliderValue.round().toString();
+            } 
+
+            if(typeOfBet == "call"){
+              amountOfBet = ref.read(toCallAmmount);
+            }
             var bet = {
               'type': ref.read(typeOfBetProvider),
-              'amount': currentSliderValue.round().toString()
+              'amount': amountOfBet
             };
 
             body['bet'] = jsonEncode(bet);
@@ -1183,7 +1196,7 @@ Widget playerCards() {
         });
   }
 
-  double currentSliderValue = 200;
+  double currentSliderValue = 0;
 
   double chipsImageWidth = 70;
   Widget userChips(var constraints) {
@@ -1352,7 +1365,7 @@ Widget playerCards() {
                                     backgroundColor: Colors.amber,
                                     shape: const CircleBorder(),
                                     elevation: 10.0,
-                                    padding: const EdgeInsets.all(24)),
+                                    padding: const EdgeInsets.all(30)),
                                 onPressed: foldHand,
                                 child: const Text(
                                   'FOLD',
@@ -1365,7 +1378,7 @@ Widget playerCards() {
                                     backgroundColor: isRaiseSelected ? Colors.red : Colors.amber,
                                     shape: const CircleBorder(),
                                     elevation: 10.0,
-                                    padding: const EdgeInsets.all(24)),
+                                    padding: const EdgeInsets.all(30)),
                                 onPressed: raiseBet,
                                 child: const Text(
                                   'RAISE',
@@ -1378,7 +1391,7 @@ Widget playerCards() {
                                     backgroundColor: isCallCheckSelected ? Colors.red : Colors.amber,
                                     shape: const CircleBorder(),
                                     elevation: 10.0,
-                                    padding: const EdgeInsets.all(24)),
+                                    padding: const EdgeInsets.all(30)),
                                 onPressed: doYouNeedToCall ? callBet : checkBet,
                                 child: Text(
                                   doYouNeedToCall ? "CALL" : "CHECK",
