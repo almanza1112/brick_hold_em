@@ -8,14 +8,14 @@ class Message {
   final String text;
   final String? photoURL;
   final String? username;
-  //final DateTime timestamp;
+  final DateTime timestamp;
   Message({
-    //required this.timestamp,
     required this.uid,
     required this.position,
     required this.text,
     required this.photoURL,
     required this.username,
+    required this.timestamp,
   });
 
 
@@ -25,6 +25,7 @@ class Message {
     String? text,
     ValueGetter<String?>? photoURL,
     ValueGetter<String?>? username,
+    DateTime? timestamp,
   }) {
     return Message(
       uid: uid ?? this.uid,
@@ -32,6 +33,7 @@ class Message {
       text: text ?? this.text,
       photoURL: photoURL?.call() ?? this.photoURL,
       username: username?.call() ?? this.username,
+      timestamp: timestamp ?? this.timestamp,
     );
   }
 
@@ -42,6 +44,7 @@ class Message {
       'text': text,
       'photoURL': photoURL,
       'username': username,
+      'timestamp': timestamp.millisecondsSinceEpoch,
     };
   }
 
@@ -52,6 +55,7 @@ class Message {
       text: map['text'] ?? '',
       photoURL: map['photoURL'],
       username: map['username'],
+      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp']),
     );
   }
 
@@ -62,7 +66,7 @@ class Message {
 
   @override
   String toString() {
-    return 'Message(uid: $uid, position: $position, text: $text, photoURL: $photoURL, username: $username)';
+    return 'Message(uid: $uid, position: $position, text: $text, photoURL: $photoURL, username: $username, timestamp: $timestamp)';
   }
 
   @override
@@ -74,7 +78,8 @@ class Message {
       other.position == position &&
       other.text == text &&
       other.photoURL == photoURL &&
-      other.username == username;
+      other.username == username &&
+      other.timestamp == timestamp;
   }
 
   @override
@@ -83,6 +88,7 @@ class Message {
       position.hashCode ^
       text.hashCode ^
       photoURL.hashCode ^
-      username.hashCode;
+      username.hashCode ^
+      timestamp.hashCode;
   }
 }

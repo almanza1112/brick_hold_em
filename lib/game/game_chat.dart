@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import 'package:brick_hold_em/globals.dart' as globals;
 
 class GameChat extends ConsumerStatefulWidget {
   const GameChat({
@@ -15,11 +18,11 @@ class GameChat extends ConsumerStatefulWidget {
 }
 
 class GameChatState extends ConsumerState<GameChat> {
+  FlutterSecureStorage storage = const FlutterSecureStorage();
+
   DatabaseReference chatRef = FirebaseDatabase.instance.ref('tables/1/chat');
   final uid = FirebaseAuth.instance.currentUser!.uid;
   final TextEditingController _messageController = TextEditingController();
-
-  List<Message> messages = [];
 
   @override
   Widget build(BuildContext context) {
@@ -50,42 +53,28 @@ class GameChatState extends ConsumerState<GameChat> {
                   child: StreamBuilder(
                       stream: chatRef.onValue,
                       builder: ((context, snapshot) {
-                        if (snapshot.hasData) {
+                        if (snapshot.hasData &&
+                            snapshot.data!.snapshot.value != null) {
+                          List<Message> messages = [];
+
                           Map<dynamic, dynamic> data = snapshot
                               .data!.snapshot.value as Map<dynamic, dynamic>;
 
                           data.forEach((key, value) {
-                            String messengerUid = value['uid'];
-                            int position = value['position'];
-                            String text = value['text'];
-
-                            final otherPlayersList =
-                                ref.read(otherPlayersInformationProvider);
-
-                            late String messgengerPlayerPhotoUrl;
-                            late String messgengerPlayerUsername;
-                            if (messengerUid == uid) {
-                              messgengerPlayerPhotoUrl =
-                                  FirebaseAuth.instance.currentUser!.photoURL!;
-                              messgengerPlayerUsername = FirebaseAuth
-                                  .instance.currentUser!.displayName!;
-                            } else {
-                              for (var player in otherPlayersList) {
-                                if (messengerUid == player.uid) {
-                                  messgengerPlayerPhotoUrl = player.photoURL;
-                                  messgengerPlayerUsername = player.username;
-                                }
-                              }
-                            }
-
                             var message = Message(
-                                uid: messengerUid,
-                                position: position,
-                                text: text,
-                                photoURL: messgengerPlayerPhotoUrl,
-                                username: messgengerPlayerUsername);
+                                uid: value['playerInfo']['uid'],
+                                position: value['position'],
+                                text: value['text'],
+                                photoURL: value['playerInfo']['photoURL'],
+                                username: value['playerInfo']['username'],
+                                timestamp: DateTime.fromMillisecondsSinceEpoch(
+                                    value['timestamp']));
+
                             messages.add(message);
                           });
+
+                          messages.sort(
+                              (a, b) => a.timestamp.compareTo(b.timestamp));
 
                           return ListView.builder(
                               itemCount: messages.length,
@@ -155,7 +144,10 @@ class GameChatState extends ConsumerState<GameChat> {
                               }));
                         } else {
                           return const Center(
-                            child: CircularProgressIndicator(),
+                            child: Text(
+                              "No messages yet",
+                              style: TextStyle(color: Colors.white),
+                            ),
                           );
                         }
                       }))),
@@ -187,14 +179,22 @@ class GameChatState extends ConsumerState<GameChat> {
     );
   }
 
-  void sendMessage() {
-    chatRef.push().set({
-      'uid': uid,
-      'position': ref.read(playerPositionProvider),
-      'text': _messageController.text,
-      'timestamp': ServerValue.timestamp
-    });
+  void sendMessage() async {
+    final username = await storage.read(key: globals.FSS_USERNAME);
 
-    _messageController.clear();
+    if (_messageController.text.isNotEmpty) {
+      chatRef.push().set({
+        'playerInfo': {
+          'uid': uid,
+          'username': username,
+          'photoURL': FirebaseAuth.instance.currentUser!.photoURL,
+        },
+        'position': ref.read(playerPositionProvider),
+        'text': _messageController.text,
+        'timestamp': ServerValue.timestamp
+      });
+
+      _messageController.clear();
+    }
   }
 }
