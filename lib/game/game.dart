@@ -46,7 +46,7 @@ class GamePageState extends ConsumerState<GamePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       drawer: menu(),
-      endDrawer: chat(),
+      endDrawer: const GameChat(),
       body: SafeArea(
         child: Container(
           color: Colors.green[700],
@@ -248,10 +248,6 @@ class GamePageState extends ConsumerState<GamePage> {
         ],
       ),
     );
-  }
-
-  Widget chat() {
-    return const GameChat();
   }
 
   removePlayer() async {

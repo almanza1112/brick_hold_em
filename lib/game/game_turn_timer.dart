@@ -23,8 +23,7 @@ class GameTurnTimerState extends ConsumerState {
 
   Timer? _timer;
 
-    bool _isDisposed = false;
-
+  bool _isDisposed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +40,7 @@ class GameTurnTimerState extends ConsumerState {
   @override
   void dispose() {
     _timer?.cancel(); //
-        _isDisposed = true; // Set the flag when the widget is disposed
+    _isDisposed = true; // Set the flag when the widget is disposed
     super.dispose();
   }
 
@@ -60,12 +59,12 @@ class GameTurnTimerState extends ConsumerState {
           if (turnPlayerPosition == playerPosition) {
             // Update the StateProvider
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              
               // Updating if it is the players turn to true
               ref.read(isPlayersTurnProvider.notifier).state = true;
 
               // Updating if the player added a card this turn to false
               ref.read(didPlayerAddCardThisTurnProvider.notifier).state = false;
+
             });
 
             return Positioned(
@@ -80,12 +79,12 @@ class GameTurnTimerState extends ConsumerState {
 
                 if (countdown > 0) {
                   _timer = Timer(const Duration(seconds: 1), () {
-                      if (_isDisposed) {
+                    if (_isDisposed) {
                       // Check if the widget is disposed before updating the state
                       _timer?.cancel();
                       return;
                     }
-                   setState(() {
+                    setState(() {
                       countdown--;
                       // if (countdown <= 0) {
                       //   // TODO: APPLY THIS LOGIC
@@ -140,7 +139,7 @@ class GameTurnTimerState extends ConsumerState {
                 children: [
                   SizedBox(
                     // Got this number by subtracting 'top' num above with height of players sizedbox which is 550
-                    height: 495, 
+                    height: 495,
                     child: Stack(
                       children: [
                         ProgressIndicatorTurn(
@@ -159,7 +158,8 @@ class GameTurnTimerState extends ConsumerState {
                         child: const Center(
                             child: Text(
                           "WAITING...",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 24),
                         )),
                       )),
                 ],

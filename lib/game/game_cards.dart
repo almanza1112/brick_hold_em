@@ -1,9 +1,10 @@
 import 'dart:convert';
 
-import 'package:brick_hold_em/game/animations/bouncing_deck.dart';
 import 'package:brick_hold_em/game/animations/bouncing_icon_button.dart';
 import 'package:brick_hold_em/game/animations/bouncing_text.dart';
 import 'package:brick_hold_em/game/card_rules.dart';
+import 'package:brick_hold_em/game/deck_card.dart';
+import 'package:brick_hold_em/game/table_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -51,8 +52,6 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   DatabaseReference potListener =
       FirebaseDatabase.instance.ref('tables/1/betting/pot');
-
-  
 
   late DatabaseReference userChipCountListener;
 
@@ -266,44 +265,36 @@ Widget playerCards() {
             width: tableCardWidth,
             height: tableCardHeight,
             color: Colors.blueAccent,
-            child: Stack(
-              children: [
-                if (ref.read(didPlayerAddCardThisTurnProvider) == false &&
-                    ref.read(isPlayersTurnProvider) == true)
-                  BouncingDeck(width: tableCardWidth, height: tableCardHeight),
-                if (ref.read(didPlayerAddCardThisTurnProvider) == true ||
-                    ref.read(isPlayersTurnProvider) == false)
-                  Image.asset(
-                    "assets/images/backside.png",
-                    fit: BoxFit.cover,
-                    width: tableCardWidth,
-                    height: tableCardHeight,
-                  ),
-                Center(
-                  child: StreamBuilder(
-                      stream: deckCountListener.onValue,
-                      builder: ((context, snapshot) {
-                        if (snapshot.hasError) {
-                          return const CircularProgressIndicator();
-                        }
+            child: StatefulBuilder(builder: (context, snapshot) {
+              return Stack(
+                children: [
+                  DeckCard(),
+                  Center(
+                    child: StreamBuilder(
+                        stream: deckCountListener.onValue,
+                        builder: ((context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const CircularProgressIndicator();
+                          }
 
-                        if (snapshot.hasData) {
-                          int count = (snapshot.data!).snapshot.value as int;
+                          if (snapshot.hasData) {
+                            int count = (snapshot.data!).snapshot.value as int;
 
-                          return Text(
-                            "$count",
-                            style: const TextStyle(
-                                color: Colors.amberAccent,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800),
-                          );
-                        } else {
-                          return const Text("n");
-                        }
-                      })),
-                )
-              ],
-            ),
+                            return Text(
+                              "$count",
+                              style: const TextStyle(
+                                  color: Colors.amberAccent,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800),
+                            );
+                          } else {
+                            return const Text("n");
+                          }
+                        })),
+                  )
+                ],
+              );
+            }),
           )),
     );
   }
@@ -638,146 +629,149 @@ Widget playerCards() {
 
   Widget? tableCard(int pos) {
     if (tappedCards.asMap().containsKey(pos)) {
-      return Stack(
-        children: [
-          tappedCards[pos],
-          GestureDetector(
-            onTap: () {
-              // Get key of the tapped card
-              ValueKey<CardKey> t = tappedCards[pos].key as ValueKey<CardKey>;
-
-              late Widget newCard;
-
-              // Check if it is a Brick card
-              if (t.value.isBrick!) {
-                // If it is than make the new card Brick
-                newCard = card(t.value.copyWith(cardName: 'brick'));
-              } else {
-                // If it isn't then its a regular card, proceed as normal
-                newCard = tappedCards[pos];
-              }
-
-              setState(() {
-                cardWidgetsBuilderList.add(newCard);
-                tappedCards.removeAt(pos);
-              });
-            },
-            onLongPress: () {
-              ValueKey<CardKey> theTappedCard =
-                  tappedCards[pos].key as ValueKey<CardKey>;
-              if (theTappedCard.value.isBrick!) {
-                showModalBottomSheet(
-                    context: context,
-                    builder: (_) => Container(
-                        color: Colors.white,
-                        height: 300,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            const Center(
-                                child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Select Suit and Value",
-                                style: TextStyle(fontSize: 18),
-                              ),
-                            )),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: SizedBox(
-                                    height: 150,
-                                    child: ListWheelScrollView(
-                                        controller: FixedExtentScrollController(
-                                            initialItem: ref.read(
-                                                brickCardSuitPositionProvider)),
-                                        itemExtent: 30,
-                                        magnification: 1.8,
-                                        //squeeze: 1.1,
-                                        //offAxisFraction: .3,
-
-                                        useMagnifier: true,
-                                        onSelectedItemChanged: (int value) {
-                                          ref
-                                              .read(
-                                                  brickCardSuitPositionProvider
-                                                      .notifier)
-                                              .state = value;
-                                        },
-                                        children: const [
-                                          Text("Spade"),
-                                          Text("Club"),
-                                          Text("Heart"),
-                                          Text("Diamond"),
-                                        ]),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: SizedBox(
-                                    height: 150,
-                                    child: Center(
-                                      child: ListWheelScrollView(
-                                          controller: FixedExtentScrollController(
-                                              initialItem: ref.read(
-                                                  brickCardNumberPositionProvider)),
-                                          itemExtent: 30,
-                                          magnification: 1.8,
-                                          //squeeze: 1.1,
-                                          //offAxisFraction: -0.3,
-                                          useMagnifier: true,
-                                          physics: const BouncingScrollPhysics(
-                                            parent:
-                                                AlwaysScrollableScrollPhysics(),
-                                          ),
-                                          onSelectedItemChanged: (int value) {
-                                            ref
-                                                .read(
-                                                    brickCardNumberPositionProvider
-                                                        .notifier)
-                                                .state = value;
-                                          },
-                                          children: cardNumbersList
-                                              .map((e) => Text(e))
-                                              .toList()),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            ElevatedButton(
-                              child: const Text("Confirm"),
-                              onPressed: () {
-                                // Handle confirmation logic here
-
-                                // Get key of card
-                                ValueKey<CardKey> t =
-                                    tappedCards[pos].key as ValueKey<CardKey>;
-                                String newCardName =
-                                    '${cardSuitsList[ref.read(brickCardSuitPositionProvider)]}${cardNumbersList[ref.read(brickCardNumberPositionProvider)]}';
-
-                                setState(
-                                  () {
-                                    isStateChanged = true;
-                                    tappedCards[pos] = card(CardKey(
-                                        position: t.value.position,
-                                        cardName: newCardName,
-                                        isBrick: t.value.isBrick));
-                                  },
-                                );
-
-                                Navigator.of(context).pop(); // Close the modal
-                              },
-                            ),
-                          ],
-                        )));
-              }
-            },
-          )
-        ],
-      );
+      return TableCard(child: tableCardDesign(pos),);
     } else {
       return null;
     }
+  }
+
+  Widget tableCardDesign(int pos) {
+    return Stack(
+      children: [
+        tappedCards[pos],
+        GestureDetector(
+          onTap: () {
+            // Get key of the tapped card
+            ValueKey<CardKey> t = tappedCards[pos].key as ValueKey<CardKey>;
+
+            late Widget newCard;
+
+            // Check if it is a Brick card
+            if (t.value.isBrick!) {
+              // If it is than make the new card Brick
+              newCard = card(t.value.copyWith(cardName: 'brick'));
+            } else {
+              // If it isn't then its a regular card, proceed as normal
+              newCard = tappedCards[pos];
+            }
+
+            setState(() {
+              cardWidgetsBuilderList.add(newCard);
+              tappedCards.removeAt(pos);
+            });
+          },
+          onLongPress: () {
+            ValueKey<CardKey> theTappedCard =
+                tappedCards[pos].key as ValueKey<CardKey>;
+            if (theTappedCard.value.isBrick!) {
+              showModalBottomSheet(
+                  context: context,
+                  builder: (_) => Container(
+                      color: Colors.white,
+                      height: 300,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          const Center(
+                              child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              "Select Suit and Value",
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          )),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 150,
+                                  child: ListWheelScrollView(
+                                      controller: FixedExtentScrollController(
+                                          initialItem: ref.read(
+                                              brickCardSuitPositionProvider)),
+                                      itemExtent: 30,
+                                      magnification: 1.8,
+                                      //squeeze: 1.1,
+                                      //offAxisFraction: .3,
+
+                                      useMagnifier: true,
+                                      onSelectedItemChanged: (int value) {
+                                        ref
+                                            .read(brickCardSuitPositionProvider
+                                                .notifier)
+                                            .state = value;
+                                      },
+                                      children: const [
+                                        Text("Spade"),
+                                        Text("Club"),
+                                        Text("Heart"),
+                                        Text("Diamond"),
+                                      ]),
+                                ),
+                              ),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 150,
+                                  child: Center(
+                                    child: ListWheelScrollView(
+                                        controller: FixedExtentScrollController(
+                                            initialItem: ref.read(
+                                                brickCardNumberPositionProvider)),
+                                        itemExtent: 30,
+                                        magnification: 1.8,
+                                        //squeeze: 1.1,
+                                        //offAxisFraction: -0.3,
+                                        useMagnifier: true,
+                                        physics: const BouncingScrollPhysics(
+                                          parent:
+                                              AlwaysScrollableScrollPhysics(),
+                                        ),
+                                        onSelectedItemChanged: (int value) {
+                                          ref
+                                              .read(
+                                                  brickCardNumberPositionProvider
+                                                      .notifier)
+                                              .state = value;
+                                        },
+                                        children: cardNumbersList
+                                            .map((e) => Text(e))
+                                            .toList()),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          ElevatedButton(
+                            child: const Text("Confirm"),
+                            onPressed: () {
+                              // Handle confirmation logic here
+
+                              // Get key of card
+                              ValueKey<CardKey> t =
+                                  tappedCards[pos].key as ValueKey<CardKey>;
+                              String newCardName =
+                                  '${cardSuitsList[ref.read(brickCardSuitPositionProvider)]}${cardNumbersList[ref.read(brickCardNumberPositionProvider)]}';
+
+                              setState(
+                                () {
+                                  isStateChanged = true;
+                                  tappedCards[pos] = card(CardKey(
+                                      position: t.value.position,
+                                      cardName: newCardName,
+                                      isBrick: t.value.isBrick));
+                                },
+                              );
+
+                              Navigator.of(context).pop(); // Close the modal
+                            },
+                          ),
+                        ],
+                      )));
+            }
+          },
+        )
+      ],
+    );
   }
 
   Widget tableChips(var constraints) {
@@ -846,7 +840,7 @@ Widget playerCards() {
           var map = event.snapshot.value! as Map<Object?, Object?>;
           var d = map[map.keys.first] as List<Object?>;
           return Image.asset(
-            "assets/images/${d[0]}.png",
+            "assets/images/${d[d.length - 1]}.png",
             width: tableCardWidth,
             height: tableCardHeight,
           );
@@ -976,7 +970,7 @@ Widget playerCards() {
 
     // Create list that adds faceUpCard
     List<String> totalCardsBeingPlayed = [
-      data[0].toString(),
+      data[data.length - 1].toString(),
       ...cardsBeingPlayed
     ];
 
@@ -1079,6 +1073,7 @@ Widget playerCards() {
     } else {
       // TODO: make this more visibly known to the user that it isnt a valid hand
       // It is not a valid hand, show user that it isnt
+      ref.read(isThereAnInvalidPlayProvider.notifier).state = true;
       HapticFeedback.heavyImpact();
       HapticFeedback.heavyImpact();
     }
