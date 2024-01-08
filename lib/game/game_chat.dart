@@ -31,7 +31,7 @@ class GameChatState extends ConsumerState<GameChat> {
     super.initState();
     _scrollController = ScrollController();
     // Scroll to the bottom when the widget is first built
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
     });
   }
