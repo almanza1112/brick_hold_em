@@ -55,8 +55,7 @@ class GamePageState extends ConsumerState<GamePage> {
           color: Colors.green[700],
           child: Stack(
             children: [
-              GameCards(),
-              //if (ref.read(isThereAWinnerProvider) == false)
+              const GameCards(),
               const GameTurnTimer(),
               const GamePlayers(),
               const TableChat(),
@@ -83,14 +82,12 @@ class GamePageState extends ConsumerState<GamePage> {
 
                         if (data == "none") {
                           // There is no winner
-
+                          // TODO: Fix this hacky way of resetting the game
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             ref.read(isThereAWinnerProvider.notifier).state =
                                 false;
 
                             ref.read(refreshKeyProvider.notifier).state = UniqueKey();
-                            print("it hit here");
-
                           });
 
 

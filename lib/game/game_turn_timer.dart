@@ -54,8 +54,6 @@ class GameTurnTimerState extends ConsumerState {
           final turnPlayerPosition = event.snapshot.value as int;
           final playerPosition = ref.read(playerPositionProvider);
 
-          //print("playerPosition: ${playerPosition}");
-
           if (turnPlayerPosition == playerPosition) {
             // Update the StateProvider
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -124,8 +122,6 @@ class GameTurnTimerState extends ConsumerState {
 
             num position =
                 (turnPlayerPosition - ref.read(playerPositionProvider)) - 1;
-
-            //print("positionAfterSub: $position");
 
             if (position < 0) {
               position = 6 + position;

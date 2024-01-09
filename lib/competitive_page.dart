@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:brick_hold_em/game/game.dart';
+import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -49,7 +52,7 @@ class CompetitivePageState extends ConsumerState {
         Scaffold(
           backgroundColor: Colors.blue,
           appBar: AppBar(
-            title: const Text('NO LIMIT'),
+            title: const Text('COMPETITIVE'),
             backgroundColor: Colors.blue,
             shadowColor: Colors.transparent,
             leading: BackButton(
@@ -259,6 +262,10 @@ class CompetitivePageState extends ConsumerState {
 
     if (response.statusCode == 201) {
       if (context.mounted) {
+        // Access body and update provider
+        Map<String, dynamic> responseBody = jsonDecode(response.body);
+        ref.read(playerPositionProvider.notifier).state = responseBody['position'];
+
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(

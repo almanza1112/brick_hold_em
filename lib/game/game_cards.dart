@@ -132,7 +132,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
                 if (snapshot.hasData) {
                   var cardsList =
                       List<String>.from(snapshot.data!.value as List);
-                  print("cardList: $cardsList");
+                  //print("cardList: $cardsList");
 
                   // Not having the line below was causing an infinite loop
                   // cardWidgets has to be cleared
