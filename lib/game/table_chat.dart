@@ -17,6 +17,7 @@ class _TableChatState extends ConsumerState<TableChat> {
   DatabaseReference chatRef = FirebaseDatabase.instance.ref('tables/1/chat');
   OverlayEntry? overlayEntry;
   final uid = FirebaseAuth.instance.currentUser!.uid;
+  bool pos1 = false, pos2 = false, pos3 = false, pos4 = false;
 
   @override
   Widget build(BuildContext context) {
@@ -29,21 +30,20 @@ class _TableChatState extends ConsumerState<TableChat> {
               Map<dynamic, dynamic> data =
                   snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
 
-              // Delay the execution until after the build phase is complete
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (data['playerInfo']['uid'] != uid) {
-                  num position =
-                      (data['position'] - ref.read(playerPositionProvider)) - 1;
+              late Widget t;
 
-                  //print("positionAfterSub: $position");
+              if (data['playerInfo']['uid'] != uid) {
+                num position =
+                    (data['position'] - ref.read(playerPositionProvider)) - 1;
 
-                  if (position < 0) {
-                    position = 6 + position;
-                  }
-                  showOverlay(data['text'], position.toInt());
+                if (position < 0) {
+                  position = 6 + position;
                 }
-              });
-              return const SizedBox();
+                t = showOverlay(data['text'], position.toInt());
+              } else {
+                t = const SizedBox();
+              }
+              return t;
             } else {
               return Container();
             }
@@ -56,12 +56,12 @@ class _TableChatState extends ConsumerState<TableChat> {
     removeOverlay();
     super.dispose();
   }
+  bool visible = true;
 
-  void showOverlay(String message, int position) {
-
+  Widget showOverlay(String message, int position) {
     bool top = false, bottom = false, right = false, left = false;
     late double topNum, leftNum, rightNum;
-    switch (3) {
+    switch (position) {
       case 0:
         // Bottom right
         bottom = true;
@@ -102,8 +102,16 @@ class _TableChatState extends ConsumerState<TableChat> {
         leftNum = 20;
         break;
     }
-    overlayEntry = OverlayEntry(
-      builder: (context) => IgnorePointer(
+
+    Future.delayed(const Duration(seconds: 3), () {
+      setState(() {
+        visible = false;
+      });
+    });
+
+    return Visibility(
+      visible: visible,
+      child: IgnorePointer(
         ignoring: true,
         child: SizedBox(
           child: Stack(
@@ -126,7 +134,11 @@ class _TableChatState extends ConsumerState<TableChat> {
                                 borderRadius: BorderRadius.circular(20),
                                 color: Colors.blue),
                             padding: const EdgeInsets.all(12.0),
-                            child: Text(message, overflow: TextOverflow.ellipsis, maxLines: 2,),
+                            child: Text(
+                              message,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                            ),
                           ),
                         ),
                       ),
@@ -139,12 +151,6 @@ class _TableChatState extends ConsumerState<TableChat> {
         ),
       ),
     );
-
-    Overlay.of(context).insert(overlayEntry!);
-    // Schedule removal of overlay after some time
-    Future.delayed(const Duration(seconds: 3), () {
-      removeOverlay();
-    });
   }
 
   removeOverlay() {
