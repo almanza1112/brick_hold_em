@@ -73,7 +73,7 @@ class GameTurnTimerState extends ConsumerState {
               right: 0,
               child: StatefulBuilder(builder: (context, setState) {
                 // Sound for the countdown
-                SystemSound.play(SystemSoundType.click);
+                //SystemSound.play(SystemSoundType.click);
                 // Vibration for the countdown
                 HapticFeedback.heavyImpact();
 

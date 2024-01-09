@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:animations/animations.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:brick_hold_em/game/game_chat.dart';
 import 'package:brick_hold_em/game/player.dart';
 import 'package:brick_hold_em/game/table_chat.dart';
@@ -31,6 +32,7 @@ class GamePageState extends ConsumerState<GamePage> {
   DatabaseReference winnerRef =
       FirebaseDatabase.instance.ref('tables/1/winner');
   final uid = FirebaseAuth.instance.currentUser!.uid;
+  final player = AudioPlayer();
 
   TextStyle menuTextStyle = TextStyle(color: Colors.grey[800]);
 
@@ -102,6 +104,11 @@ class GamePageState extends ConsumerState<GamePage> {
                           });
 
                           if (data == uid) {
+                             // Play valid sound
+                            Source roundWonSound =
+                                AssetSource("sounds/round_won.wav");
+                            player.play(roundWonSound);
+
                             // You are the winner
                             return BackdropFilter(
                                 filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
@@ -113,6 +120,11 @@ class GamePageState extends ConsumerState<GamePage> {
                                       color: Colors.amber),
                                 ));
                           } else {
+                            // Play round lost sound
+                             Source roundLostSound =
+                                AssetSource("sounds/round_lost.wav");
+                            player.play(roundLostSound);
+
                             // Another player is the winner
                             final otherPlayersList =
                                 ref.read(otherPlayersInformationProvider);

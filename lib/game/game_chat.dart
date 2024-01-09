@@ -130,6 +130,8 @@ class GameChatState extends ConsumerState<GameChat> {
                                                           FontWeight.w300),
                                                 ),
                                               Container(
+                                                constraints: const BoxConstraints(
+                                                    maxWidth: 200),
                                                 decoration: BoxDecoration(
                                                     color:
                                                         messages[index].uid ==
@@ -142,11 +144,7 @@ class GameChatState extends ConsumerState<GameChat> {
                                                                 20))),
                                                 child: Padding(
                                                   padding:
-                                                      const EdgeInsets.only(
-                                                          left: 6,
-                                                          right: 6,
-                                                          top: 2,
-                                                          bottom: 2),
+                                                      const EdgeInsets.all(8),
                                                   child: Text(
                                                     messages[index].text,
                                                     style: TextStyle(

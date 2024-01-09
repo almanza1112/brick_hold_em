@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -15,22 +16,24 @@ class TableChat extends ConsumerStatefulWidget {
 
 class _TableChatState extends ConsumerState<TableChat> {
   DatabaseReference chatRef = FirebaseDatabase.instance.ref('tables/1/chat');
-  OverlayEntry? overlayEntry;
   final uid = FirebaseAuth.instance.currentUser!.uid;
   bool pos1 = false, pos2 = false, pos3 = false, pos4 = false;
 
+  final player = AudioPlayer();
+
   @override
   Widget build(BuildContext context) {
+
     // The sized box has to be the same height as the game_players
     return SizedBox(
       child: StreamBuilder(
           stream: chatRef.limitToLast(1).onChildAdded,
           builder: ((context, snapshot) {
+
             if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
               Map<dynamic, dynamic> data =
                   snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
 
-              late Widget t;
 
               if (data['playerInfo']['uid'] != uid) {
                 num position =
@@ -39,11 +42,24 @@ class _TableChatState extends ConsumerState<TableChat> {
                 if (position < 0) {
                   position = 6 + position;
                 }
-                t = showOverlay(data['text'], position.toInt());
+                // Play message sound
+                Source invalidPlaySound =
+                    AssetSource("sounds/message_received.mp3");
+                player.play(invalidPlaySound);
+
+                return FutureBuilder(
+                  future: Future.delayed(const Duration(seconds: 3)),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return const SizedBox();
+                    } else {
+                      return showMessage(data['text'], position.toInt());
+                    }
+                  },
+                );
               } else {
-                t = const SizedBox();
+                return const SizedBox();
               }
-              return t;
             } else {
               return Container();
             }
@@ -51,14 +67,9 @@ class _TableChatState extends ConsumerState<TableChat> {
     );
   }
 
-  @override
-  void dispose() {
-    removeOverlay();
-    super.dispose();
-  }
   bool visible = true;
 
-  Widget showOverlay(String message, int position) {
+  Widget showMessage(String message, int position) {
     bool top = false, bottom = false, right = false, left = false;
     late double topNum, leftNum, rightNum;
     switch (position) {
@@ -103,12 +114,6 @@ class _TableChatState extends ConsumerState<TableChat> {
         break;
     }
 
-    Future.delayed(const Duration(seconds: 3), () {
-      setState(() {
-        visible = false;
-      });
-    });
-
     return Visibility(
       visible: visible,
       child: IgnorePointer(
@@ -151,11 +156,5 @@ class _TableChatState extends ConsumerState<TableChat> {
         ),
       ),
     );
-  }
-
-  removeOverlay() {
-    overlayEntry?.remove();
-    overlayEntry?.dispose();
-    overlayEntry = null;
   }
 }

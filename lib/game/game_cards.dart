@@ -603,6 +603,11 @@ Widget playerCards() {
                           ],
                         )));
               } else {
+                // Play card sliding sound
+                Source cardSlidingSound =
+                    AssetSource("sounds/card_sliding.mp3");
+                player.play(cardSlidingSound);
+
                 setState(() {
                   isStateChanged = true;
 
@@ -629,7 +634,9 @@ Widget playerCards() {
 
   Widget? tableCard(int pos) {
     if (tappedCards.asMap().containsKey(pos)) {
-      return TableCard(child: tableCardDesign(pos),);
+      return TableCard(
+        child: tableCardDesign(pos),
+      );
     } else {
       return null;
     }
@@ -656,6 +663,10 @@ Widget playerCards() {
             }
 
             setState(() {
+              // Play card sliding sound
+              Source cardSlidingSound = AssetSource("sounds/card_sliding.mp3");
+              player.play(cardSlidingSound);
+
               cardWidgetsBuilderList.add(newCard);
               tappedCards.removeAt(pos);
             });
@@ -981,6 +992,10 @@ Widget playerCards() {
 
     // It is a valid play
     if (result == "success") {
+      // Play valid sound
+      Source validPlaySound = AssetSource("sounds/valid.wav");
+      player.play(validPlaySound);
+
       // Makes tapped cards on table animate to discard pile
       ref.read(isPlayButtonSelectedProvider.notifier).state = true;
 
