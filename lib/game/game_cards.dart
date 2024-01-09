@@ -5,6 +5,7 @@ import 'package:brick_hold_em/game/animations/bouncing_text.dart';
 import 'package:brick_hold_em/game/card_rules.dart';
 import 'package:brick_hold_em/game/deck_card.dart';
 import 'package:brick_hold_em/game/table_card.dart';
+import 'package:brick_hold_em/game/user_blind.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -105,6 +106,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
             buttons(),
             animatedChipsToTable(constraints),
             userChips(constraints),
+            const UserBlind(),
             tableChips(constraints),
           ],
         );

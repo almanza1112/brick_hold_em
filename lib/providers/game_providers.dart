@@ -71,3 +71,7 @@ final isRaiseSelectedProvider = StateProvider<bool>((ref) => false);
 final isCallCheckSelectedProvider = StateProvider<bool>((ref) => false);
 
 final isThereAnInvalidPlayProvider = StateProvider<bool>((ref) => false);
+
+
+// BLINDS
+final userBlindProvider = StateProvider<String>((ref) => "none");

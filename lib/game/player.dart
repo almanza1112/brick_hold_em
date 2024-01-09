@@ -8,6 +8,7 @@ class Player {
   final String photoURL;
   final String? fullName;
   final String uid;
+  final int position;
   final bool folded;
 
   Player({
@@ -16,6 +17,7 @@ class Player {
     required this.photoURL,
     this.fullName,
     required this.uid,
+    required this.position,
     required this.folded,
   });
 
@@ -25,9 +27,8 @@ class Player {
     String? username,
     String? photoURL,
     ValueGetter<String?>? fullName,
-    ValueGetter<int?>? chips,
-    ValueGetter<int?>? cardCount,
     String? uid,
+    int? position,
     bool? folded,
   }) {
     return Player(
@@ -36,6 +37,7 @@ class Player {
       photoURL: photoURL ?? this.photoURL,
       fullName: fullName?.call() ?? this.fullName,
       uid: uid ?? this.uid,
+      position: position ?? this.position,
       folded: folded ?? this.folded,
     );
   }
@@ -49,6 +51,7 @@ class Player {
       'photoURL': photoURL,
       'fullName': fullName,
       'uid': uid,
+      'position': position,
       'folded': folded,
     };
   }
@@ -60,6 +63,7 @@ class Player {
       photoURL: map['photoURL'] ?? '',
       fullName: map['fullName'],
       uid: map['uid'] ?? '',
+      position: map['position']?.toInt() ?? 0,
       folded: map['folded'] ?? false,
     );
   }
@@ -70,7 +74,7 @@ class Player {
 
   @override
   String toString() {
-    return 'Player(name: $name, username: $username, photoURL: $photoURL, fullName: $fullName, uid: $uid, folded: $folded)';
+    return 'Player(name: $name, username: $username, photoURL: $photoURL, fullName: $fullName, uid: $uid, position: $position, folded: $folded)';
   }
 
   @override
@@ -83,6 +87,7 @@ class Player {
       other.photoURL == photoURL &&
       other.fullName == fullName &&
       other.uid == uid &&
+      other.position == position &&
       other.folded == folded;
   }
 
@@ -93,6 +98,7 @@ class Player {
       photoURL.hashCode ^
       fullName.hashCode ^
       uid.hashCode ^
+      position.hashCode ^
       folded.hashCode;
   }
 }

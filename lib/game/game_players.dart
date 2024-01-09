@@ -48,8 +48,7 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
 
               // Loop through each child from list returned and assign keys
               for (final child in snapshot.data!.snapshot.children) {
-                final childObj =
-                    Map<String, dynamic>.from(child.value as Map);
+                final childObj = Map<String, dynamic>.from(child.value as Map);
                 if (childObj['uid'] != uid) {
                   final data = Player.fromMap(childObj);
                   otherPlayersList.add(data);
@@ -76,9 +75,8 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
 
               // Update the StateProvider
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                ref
-                    .read(otherPlayersAdjustedPositionsProvider.notifier)
-                    .state = adjustedOtherPlayersKeys;
+                ref.read(otherPlayersAdjustedPositionsProvider.notifier).state =
+                    adjustedOtherPlayersKeys;
 
                 ref.read(playerPositionProvider.notifier).state = playerKey;
 
@@ -87,7 +85,12 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
               });
 
               List<Player> playersList = <Player>[];
-              Player noOne = Player(username: "", photoURL: "", uid: '', folded: true);
+              Player noOne = Player(
+                  username: "",
+                  photoURL: "",
+                  uid: '',
+                  folded: true,
+                  position: 20);
               for (int i = 0; i < 5; i++) {
                 int matchingIndex = adjustedOtherPlayersKeys.indexOf(i);
                 if (matchingIndex != -1) {
@@ -188,11 +191,11 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                         as ImageProvider,
                 radius: imageRadius,
               ),
-              if(isFolded)
-              CircleAvatar(
-                backgroundColor: const Color.fromRGBO(255, 255, 255, 0.5),
-                radius: imageRadius,
-              ),
+              if (isFolded)
+                CircleAvatar(
+                  backgroundColor: const Color.fromRGBO(255, 255, 255, 0.5),
+                  radius: imageRadius,
+                ),
               if (playerDetailsVisible)
                 Positioned(
                   bottom: bottom,
@@ -205,19 +208,32 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          if(!isFolded)
-                          Image.asset(
-                            'assets/images/backside.png',
-                            height: 35, // Must be same height as SizedBox below
-                            width: 25,
-                          ),
                           if (!isFolded)
-                          Align(
-                              alignment: Alignment.center,
-                              child: streamedCardCount(player))
+                            Image.asset(
+                              'assets/images/backside.png',
+                              height:
+                                  35, // Must be same height as SizedBox below
+                              width: 25,
+                            ),
+                          if (!isFolded)
+                            Align(
+                                alignment: Alignment.center,
+                                child: streamedCardCount(player))
                         ],
                       )),
                 ),
+              if (!isFolded)
+                Positioned(
+                  top: 0,
+                  left: left ? 0 : null,
+                  right: right ? 0 : null,
+                  child: Transform(
+                    transform: left
+                        ? Matrix4.translationValues(-8, 0, 0)
+                        : Matrix4.translationValues(8, 0, 0),
+                    child: streamedBlind(player),
+                  ),
+                )
             ],
           ),
           SizedBox(
@@ -229,7 +245,10 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                 if (playerDetailsVisible)
                   Text(
                     player.username,
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isFolded ? Colors.grey[400] : Colors.amber),
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isFolded ? Colors.grey[400] : Colors.amber),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
@@ -249,17 +268,59 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                       streamedChipCount(player)
                     ],
                   ),
-                // if (!playerDetailsVisible)
-                //   const Text(
-                //     "Waiting..",
-                //     style: TextStyle(color: Colors.white, fontSize: 12),
-                //   )
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget streamedBlind(Player player) {
+    return StreamBuilder(
+        stream: FirebaseDatabase.instance.ref('tables/1/blinds').onValue,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            Map<dynamic, dynamic> data =
+                snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+            if (data['smallBlind'] == player.position) {
+              return const CircleAvatar(
+                  backgroundColor: Colors.blue,
+                  radius: 10,
+                  child: Text(
+                    "S",
+                    style: TextStyle(fontSize: 10, color: Colors.white),
+                  ));
+            } else if (data['bigBlind'] == player.position) {
+              return const CircleAvatar(
+                backgroundColor: Colors.red,
+                radius: 10,
+                child: Text(
+                  "B",
+                  style: TextStyle(fontSize: 10, color: Colors.white),
+                ),
+              );
+            } else {
+              // You are the one of the blinds
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+
+                if(data['smallBlind'] == ref.read(playerPositionProvider)){
+                  ref.read(userBlindProvider.notifier).state = "small";
+                } else if (data['bigBlind'] == ref.read(playerPositionProvider)){
+                  ref.read(userBlindProvider.notifier).state = "big";
+                } else {
+                  ref.read(userBlindProvider.notifier).state = "none";
+                }
+              });
+
+              return const SizedBox();
+            }
+          } else if (snapshot.hasError) {
+            return const Text("Error");
+          } else {
+            return const CircularProgressIndicator();
+          }
+        });
   }
 
   Widget streamedCardCount(Player player) {
@@ -303,7 +364,9 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
 
             return Text(
               data.toString(),
-              style: TextStyle(fontSize: 10, color: player.folded ? Colors.grey[400] : Colors.amber),
+              style: TextStyle(
+                  fontSize: 10,
+                  color: player.folded ? Colors.grey[400] : Colors.amber),
             );
           } else {
             return const Text("loading...");
