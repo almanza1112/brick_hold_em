@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:animations/animations.dart';
 import 'package:brick_hold_em/game/game_chat.dart';
 import 'package:brick_hold_em/game/player.dart';
+import 'package:brick_hold_em/game/table_chat.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -56,6 +57,7 @@ class GamePageState extends ConsumerState<GamePage> {
               //if (ref.read(isThereAWinnerProvider) == false)
               const GameTurnTimer(),
               const GamePlayers(),
+              const TableChat(),
               drawerButton(),
               endDrawerButton(),
               // IgnorePointer(

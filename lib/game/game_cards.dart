@@ -1074,6 +1074,12 @@ Widget playerCards() {
       // TODO: make this more visibly known to the user that it isnt a valid hand
       // It is not a valid hand, show user that it isnt
       ref.read(isThereAnInvalidPlayProvider.notifier).state = true;
+
+      // Play invalid sound
+      Source invalidPlaySound = AssetSource("sounds/invalid.wav");
+      player.play(invalidPlaySound);
+
+      // Vibrate phone
       HapticFeedback.heavyImpact();
       HapticFeedback.heavyImpact();
     }
@@ -1501,8 +1507,8 @@ Widget playerCards() {
     // Maybe..
     // TODO: look into this, not a priority...maybe cloud function??
 
-    //Source cardDrawnSound = AssetSource("sounds/card_drawn.mp3");
-    //player.play(cardDrawnSound);
+    Source cardDrawnSound = AssetSource("sounds/card_drawn.mp3");
+    player.play(cardDrawnSound);
 
     // Updating state that the player already a card
     ref.read(didPlayerAddCardThisTurnProvider.notifier).state = true;

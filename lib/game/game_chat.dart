@@ -214,7 +214,7 @@ class GameChatState extends ConsumerState<GameChat> {
   void _scrollToBottom() {
     _scrollController.animateTo(
       _scrollController.position.maxScrollExtent,
-      duration: Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 100),
       curve: Curves.easeInOut,
     );
   }

@@ -26,22 +26,29 @@ class _TableErrorState extends ConsumerState<TableCard>
   late AnimationController controller;
   late Animation<double> offsetAnimation;
 
+  late Animation<double>offsetAnimation2;
+  
+
 
   @override
   void initState() {
-    controller = AnimationController(duration: widget.duration, vsync: this)..addStatusListener((status) { 
-      if(status == AnimationStatus.completed){
-        controller.reset();
-        ref.read(isThereAnInvalidPlayProvider.notifier).state = false;
-        print("within");
-      }
-    });
+    controller = AnimationController(duration: widget.duration, vsync: this)..forward();
     offsetAnimation = Tween<double>(begin: 0.0, end: 1.0)
         .chain(CurveTween(curve: widget.curve))
-        .animate(controller);
+        .animate(controller)..addStatusListener((status) { 
+          if (status == AnimationStatus.completed) {
+            controller.reset();
+            ref.read(isThereAnInvalidPlayProvider.notifier).state = false;
+            print("okay we here");
+          } 
+        });
     if (widget.controller is Function) {
       widget.controller!(controller);
     }
+
+    offsetAnimation2 = Tween<double>(begin: 0.0, end: 0.0)
+        .chain(CurveTween(curve: widget.curve))
+        .animate(controller);
 
     super.initState();
   }
@@ -62,10 +69,16 @@ class _TableErrorState extends ConsumerState<TableCard>
     return AnimatedBuilder(
       animation: offsetAnimation, 
       builder: (BuildContext context, Widget? child) {
-        return Transform.translate(
+        if(ref.watch(isThereAnInvalidPlayProvider)){
+          print("HIIIII");
+          return Transform.translate(
           offset: Offset(widget.deltaX * shake(offsetAnimation.value), 0),
           child: child,
         );
+        } else {
+          print("BYEEE");
+          return SizedBox(child: child);
+        }
       },
       child: widget.child,
     );
