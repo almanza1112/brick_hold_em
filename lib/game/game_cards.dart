@@ -1303,6 +1303,15 @@ Widget playerCards() {
     final isFoldSelected = ref.read(isFoldSelectedProvider);
     final isRaiseSelected = ref.read(isRaiseSelectedProvider);
     final isCallCheckSelected = ref.read(isCallCheckSelectedProvider);
+
+    late int minBet;
+
+    if(doYouNeedToCall){
+      
+    }
+
+
+
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -1355,6 +1364,7 @@ Widget playerCards() {
                           return Column(
                             children: [
                               Slider(
+                                  min: 4,
                                   max: ref.read(playerChipCountProvider),
                                   thumbColor: Colors.amber,
                                   activeColor: Colors.amber,
