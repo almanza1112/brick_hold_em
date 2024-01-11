@@ -28,7 +28,6 @@ class GameCards extends ConsumerStatefulWidget {
 
 class GameCardsPageState extends ConsumerState<GameCards> {
   final onceRef = FirebaseDatabase.instance.ref();
-  bool isStateChanged = false;
   var cardWidgetsBuilderList = <Widget>[];
   double handCardWidth = 50;
   double handCardHeight = 70;
@@ -115,14 +114,15 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   }
 
   Widget playerCards() {
-    final refreshKey = ref.watch(refreshKeyProvider);
+    print('playerCards() called');
+    //final refreshKey = ref.watch(refreshKeyProvider);
     // TODO: this is not optimal but a temporary patch
     Future<DataSnapshot> handRef = FirebaseDatabase.instance
         .ref(
             'tables/1/cards/playerCards/${FirebaseAuth.instance.currentUser!.uid}/hand')
         .get();
     return SafeArea(
-      key: refreshKey,
+      key: ref.watch(refreshKeyProvider),
       child: Stack(children: [
         Positioned(
           right: 0,
@@ -153,8 +153,7 @@ class GameCardsPageState extends ConsumerState<GameCards> {
                     cardWidgets.add(card(cardKey));
                   }
 
-                  // Find out why this is here, i forget
-                  if (!isStateChanged) {
+                  if (!ref.read(didUserMoveCardProvider)) {
                     cardWidgetsBuilderList = cardWidgets;
                   }
 
@@ -586,10 +585,14 @@ Widget playerCards() {
                                 Widget brickCard = card(
                                     t.value.copyWith(cardName: newCardName));
 
+                                // THIS IS IMPORTANT FOR WHEN GAME RESTARTS
+                                // MUST GGO ALONG WITH setState() BELOW
+                                ref
+                                    .read(didUserMoveCardProvider.notifier)
+                                    .state = true;
+
                                 setState(
                                   () {
-                                    isStateChanged = true;
-
                                     // Add tapped card to table (tappedCards List)
                                     tappedCards.add(brickCard);
 
@@ -610,9 +613,11 @@ Widget playerCards() {
                     AssetSource("sounds/card_sliding.mp3");
                 player.play(cardSlidingSound);
 
-                setState(() {
-                  isStateChanged = true;
+                // THIS IS IMPORTANT FOR WHEN GAME RESTARTS
+                // MUST GGO ALONG WITH setState() BELOW
+                ref.read(didUserMoveCardProvider.notifier).state = true;
 
+                setState(() {
                   // Add tapped card to table (tappedCards List)
                   tappedCards.add(cardWidgetsBuilderList[result]);
 
@@ -765,9 +770,13 @@ Widget playerCards() {
                               String newCardName =
                                   '${cardSuitsList[ref.read(brickCardSuitPositionProvider)]}${cardNumbersList[ref.read(brickCardNumberPositionProvider)]}';
 
+                              // THIS IS IMPORTANT FOR WHEN GAME RESTARTS
+                              // MUST GGO ALONG WITH setState() BELOW
+                              ref.read(didUserMoveCardProvider.notifier).state =
+                                  true;
+
                               setState(
                                 () {
-                                  isStateChanged = true;
                                   tappedCards[pos] = card(CardKey(
                                       position: t.value.position,
                                       cardName: newCardName,
@@ -1306,11 +1315,7 @@ Widget playerCards() {
 
     late int minBet;
 
-    if(doYouNeedToCall){
-      
-    }
-
-
+    if (doYouNeedToCall) {}
 
     showModalBottomSheet(
         context: context,
@@ -1564,8 +1569,11 @@ Widget playerCards() {
     await cardsRef
         .update({"dealer/deck": deck, "playerCards/$uid/hand": playersCards});
 
+    // THIS IS IMPORTANT FOR WHEN GAME RESTARTS
+    // MUST GGO ALONG WITH setState() BELOW
+    ref.read(didUserMoveCardProvider.notifier).state = true;
+
     setState(() {
-      isStateChanged = true;
       cardWidgetsBuilderList.add(card(CardKey(
           position: cardWidgetsBuilderList.length,
           cardName: cardBeingAdded,
@@ -1574,8 +1582,11 @@ Widget playerCards() {
   }
 
   shuffleHand() {
+    // THIS IS IMPORTANT FOR WHEN GAME RESTARTS
+    // MUST GGO ALONG WITH setState() BELOW
+    ref.read(didUserMoveCardProvider.notifier).state = true;
+
     setState(() {
-      isStateChanged = true;
       cardWidgetsBuilderList.shuffle();
     });
   }

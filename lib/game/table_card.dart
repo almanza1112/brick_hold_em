@@ -39,7 +39,7 @@ class _TableErrorState extends ConsumerState<TableCard>
           if (status == AnimationStatus.completed) {
             controller.reset();
             ref.read(isThereAnInvalidPlayProvider.notifier).state = false;
-            print("okay we here");
+            //print("okay we here");
           } 
         });
     if (widget.controller is Function) {
@@ -70,13 +70,13 @@ class _TableErrorState extends ConsumerState<TableCard>
       animation: offsetAnimation, 
       builder: (BuildContext context, Widget? child) {
         if(ref.watch(isThereAnInvalidPlayProvider)){
-          print("HIIIII");
+          //print("HIIIII");
           return Transform.translate(
           offset: Offset(widget.deltaX * shake(offsetAnimation.value), 0),
           child: child,
         );
         } else {
-          print("BYEEE");
+          //print("BYEEE");
           return SizedBox(child: child);
         }
       },

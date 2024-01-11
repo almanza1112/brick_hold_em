@@ -12,8 +12,8 @@ class UserBlind extends ConsumerStatefulWidget {
 class _UserBlindState extends ConsumerState<UserBlind> {
   @override
   Widget build(BuildContext context) {
-    print('it be hitting');
-    print(ref.read(userBlindProvider));
+    //print('it be hitting');
+    //print(ref.read(userBlindProvider));
     return Positioned(
       bottom: 190,
       left: 50,

@@ -75,3 +75,6 @@ final isThereAnInvalidPlayProvider = StateProvider<bool>((ref) => false);
 
 // BLINDS
 final userBlindProvider = StateProvider<String>((ref) => "none");
+
+// OTHER
+final didUserMoveCardProvider = StateProvider<bool>((ref) => false);

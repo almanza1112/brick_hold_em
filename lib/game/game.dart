@@ -84,10 +84,8 @@ class GamePageState extends ConsumerState<GamePage> {
                           // There is no winner
                           // TODO: Fix this hacky way of resetting the game
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            ref.read(isThereAWinnerProvider.notifier).state =
+                            ref.read(didUserMoveCardProvider.notifier).state =
                                 false;
-
-                            ref.read(refreshKeyProvider.notifier).state = UniqueKey();
                           });
 
 
