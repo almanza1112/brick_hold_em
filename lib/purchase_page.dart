@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class PurchasePage extends StatefulWidget {
+  const PurchasePage({super.key});
+
+  @override
   PurchasePageState createState() => PurchasePageState();
 }
 
@@ -18,6 +21,7 @@ class PurchasePageState extends State<PurchasePage> {
       appBar: AppBar(
           title: const Text('PURCHASE CHIPS'),
           backgroundColor: Colors.teal,
+          foregroundColor: Colors.white,
           shadowColor: Colors.transparent,
           leading: BackButton(
             onPressed: () {

@@ -2,7 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class EditProfilePicturePage extends StatefulWidget {
-  _EditProfilePicturePageState createState() => _EditProfilePicturePageState();
+  const EditProfilePicturePage({super.key});
+
+  @override
+  State<EditProfilePicturePage> createState() => _EditProfilePicturePageState();
 }
 
 class _EditProfilePicturePageState extends State<EditProfilePicturePage> {
@@ -14,6 +17,7 @@ class _EditProfilePicturePageState extends State<EditProfilePicturePage> {
       appBar: AppBar(
         title: const Text('PROFILE PICTURE'),
         backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {

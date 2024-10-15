@@ -37,6 +37,7 @@ class _AdsPageState extends State<AdsPage> {
       appBar: AppBar(
         title: const Text('EARN CHIPS'),
         backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {

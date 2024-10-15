@@ -34,6 +34,7 @@ class _FriendsPageState extends State<FriendsPage> {
       appBar: AppBar(
         title: const Text('FRIENDS'),
         backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {
@@ -45,7 +46,6 @@ class _FriendsPageState extends State<FriendsPage> {
               onPressed: navigateToSearchUsers,
               icon: const Icon(
                 Icons.search,
-                color: Colors.white,
               ))
         ],
       ),
@@ -193,6 +193,6 @@ class _FriendsPageState extends State<FriendsPage> {
 
   void navigateToSearchUsers() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => SearchUsersPage()));
+        context, MaterialPageRoute(builder: (context) => const SearchUsersPage()));
   }
 }

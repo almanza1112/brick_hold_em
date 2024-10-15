@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class HowToPlayPage extends StatefulWidget {
-  _HowToPlayPageState createState() => _HowToPlayPageState();
+  const HowToPlayPage({super.key});
+
+  @override
+  State<HowToPlayPage> createState() => _HowToPlayPageState();
 }
 
 class _HowToPlayPageState extends State<HowToPlayPage> {
@@ -13,6 +16,7 @@ class _HowToPlayPageState extends State<HowToPlayPage> {
       appBar: AppBar(
         title: const Text('HOW TO PLAY'),
         backgroundColor: Colors.red,
+        foregroundColor: Colors.white,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {

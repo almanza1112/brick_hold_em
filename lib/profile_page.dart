@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatefulWidget {
-  _ProfilePageState createState()=> _ProfilePageState();
+  const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState()=> _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
@@ -12,6 +15,7 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: Colors.red,
       appBar: AppBar(
         backgroundColor: Colors.red,
+        foregroundColor: Colors.white,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {

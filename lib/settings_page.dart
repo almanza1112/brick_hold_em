@@ -57,6 +57,7 @@ class _SettingsPageState extends State<SettingsPage> {
         appBar: AppBar(
           title: const Text('SETTINGS'),
           backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
           shadowColor: Colors.transparent,
           leading: BackButton(
             onPressed: () {

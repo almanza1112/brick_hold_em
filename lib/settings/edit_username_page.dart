@@ -6,11 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class EditUsernamePage extends StatefulWidget {
-  const EditUsernamePage({required this.onChanged});
+  const EditUsernamePage({super.key, required this.onChanged});
 
   final ValueChanged<String> onChanged;
 
-  _EditUsernamePageState createState() => _EditUsernamePageState();
+  @override
+  State<EditUsernamePage> createState() => _EditUsernamePageState();
 }
 
 class _EditUsernamePageState extends State<EditUsernamePage> {
@@ -36,6 +37,7 @@ class _EditUsernamePageState extends State<EditUsernamePage> {
       appBar: AppBar(
         title: const Text('USERNAME'),
         backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {
@@ -52,11 +54,11 @@ class _EditUsernamePageState extends State<EditUsernamePage> {
             child: Center(
               child: Container(
                 color: Colors.greenAccent[100],
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
+                child: const Padding(
+                  padding: EdgeInsets.all(15),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Icon(Icons.check, color: Colors.green),
                       SizedBox(
                         width: 10,

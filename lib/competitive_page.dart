@@ -54,6 +54,7 @@ class CompetitivePageState extends ConsumerState {
           appBar: AppBar(
             title: const Text('COMPETITIVE'),
             backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
             shadowColor: Colors.transparent,
             leading: BackButton(
               onPressed: () {

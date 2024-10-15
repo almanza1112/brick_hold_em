@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class EditEmailPage extends StatefulWidget {
-  const EditEmailPage({required this.onChanged});
+  const EditEmailPage({super.key, required this.onChanged});
 
   final ValueChanged<String> onChanged;
-  _EditEmailPageState createState() => _EditEmailPageState();
+  @override
+  State<EditEmailPage> createState() => _EditEmailPageState();
 }
 
 class _EditEmailPageState extends State<EditEmailPage> {
@@ -31,6 +32,7 @@ class _EditEmailPageState extends State<EditEmailPage> {
       appBar: AppBar(
         title: const Text('EMAIL'),
         backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {
@@ -47,11 +49,11 @@ class _EditEmailPageState extends State<EditEmailPage> {
             child: Center(
               child: Container(
                 color: Colors.greenAccent[100],
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
+                child: const Padding(
+                  padding: EdgeInsets.all(15),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Icon(Icons.check, color: Colors.green),
                       SizedBox(
                         width: 10,

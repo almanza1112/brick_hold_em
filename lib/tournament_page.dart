@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class TournamentPage extends StatefulWidget {
-  _TournamentPageState createState() => _TournamentPageState();
+  const TournamentPage({super.key});
+
+  @override
+  State<TournamentPage> createState() => _TournamentPageState();
 }
 
 class _TournamentPageState extends State<TournamentPage> {
@@ -12,6 +15,7 @@ class _TournamentPageState extends State<TournamentPage> {
       appBar: AppBar(
         title: const Text('TOURNAMENT'),
         backgroundColor: Colors.teal,
+        foregroundColor: Colors.white,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {
@@ -19,13 +23,12 @@ class _TournamentPageState extends State<TournamentPage> {
           },
         ),
       ),
-      body: SafeArea(
-        child: Expanded(
-          child: Column(
-            children: [
-              
-            ],
-          ))
+      body: const SafeArea(
+        child: Column(
+          children: [
+            
+          ],
+        )
         ),
     );
   }

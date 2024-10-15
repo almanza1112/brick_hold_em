@@ -2,10 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class EditNamePage extends StatefulWidget {
-  const EditNamePage({ required this.onChanged});
+  const EditNamePage({super.key,  required this.onChanged});
 
   final ValueChanged<String> onChanged;
-  _EditNamePageState createState() => _EditNamePageState();
+  @override
+  State<EditNamePage> createState() => _EditNamePageState();
 }
 
 class _EditNamePageState extends State<EditNamePage> {
@@ -27,6 +28,7 @@ class _EditNamePageState extends State<EditNamePage> {
       appBar: AppBar(
         title: const Text('NAME'),
         backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
         shadowColor: Colors.transparent,
         leading: BackButton(
           onPressed: () {
