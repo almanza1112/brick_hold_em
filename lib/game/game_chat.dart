@@ -5,31 +5,33 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class GameChat extends ConsumerStatefulWidget {
-  const GameChat({
-    Key? key,
-  }) : super(key: key);
+  const GameChat({Key? key}) : super(key: key);
 
   @override
   GameChatState createState() => GameChatState();
 }
 
 class GameChatState extends ConsumerState<GameChat> {
-  FlutterSecureStorage storage = const FlutterSecureStorage();
-
-  DatabaseReference chatRef = FirebaseDatabase.instance.ref('tables/1/chat');
-  final uid = FirebaseAuth.instance.currentUser!.uid;
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
+  final DatabaseReference chatRef =
+      FirebaseDatabase.instance.ref('tables/1/chat');
   final TextEditingController _messageController = TextEditingController();
-
-  late ScrollController _scrollController;
+  final ScrollController _scrollController = ScrollController();
+  final String uid = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -54,8 +56,8 @@ class GameChatState extends ConsumerState<GameChat> {
                             color: Colors.white),
                       ),
                       trailing: IconButton(
-                        onPressed: () {
-                          Navigator.pop(context);
+                        onPressed: () async { 
+                          Navigator.pop(context); // Pop the chat widget after keyboard is hidden
                         },
                         icon: const Icon(Icons.close, color: Colors.white54),
                       ),
@@ -63,11 +65,10 @@ class GameChatState extends ConsumerState<GameChat> {
                     Expanded(
                       child: StreamBuilder(
                           stream: chatRef.onValue,
-                          builder: ((context, snapshot) {
+                          builder: (context, snapshot) {
                             if (snapshot.hasData &&
                                 snapshot.data!.snapshot.value != null) {
                               List<Message> messages = [];
-
                               Map<dynamic, dynamic> data = snapshot.data!
                                   .snapshot.value as Map<dynamic, dynamic>;
 
@@ -81,87 +82,84 @@ class GameChatState extends ConsumerState<GameChat> {
                                     timestamp:
                                         DateTime.fromMillisecondsSinceEpoch(
                                             value['timestamp']));
-
                                 messages.add(message);
                               });
 
                               messages.sort(
                                   (a, b) => a.timestamp.compareTo(b.timestamp));
-                                  WidgetsBinding.instance
-                                  .addPostFrameCallback((_) {
-                                _scrollToBottom();
+
+                              // Ensure that we are scrolled to the bottom without animation
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (_scrollController.hasClients) {
+                                  _scrollController.jumpTo(_scrollController
+                                      .position.maxScrollExtent +10);
+                                }
                               });
 
                               return ListView.builder(
-                                  controller: _scrollController,
-                                  //shrinkWrap: true,
-                                  itemCount: messages.length,
-                                  itemBuilder: ((context, index) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 4, bottom: 4),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            messages[index].uid == uid
-                                                ? MainAxisAlignment.end
-                                                : MainAxisAlignment.start,
-                                        children: <Widget>[
-                                          if (messages[index].uid != uid)
-                                            CircleAvatar(
-                                              backgroundImage: NetworkImage(
-                                                  messages[index].photoURL!),
-                                              radius: 20,
-                                            ),
-                                          Column(
-                                            crossAxisAlignment:
-                                                messages[index].uid == uid
-                                                    ? CrossAxisAlignment.end
-                                                    : CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: <Widget>[
-                                              if (messages[index].uid != uid)
-                                                Text(
-                                                  messages[index].username!,
-                                                  style: const TextStyle(
-                                                      color: Colors.amber,
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.w300),
-                                                ),
-                                              Container(
-                                                constraints: const BoxConstraints(
-                                                    maxWidth: 200),
-                                                decoration: BoxDecoration(
-                                                    color:
-                                                        messages[index].uid ==
-                                                                uid
-                                                            ? Colors.white
-                                                            : Colors.blue,
-                                                    borderRadius:
-                                                        const BorderRadius.all(
-                                                            Radius.circular(
-                                                                20))),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8),
-                                                  child: Text(
-                                                    messages[index].text,
-                                                    style: TextStyle(
-                                                        color: messages[index]
-                                                                    .uid ==
-                                                                uid
-                                                            ? Colors.black
-                                                            : Colors.white),
-                                                  ),
-                                                ),
-                                              )
-                                            ],
+                                controller: _scrollController,
+                                itemCount: messages.length,
+                                itemBuilder: (context, index) {
+                                  final isMe = messages[index].uid == uid;
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 4),
+                                    child: Row(
+                                      mainAxisAlignment: isMe
+                                          ? MainAxisAlignment.end
+                                          : MainAxisAlignment.start,
+                                      children: <Widget>[
+                                        if (!isMe)
+                                          CircleAvatar(
+                                            backgroundImage: NetworkImage(
+                                                messages[index].photoURL!),
+                                            radius: 16,
                                           ),
-                                        ],
-                                      ),
-                                    );
-                                  }));
+                                        const SizedBox(width: 8),
+                                        Column(
+                                          crossAxisAlignment: isMe
+                                              ? CrossAxisAlignment.end
+                                              : CrossAxisAlignment.start,
+                                          children: [
+                                            if (!isMe)
+                                              Text(
+                                                messages[index].username!,
+                                                style: const TextStyle(
+                                                    color: Colors.amber,
+                                                    fontSize: 10,
+                                                    fontWeight:
+                                                        FontWeight.w300),
+                                              ),
+                                            Container(
+                                              constraints: const BoxConstraints(
+                                                  maxWidth: 200),
+                                              decoration: BoxDecoration(
+                                                color: isMe
+                                                    ? Colors.white
+                                                    : Colors.blue,
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                        Radius.circular(20)),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8),
+                                                child: Text(
+                                                  messages[index].text,
+                                                  style: TextStyle(
+                                                      color: isMe
+                                                          ? Colors.black
+                                                          : Colors.white),
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
                             } else {
                               return const Center(
                                 child: Text(
@@ -170,7 +168,7 @@ class GameChatState extends ConsumerState<GameChat> {
                                 ),
                               );
                             }
-                          })),
+                          }),
                     ),
                     Row(
                       children: [
@@ -185,17 +183,17 @@ class GameChatState extends ConsumerState<GameChat> {
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(30)),
                                   hintText: "Send Message"),
+                              onSubmitted: (_) =>
+                                  sendMessage(), // Send message on "Enter"
                             ),
                           ),
                         ),
                         IconButton(
-                            onPressed: sendMessage,
-                            icon: const Icon(
-                              Icons.send,
-                              color: Colors.green,
-                            ))
+                          onPressed: sendMessage,
+                          icon: const Icon(Icons.send, color: Colors.green),
+                        ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -204,23 +202,16 @@ class GameChatState extends ConsumerState<GameChat> {
         ),
         SizedBox(
           height: MediaQuery.of(context).viewInsets.bottom,
-        )
+        ),
       ],
-    );
-  }
-
-  void _scrollToBottom() {
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.easeInOut,
     );
   }
 
   void sendMessage() async {
     final username = await storage.read(key: globals.FSS_USERNAME);
+    final messageText = _messageController.text.trim();
 
-    if (_messageController.text.isNotEmpty) {
+    if (messageText.isNotEmpty) {
       chatRef.push().set({
         'playerInfo': {
           'uid': uid,
@@ -228,10 +219,9 @@ class GameChatState extends ConsumerState<GameChat> {
           'photoURL': FirebaseAuth.instance.currentUser!.photoURL,
         },
         'position': ref.read(playerPositionProvider),
-        'text': _messageController.text,
-        'timestamp': ServerValue.timestamp
+        'text': messageText,
+        'timestamp': ServerValue.timestamp,
       });
-
       _messageController.clear();
     }
   }

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:brick_hold_em/game/animations/bouncing_icon_button.dart';
-import 'package:brick_hold_em/game/animations/bouncing_text.dart';
 import 'package:brick_hold_em/game/card_rules.dart';
 import 'package:brick_hold_em/game/deck_card.dart';
 import 'package:brick_hold_em/game/table_card.dart';
@@ -26,7 +25,8 @@ class GameCards extends ConsumerStatefulWidget {
   GameCardsPageState createState() => GameCardsPageState();
 }
 
-class GameCardsPageState extends ConsumerState<GameCards> {
+class GameCardsPageState extends ConsumerState<GameCards>
+    with AutomaticKeepAliveClientMixin {
   final onceRef = FirebaseDatabase.instance.ref();
   var cardWidgetsBuilderList = <Widget>[];
   double handCardWidth = 50;
@@ -62,6 +62,8 @@ class GameCardsPageState extends ConsumerState<GameCards> {
 
   late DatabaseReference playerCardCount;
 
+  Future<DataSnapshot>? _handRefFuture;
+
   // Create lists for the selction of the brick card. Must be in exact
   // same order as the children of ListWheelScrollView
   List<String> cardSuitsList = ['spades', 'clubs', 'hearts', 'diamonds'];
@@ -81,19 +83,34 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   // DatabaseReference cardsInHandListener = FirebaseDatabase.instance
   //     .ref('tables/1/cards/playerCards/32Zp41SqjzStoba7J6Tu2DYmk7E3/hand');
 
+  double currentSliderValue = 0;
+  double chipsImageWidth = 70;
+  double userChipsStartingPosYBottom = 190;
+  bool userChipsToTableVisibility = false;
+
   @override
   void initState() {
+    super.initState();
     playerCardCount =
         FirebaseDatabase.instance.ref('tables/1/cards/playerCards/$uid/hand');
 
     userChipCountListener =
         FirebaseDatabase.instance.ref('tables/1/chips/$uid/chipCount');
 
-    super.initState();
+    _handRefFuture = FirebaseDatabase.instance
+        .ref(
+            'tables/1/cards/playerCards/${FirebaseAuth.instance.currentUser!.uid}/hand')
+        .get(); // Cache the future in initState
   }
+
+  // This is with AutomaticKeepAliveClientMixin and is meant to avoid unnecessary
+  // rebuilds of the widget when keyboard is opened/closed
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return LayoutBuilder(
       builder: ((BuildContext context, BoxConstraints constraints) {
         return Stack(
@@ -114,23 +131,23 @@ class GameCardsPageState extends ConsumerState<GameCards> {
   }
 
   Widget playerCards() {
-    print('playerCards() called');
     //final refreshKey = ref.watch(refreshKeyProvider);
     // TODO: this is not optimal but a temporary patch
-    Future<DataSnapshot> handRef = FirebaseDatabase.instance
-        .ref(
-            'tables/1/cards/playerCards/${FirebaseAuth.instance.currentUser!.uid}/hand')
-        .get();
+    // Future<DataSnapshot> handRef = FirebaseDatabase.instance
+    //     .ref(
+    //         'tables/1/cards/playerCards/${FirebaseAuth.instance.currentUser!.uid}/hand')
+    //     .get();
     return SafeArea(
-      key: ref.watch(refreshKeyProvider),
+      //key: ref.watch(refreshKeyProvider), // TODO: why do i need this?
       child: Stack(children: [
         Positioned(
           right: 0,
           bottom: 100,
           left: 0,
           child: FutureBuilder(
-              future: handRef,
+              future: _handRefFuture,
               builder: ((context, snapshot) {
+                print('playerCards() called');
                 if (snapshot.hasData) {
                   var cardsList =
                       List<String>.from(snapshot.data!.value as List);
@@ -269,7 +286,7 @@ Widget playerCards() {
             child: StatefulBuilder(builder: (context, snapshot) {
               return Stack(
                 children: [
-                  DeckCard(),
+                  const DeckCard(),
                   Center(
                     child: StreamBuilder(
                         stream: deckCountListener.onValue,
@@ -387,7 +404,7 @@ Widget playerCards() {
             top: tableCardsYPos,
             left: (constraints.constrainWidth() / 2) -
                 ((tableCardWidth * 2.5) + 10),
-            child: Container(
+            child: const SizedBox(
               height: 70,
               width: 50,
               // decoration: BoxDecoration(
@@ -403,7 +420,7 @@ Widget playerCards() {
                 : (constraints.constrainWidth() / 2) -
                     ((tableCardWidth * 1) + 5),
             duration: tableCardAnimationDuration,
-            child: Container(
+            child: SizedBox(
               //margin: const EdgeInsets.all(15.0),
               height: tableCardHeight,
               width: tableCardWidth,
@@ -420,7 +437,7 @@ Widget playerCards() {
                     ((tableCardWidth * 2) + 10)
                 : (constraints.constrainWidth() / 2),
             duration: tableCardAnimationDuration,
-            child: Container(
+            child: SizedBox(
               //margin: const EdgeInsets.all(15.0),
               height: tableCardHeight,
               width: tableCardWidth,
@@ -438,7 +455,7 @@ Widget playerCards() {
                 : (constraints.constrainWidth() / 2) +
                     ((tableCardWidth * 1) + 5),
             duration: tableCardAnimationDuration,
-            child: Container(
+            child: SizedBox(
               //margin: const EdgeInsets.all(15.0),
               height: tableCardHeight,
               width: tableCardWidth,
@@ -456,7 +473,7 @@ Widget playerCards() {
                 : (constraints.constrainWidth() / 2) +
                     ((tableCardWidth * 2) + 10),
             duration: tableCardAnimationDuration,
-            child: Container(
+            child: SizedBox(
               //margin: const EdgeInsets.all(15.0),
               height: tableCardHeight,
               width: tableCardWidth,
@@ -468,13 +485,12 @@ Widget playerCards() {
     );
   }
 
-  // TODO: Make into its on class for better functionality
   Widget card(CardKey cardKey) {
     String cardName = cardKey.cardName!;
-    var _cardKey = ValueKey(cardKey);
+    var cardKey0 = ValueKey(cardKey);
 
     return SizedBox(
-      key: _cardKey,
+      key: cardKey0,
       width: handCardWidth,
       height: handCardHeight,
       child: GestureDetector(
@@ -485,7 +501,7 @@ Widget playerCards() {
             if (tappedCards.length < 4) {
               // Find index of tapped cardKey (_cardKey)
               var result = cardWidgetsBuilderList
-                  .indexWhere((element) => element.key == _cardKey);
+                  .indexWhere((element) => element.key == cardKey0);
 
               if (cardName == 'brick') {
                 // Prompt user to select what they want brick card to be
@@ -598,7 +614,7 @@ Widget playerCards() {
 
                                     // Remove tapped card from hand (cardWigetsBuilderList)
                                     cardWidgetsBuilderList.removeWhere(
-                                        (element) => element.key == _cardKey);
+                                        (element) => element.key == cardKey0);
                                   },
                                 );
 
@@ -623,7 +639,7 @@ Widget playerCards() {
 
                   // Remove tapped card from hand (cardWigetsBuilderList)
                   cardWidgetsBuilderList
-                      .removeWhere((element) => element.key == _cardKey);
+                      .removeWhere((element) => element.key == cardKey0);
                 });
               }
             }
@@ -880,7 +896,7 @@ Widget playerCards() {
           context: context,
           builder: ((context) => AlertDialog(
                 title: const Text("Last Move"),
-                content: Container(
+                content: SizedBox(
                   width: double.maxFinite,
                   height: 100,
                   child: ListView(
@@ -1060,7 +1076,7 @@ Widget playerCards() {
           } else {
             // There is no bet or call made, prompt user
             var snackBar = SnackBar(
-              content: Text('You need to either call or raise'),
+              content: const Text('You need to either call or raise'),
               dismissDirection: DismissDirection.up,
               behavior: SnackBarBehavior.floating,
               margin: EdgeInsets.only(
@@ -1221,9 +1237,8 @@ Widget playerCards() {
         });
   }
 
-  double currentSliderValue = 0;
+  void betModal() {}
 
-  double chipsImageWidth = 70;
   Widget userChips(var constraints) {
     return Positioned(
         bottom: 190,
@@ -1269,8 +1284,6 @@ Widget playerCards() {
         ));
   }
 
-  double userChipsStartingPosYBottom = 190;
-  bool userChipsToTableVisibility = false;
   Widget animatedChipsToTable(var constraints) {
     return Visibility(
       visible: userChipsToTableVisibility,
@@ -1305,183 +1318,6 @@ Widget playerCards() {
         userChipsStartingPosYBottom = 500;
       });
     });
-  }
-
-  void betModal() {
-    final doYouNeedToCall = ref.read(doYouNeedToCallProvider);
-    final isFoldSelected = ref.read(isFoldSelectedProvider);
-    final isRaiseSelected = ref.read(isRaiseSelectedProvider);
-    final isCallCheckSelected = ref.read(isCallCheckSelectedProvider);
-
-    late int minBet;
-
-    if (doYouNeedToCall) {}
-
-    showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
-        )),
-        clipBehavior: Clip.antiAliasWithSaveLayer,
-        builder: (_) => SingleChildScrollView(
-              child: Container(
-                color: Colors.green,
-                child: Material(
-                  color: Colors.green,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      children: <Widget>[
-                        const Center(
-                            child: Text(
-                          'BET',
-                          style: TextStyle(
-                              fontSize: 24,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.none),
-                        )),
-
-                        // To call
-                        if (doYouNeedToCall)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 36),
-                            child: Center(
-                              child: BouncingText(
-                                text: '${ref.read(toCallAmmount)} to call',
-                                textStyle: const TextStyle(
-                                    fontSize: 32,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-
-                        // Padding between to call and slider
-                        const SizedBox(
-                          height: 36,
-                        ),
-
-                        // Slider
-                        StatefulBuilder(builder: (context, setState) {
-                          return Column(
-                            children: [
-                              Slider(
-                                  min: 4,
-                                  max: ref.read(playerChipCountProvider),
-                                  thumbColor: Colors.amber,
-                                  activeColor: Colors.amber,
-                                  inactiveColor: Colors.white,
-                                  value: currentSliderValue,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      currentSliderValue = value;
-                                    });
-                                  }),
-                              Text(currentSliderValue.round().toString())
-                            ],
-                          );
-                        }),
-                        const SizedBox(
-                          height: 54,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.amber,
-                                    shape: const CircleBorder(),
-                                    elevation: 10.0,
-                                    padding: const EdgeInsets.all(30)),
-                                onPressed: foldHand,
-                                child: const Text(
-                                  'FOLD',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                )),
-                            ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: isRaiseSelected
-                                        ? Colors.red
-                                        : Colors.amber,
-                                    shape: const CircleBorder(),
-                                    elevation: 10.0,
-                                    padding: const EdgeInsets.all(30)),
-                                onPressed: raiseBet,
-                                child: const Text(
-                                  'RAISE',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                )),
-                            ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: isCallCheckSelected
-                                        ? Colors.red
-                                        : Colors.amber,
-                                    shape: const CircleBorder(),
-                                    elevation: 10.0,
-                                    padding: const EdgeInsets.all(30)),
-                                onPressed: doYouNeedToCall ? callBet : checkBet,
-                                child: Text(
-                                  doYouNeedToCall ? "CALL" : "CHECK",
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                )),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 12,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ));
-  }
-
-  void raiseBet() {
-    // Raise is selected so unselect Fold and Check/Call
-    ref.read(isRaiseSelectedProvider.notifier).state = true;
-    ref.read(isCallCheckSelectedProvider.notifier).state = false;
-    ref.read(isFoldSelectedProvider.notifier).state = false;
-
-    ref.read(isThereABetProvider.notifier).state = true;
-    ref.read(typeOfBetProvider.notifier).state = "raise";
-    Navigator.pop(context);
-  }
-
-  void callBet() {
-    // TODO: why is this here? what for?
-    double amount = double.parse(ref.read(toCallAmmount));
-    ref.read(chipsValueProvider.notifier).state = amount;
-
-    ref.read(isThereABetProvider.notifier).state = true;
-    ref.read(typeOfBetProvider.notifier).state = "call";
-
-    // Call is selected so unselect Fold and Raise
-    ref.read(isCallCheckSelectedProvider.notifier).state = true;
-    ref.read(isFoldSelectedProvider.notifier).state = false;
-    ref.read(isRaiseSelectedProvider.notifier).state = false;
-
-    Navigator.pop(context);
-  }
-
-  void checkBet() {
-    ref.read(typeOfBetProvider.notifier).state = "check";
-
-    // Check is selected so unselect Fold and Raise
-    ref.read(isCallCheckSelectedProvider.notifier).state = true;
-    ref.read(isFoldSelectedProvider.notifier).state = false;
-    ref.read(isRaiseSelectedProvider.notifier).state = false;
-
-    Navigator.pop(context);
   }
 
   void foldHand() async {

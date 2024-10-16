@@ -4,6 +4,7 @@ import 'package:brick_hold_em/game/player_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GamePlayers extends ConsumerStatefulWidget {
@@ -140,108 +141,110 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
   }
 
   // TODO : make this in to its own class
-  Widget player(Player player, int position) {
-    bool isFolded = player.folded;
-    bool left = false, right = false;
-    switch (position) {
-      case 0:
-        left = true;
-        break;
-      case 1:
-        left = true;
-        break;
-      case 2:
-        left = true;
-        break;
-      case 3:
-        right = true;
-        break;
-      case 4:
-        right = true;
-        break;
-    }
+ Widget player(Player player, int position) {
+  bool isFolded = player.folded;
+  bool left = false, right = false;
+  switch (position) {
+    case 0:
+      left = true;
+      break;
+    case 1:
+      left = true;
+      break;
+    case 2:
+      left = true;
+      break;
+    case 3:
+      right = true;
+      break;
+    case 4:
+      right = true;
+      break;
+  }
 
-    bool playerDetailsVisible =
-        player.username.isNotEmpty || player.photoURL.isNotEmpty;
+  bool playerDetailsVisible = player.username.isNotEmpty || player.photoURL.isNotEmpty;
 
-    return GestureDetector(
-      onTap: () {
-        if (playerDetailsVisible) {
-          showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(
-                top: Radius.circular(20),
-              )),
-              clipBehavior: Clip.antiAliasWithSaveLayer,
-              builder: (_) => PlayerProfilePage(player: player));
-        }
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Stack(
-            children: <Widget>[
+  return GestureDetector(
+    onTap: () {
+      if (playerDetailsVisible) {
+        showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+              top: Radius.circular(20),
+            )),
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            builder: (_) => PlayerProfilePage(player: player));
+      }
+    },
+    child: Column(
+      mainAxisSize: MainAxisSize.min, // Add this line
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Stack(
+          children: <Widget>[
+            CircleAvatar(
+              backgroundImage: playerDetailsVisible
+                  ? NetworkImage(player.photoURL)
+                  : const AssetImage('assets/images/poker_player.jpeg')
+                      as ImageProvider,
+              radius: imageRadius,
+            ),
+            if (isFolded)
               CircleAvatar(
-                backgroundImage: playerDetailsVisible
-                    ? NetworkImage(player.photoURL)
-                    : const AssetImage('assets/images/poker_player.jpeg')
-                        as ImageProvider,
+                backgroundColor: const Color.fromRGBO(255, 255, 255, 0.5),
                 radius: imageRadius,
               ),
-              if (isFolded)
-                CircleAvatar(
-                  backgroundColor: const Color.fromRGBO(255, 255, 255, 0.5),
-                  radius: imageRadius,
-                ),
-              if (playerDetailsVisible)
-                Positioned(
-                  bottom: bottom,
-                  left: left ? 0 : null,
-                  right: right ? 0 : null,
-                  child: Transform(
-                      transform: left
-                          ? Matrix4.translationValues(-10, 0, 0)
-                          : Matrix4.translationValues(10, 0, 0),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          if (!isFolded)
-                            Image.asset(
-                              'assets/images/backside.png',
-                              height:
-                                  35, // Must be same height as SizedBox below
-                              width: 25,
-                            ),
-                          if (!isFolded)
-                            Align(
-                                alignment: Alignment.center,
-                                child: streamedCardCount(player))
-                        ],
-                      )),
-                ),
-              if (!isFolded)
-                Positioned(
-                  top: 0,
-                  left: left ? 0 : null,
-                  right: right ? 0 : null,
-                  child: Transform(
+            if (playerDetailsVisible)
+              Positioned(
+                bottom: bottom,
+                left: left ? 0 : null,
+                right: right ? 0 : null,
+                child: Transform(
                     transform: left
-                        ? Matrix4.translationValues(-8, 0, 0)
-                        : Matrix4.translationValues(8, 0, 0),
-                    child: streamedBlind(player),
-                  ),
-                )
-            ],
-          ),
-          SizedBox(
-            height: 35, // Must be same height as Image.asset in stack above
-            width: 100,
+                        ? Matrix4.translationValues(-10, 0, 0)
+                        : Matrix4.translationValues(10, 0, 0),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        if (!isFolded)
+                          Image.asset(
+                            'assets/images/backside.png',
+                            height: 35,
+                            width: 25,
+                          ),
+                        if (!isFolded)
+                          Align(
+                              alignment: Alignment.center,
+                              child: streamedCardCount(player))
+                      ],
+                    )),
+              ),
+            if (!isFolded)
+              Positioned(
+                top: 0,
+                left: left ? 0 : null,
+                right: right ? 0 : null,
+                child: Transform(
+                  transform: left
+                      ? Matrix4.translationValues(-8, 0, 0)
+                      : Matrix4.translationValues(8, 0, 0),
+                  child: streamedBlind(player),
+                ),
+              )
+          ],
+        ),
+        SizedBox(
+          height: 35, // Keep your desired height
+          width: 100,
+          child: Align(
+            alignment: Alignment.bottomCenter,
             child: Column(
+              mainAxisSize: MainAxisSize.min, // Add this line
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Expanded(child: SizedBox()),
                 if (playerDetailsVisible)
                   Text(
                     player.username,
@@ -262,19 +265,19 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                         size: 8,
                         color: isFolded ? Colors.grey[400] : Colors.amber,
                       ),
-                      const SizedBox(
-                        width: 2,
-                      ),
-                      streamedChipCount(player)
+                      const SizedBox(width: 2),
+                      streamedChipCount(player),
                     ],
                   ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget streamedBlind(Player player) {
     return StreamBuilder(
@@ -303,10 +306,10 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
             } else {
               // You are the one of the blinds
               WidgetsBinding.instance.addPostFrameCallback((_) {
-
-                if(data['smallBlind'] == ref.read(playerPositionProvider)){
+                if (data['smallBlind'] == ref.read(playerPositionProvider)) {
                   ref.read(userBlindProvider.notifier).state = "small";
-                } else if (data['bigBlind'] == ref.read(playerPositionProvider)){
+                } else if (data['bigBlind'] ==
+                    ref.read(playerPositionProvider)) {
                   ref.read(userBlindProvider.notifier).state = "big";
                 } else {
                   ref.read(userBlindProvider.notifier).state = "none";
@@ -357,6 +360,7 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             // TODO: show error
+            return const SizedBox.shrink();
           }
 
           if (snapshot.hasData) {
@@ -369,7 +373,7 @@ class GamePlayersState extends ConsumerState with TickerProviderStateMixin {
                   color: player.folded ? Colors.grey[400] : Colors.amber),
             );
           } else {
-            return const Text("loading...");
+            return const SizedBox.shrink();
           }
         });
   }
