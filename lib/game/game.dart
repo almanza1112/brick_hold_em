@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:animations/animations.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:brick_hold_em/game/game_chat.dart';
-import 'package:brick_hold_em/game/player.dart';
-import 'package:brick_hold_em/game/table_chat.dart';
+import 'package:brick_hold_em/game/chat/game_chat.dart';
+import 'package:brick_hold_em/game/players/player.dart';
+import 'package:brick_hold_em/game/chat/table_chat.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -13,7 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:brick_hold_em/game/game_cards.dart';
-import 'package:brick_hold_em/game/game_players.dart';
+import 'package:brick_hold_em/game/players/game_players.dart';
 
 import 'game_turn_timer.dart';
 

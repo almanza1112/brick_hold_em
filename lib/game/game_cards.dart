@@ -5,6 +5,7 @@ import 'package:brick_hold_em/game/card_rules.dart';
 import 'package:brick_hold_em/game/deck_card.dart';
 import 'package:brick_hold_em/game/table_card.dart';
 import 'package:brick_hold_em/game/user_blind.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +55,7 @@ class GameCardsPageState extends ConsumerState<GameCards>
       FirebaseDatabase.instance.ref('tables/1/betting/pot');
 
   late DatabaseReference userChipCountListener;
+  late DatabaseReference userChipCountRef;
 
   DatabaseReference movesRef = FirebaseDatabase.instance.ref('tables/1/moves');
 
@@ -80,9 +82,6 @@ class GameCardsPageState extends ConsumerState<GameCards>
     '10'
   ];
 
-  // DatabaseReference cardsInHandListener = FirebaseDatabase.instance
-  //     .ref('tables/1/cards/playerCards/32Zp41SqjzStoba7J6Tu2DYmk7E3/hand');
-
   double currentSliderValue = 0;
   double chipsImageWidth = 70;
   double userChipsStartingPosYBottom = 190;
@@ -96,6 +95,8 @@ class GameCardsPageState extends ConsumerState<GameCards>
 
     userChipCountListener =
         FirebaseDatabase.instance.ref('tables/1/chips/$uid/chipCount');
+
+    userChipCountRef = FirebaseDatabase.instance.ref('tables/1/chips/$uid/');
 
     _handRefFuture = FirebaseDatabase.instance
         .ref(
@@ -197,75 +198,6 @@ class GameCardsPageState extends ConsumerState<GameCards>
       ]),
     );
   }
-
-  // SO!! this widget below is an attempt to use StreamBuilder, this gets tricky since the stream can
-  // override the shuffle effect.
-  // TODO: need to look over this in the near f
-
-  /*
-   
-
-Widget playerCards() {
-    return SafeArea(
-      child: Stack(children: [
-        Positioned(
-          right: 0,
-          bottom: 50,
-          left: 0,
-          child: StreamBuilder(
-              stream: cardsInHandListener.onValue,
-              builder: ((context, snapshot) {
-                if (snapshot.hasData) {
-                  List cardsList = [];
-                  print(snapshot.data!.snapshot.children.length);
-                  for (final child in snapshot.data!.snapshot.children) {                    
-                    cardsList.add(child.value);
-                  }
-
-                  var cardWidgets = <Widget>[];
-                  //cardWidgets.clear(); //uncomment this line if you are declaring cardWidgets globally
-
-                  for (int i = 0; i < cardsList.length; i++) {
-                    CardKey cardKey =
-                        CardKey(position: i, cardName: cardsList[i]);
-                    cardWidgets.add(card(cardKey));
-                  }
-
-                  // I did this without an explanation, code works with this
-                  // if statement but have no idea why 
-                  if (!isStateChanged) {
-                    cardWidgetsBuilderList = cardWidgets;
-                  }
-
-                  print("infinite loop check");
-
-                  return SizedBox(
-                    height: 70,
-                    child: Center(
-                      child: ListView.builder(
-                        //clipBehavior: Clip.none,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemCount: cardWidgetsBuilderList.length,
-                        itemBuilder: (context, index) {
-                          return cardWidgetsBuilderList[index];
-                        },
-                      ),
-                    ),
-                  );
-                } else {
-                  return const Text(
-                      "Something went wrong. Unable to retrieve cards.");
-                }
-              })),
-        ),
-      ]),
-    );
-  }
-
-
-
-   */
 
   Widget deck(var constraints) {
     return Positioned(
@@ -625,9 +557,9 @@ Widget playerCards() {
                         )));
               } else {
                 // Play card sliding sound
-                Source cardSlidingSound =
+                //Source cardSlidingSound =
                     AssetSource("sounds/card_sliding.mp3");
-                player.play(cardSlidingSound);
+                //player.play(cardSlidingSound);
 
                 // THIS IS IMPORTANT FOR WHEN GAME RESTARTS
                 // MUST GGO ALONG WITH setState() BELOW
@@ -687,8 +619,8 @@ Widget playerCards() {
 
             setState(() {
               // Play card sliding sound
-              Source cardSlidingSound = AssetSource("sounds/card_sliding.mp3");
-              player.play(cardSlidingSound);
+              //Source cardSlidingSound = AssetSource("sounds/card_sliding.mp3");
+              //player.play(cardSlidingSound);
 
               cardWidgetsBuilderList.add(newCard);
               tappedCards.removeAt(pos);
@@ -961,7 +893,7 @@ Widget playerCards() {
                           color: Colors.amber,
                           size: 36,
                         )),
-                    betButton()
+                    //betButton()
                   ],
                 ),
               ),
@@ -981,7 +913,7 @@ Widget playerCards() {
                           color: Colors.amber,
                           size: 36,
                         )),
-                    betButton()
+                    //betButton()
                   ],
                 ));
           }
@@ -1020,8 +952,8 @@ Widget playerCards() {
     // It is a valid play
     if (result == "success") {
       // Play valid sound
-      Source validPlaySound = AssetSource("sounds/valid.wav");
-      player.play(validPlaySound);
+      //Source validPlaySound = AssetSource("sounds/valid.wav");
+      //player.play(validPlaySound);
 
       // Makes tapped cards on table animate to discard pile
       ref.read(isPlayButtonSelectedProvider.notifier).state = true;
@@ -1118,8 +1050,8 @@ Widget playerCards() {
       ref.read(isThereAnInvalidPlayProvider.notifier).state = true;
 
       // Play invalid sound
-      Source invalidPlaySound = AssetSource("sounds/invalid.wav");
-      player.play(invalidPlaySound);
+     //Source invalidPlaySound = AssetSource("sounds/invalid.wav");
+      //player.play(invalidPlaySound);
 
       // Vibrate phone
       HapticFeedback.heavyImpact();
@@ -1375,8 +1307,8 @@ Widget playerCards() {
     // Maybe..
     // TODO: look into this, not a priority...maybe cloud function??
 
-    Source cardDrawnSound = AssetSource("sounds/card_drawn.mp3");
-    player.play(cardDrawnSound);
+    //Source cardDrawnSound = AssetSource("sounds/card_drawn.mp3");
+    // player.play(cardDrawnSound);
 
     // Updating state that the player already a card
     ref.read(didPlayerAddCardThisTurnProvider.notifier).state = true;
@@ -1402,8 +1334,13 @@ Widget playerCards() {
       isBrick = false;
     }
 
+    startChipsAnimation();
+    print(ref.read(playerChipCountProvider));
+
     await cardsRef
         .update({"dealer/deck": deck, "playerCards/$uid/hand": playersCards});
+
+    await userChipCountRef.update({'chipCount': ref.read(playerChipCountProvider) - 10});
 
     // THIS IS IMPORTANT FOR WHEN GAME RESTARTS
     // MUST GGO ALONG WITH setState() BELOW

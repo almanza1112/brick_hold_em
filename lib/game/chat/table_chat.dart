@@ -11,7 +11,7 @@ class TableChat extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  _TableChatState createState() => _TableChatState();
+  ConsumerState<TableChat> createState() => _TableChatState();
 }
 
 class _TableChatState extends ConsumerState<TableChat> {

@@ -11,7 +11,7 @@ class BouncingDeck extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _BouncingDeckState createState() => _BouncingDeckState();
+  State<BouncingDeck> createState() => _BouncingDeckState();
 }
 
 class _BouncingDeckState extends State<BouncingDeck>
@@ -22,12 +22,11 @@ class _BouncingDeckState extends State<BouncingDeck>
   void initState() {
     super.initState();
 
-    // Set up a looping animation controller
+    // Set up a looping animation controller that reverses back to original size
     _controller = AnimationController(
-        duration: const Duration(milliseconds: 800), vsync: this)
-      ..repeat();
-
-    //_controller.repeat(reverse: true);
+      duration: const Duration(milliseconds: 800), 
+      vsync: this,
+    )..repeat(reverse: true); // Repeat with reverse motion
   }
 
   @override
@@ -39,11 +38,11 @@ class _BouncingDeckState extends State<BouncingDeck>
           scale:
               1.0 + 0.3 * _controller.value, // Adjust the amplitude as needed
           child: Image.asset(
-                  "assets/images/backside.png",
-                  fit: BoxFit.cover,
-                  width: widget.width,
-                  height: widget.height,
-                ),
+            "assets/images/backside.png",
+            fit: BoxFit.cover,
+            width: widget.width,
+            height: widget.height,
+          ),
         );
       },
     );

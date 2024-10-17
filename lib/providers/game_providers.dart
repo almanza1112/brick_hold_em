@@ -2,7 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../game/player.dart';
+import '../game/players/player.dart';
 
 final faceUpCardProvider = StreamProvider<DatabaseEvent>((ref) {
   Query faceUpCardRef = FirebaseDatabase.instance

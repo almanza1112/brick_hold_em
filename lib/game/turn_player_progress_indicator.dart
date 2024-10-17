@@ -43,9 +43,9 @@ class _TurnPlayerProgressIndicatorState
       value: controller.value,
       semanticsLabel: 'Linear progress indicator',
       valueColor:
-          AlwaysStoppedAnimation<Color>(Colors.blue), // Customize the color
+          const AlwaysStoppedAnimation<Color>(Colors.blue), // Customize the color
       backgroundColor: Colors.grey, // Customize the background color
-      minHeight: 30, // Adjust the height to make it thicker
+      minHeight: 35, // Adjust the height to make it thicker
     );
   }
 }

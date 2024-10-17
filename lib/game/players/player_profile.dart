@@ -1,4 +1,4 @@
-import 'package:brick_hold_em/game/player.dart';
+import 'package:brick_hold_em/game/players/player.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +9,7 @@ class PlayerProfilePage extends StatefulWidget {
   final Player player;
   const PlayerProfilePage({super.key, required this.player});
 
+  @override
   PlayerProfilePageState createState() => PlayerProfilePageState();
 }
 

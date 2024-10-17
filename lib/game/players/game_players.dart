@@ -1,10 +1,9 @@
 import 'package:brick_hold_em/providers/game_providers.dart';
-import 'package:brick_hold_em/game/player.dart';
-import 'package:brick_hold_em/game/player_profile.dart';
+import 'package:brick_hold_em/game/players/player.dart';
+import 'package:brick_hold_em/game/players/player_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GamePlayers extends ConsumerStatefulWidget {

@@ -28,7 +28,7 @@ class CardRules {
     var card1 = cardInfo[cards[0]] as Map<String, dynamic>;
     var card2 = cardInfo[cards[1]] as Map<String, dynamic>;
 
-    if (card1['value'] == card2['value'] || card1['color'] == card2['color']) {
+    if (card1['value'] == card2['value'] || card1['color'] == card2['color'] || card2['value'] > card1['value']) {
       // Single Number or Suit
       return success;
     } else {
@@ -130,7 +130,6 @@ class CardRules {
       // full house
       return success;
     } else {
-
       // Create list of cardValues to determine Straight
       List<int> cardValues = [
         card1['value'],
@@ -145,7 +144,7 @@ class CardRules {
 
       // Check if there is an Ace(1) among the cards
       final ifThereIsAnAce = cardValues.indexWhere((e) => e == 1);
-      
+
       if (ifThereIsAnAce == -1) {
         // There isnt an ace, proceed to see for regular straight
         for (int i = 1; i < cardValues.length; i++) {

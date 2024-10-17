@@ -1,4 +1,4 @@
-import 'package:brick_hold_em/game/message.dart';
+import 'package:brick_hold_em/game/chat/message.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

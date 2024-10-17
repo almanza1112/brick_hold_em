@@ -5,14 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class DeckCard extends ConsumerWidget {
   const DeckCard({Key? key}) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     double tableCardWidth = 40;
     double tableCardHeight = 56;
-    
+
+    // Use watch instead of read to listen to the provider
+    bool stopAnimation = ref.watch(didPlayerAddCardThisTurnProvider);
+
     if (ref.watch(isPlayersTurnProvider)) {
-      if (ref.read(didPlayerAddCardThisTurnProvider)) {
+      if (stopAnimation) {
         return Image.asset(
           "assets/images/backside.png",
           fit: BoxFit.cover,
@@ -31,6 +34,4 @@ class DeckCard extends ConsumerWidget {
       );
     }
   }
-
-  
 }
