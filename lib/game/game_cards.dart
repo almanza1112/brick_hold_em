@@ -1342,6 +1342,8 @@ class GameCardsPageState extends ConsumerState<GameCards>
 
     await userChipCountRef.update({'chipCount': ref.read(playerChipCountProvider) - 10});
 
+    await potListener.update({'pot1': 10});
+
     // THIS IS IMPORTANT FOR WHEN GAME RESTARTS
     // MUST GGO ALONG WITH setState() BELOW
     ref.read(didUserMoveCardProvider.notifier).state = true;
