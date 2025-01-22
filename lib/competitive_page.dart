@@ -94,44 +94,44 @@ class CompetitivePageState extends ConsumerState {
                     style: titleStyle,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: SizedBox(
-                    height: 150,
-                    child: CarouselSlider(
-                      options: CarouselOptions(
-                        onPageChanged: (index, reason) {
-                          // TODO: need to apply selection of table logic
-                        },
-                        enlargeCenterPage: true,
-                        enlargeFactor: .7,
-                        enlargeStrategy: CenterPageEnlargeStrategy.height,
-                        enableInfiniteScroll: false,
-                        aspectRatio: 2,
-                      ),
-                      items: (BuildContext context, int itemIndex,
-                          int pageViewIndex) {
-                        int itemIndexAdjusted = itemIndex + 1;
-                        int tableValue = itemIndexAdjusted * 100;
-                        return Container(
-                          height: 150,
-                          width: 300,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: Colors.white)),
-                          child: Center(
-                              child: Text(
-                            tableValue.toString(),
-                            style: const TextStyle(
-                                color: Colors.blue,
-                                fontSize: 24,
-                                fontWeight: FontWeight.w700),
-                          )),
-                        );
-                      },
-                    ),
-                  ),
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.only(top: 10),
+                //   child: SizedBox(
+                //     height: 150,
+                //     child: CarouselSlider(
+                //       options: CarouselOptions(
+                //         onPageChanged: (index, reason) {
+                //           // TODO: need to apply selection of table logic
+                //         },
+                //         enlargeCenterPage: true,
+                //         enlargeFactor: .7,
+                //         enlargeStrategy: CenterPageEnlargeStrategy.height,
+                //         enableInfiniteScroll: false,
+                //         aspectRatio: 2,
+                //       ),
+                //       items: (BuildContext context, int itemIndex,
+                //           int pageViewIndex) {
+                //         int itemIndexAdjusted = itemIndex + 1;
+                //         int tableValue = itemIndexAdjusted * 100;
+                //         return Container(
+                //           height: 150,
+                //           width: 300,
+                //           decoration: BoxDecoration(
+                //               color: Colors.white,
+                //               border: Border.all(color: Colors.white)),
+                //           child: Center(
+                //               child: Text(
+                //             tableValue.toString(),
+                //             style: const TextStyle(
+                //                 color: Colors.blue,
+                //                 fontSize: 24,
+                //                 fontWeight: FontWeight.w700),
+                //           )),
+                //         );
+                //       },
+                //     ),
+                //   ),
+                // ),
                 Padding(
                   padding: titlePadding,
                   child: Text(
