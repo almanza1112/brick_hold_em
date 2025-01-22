@@ -32,6 +32,8 @@ class CompetitivePageState extends ConsumerState {
   final storage = const FlutterSecureStorage();
   late Future<String?> chips;
 
+  final CarouselSliderController _carouselController = CarouselSliderController();
+
   @override
   void initState() {
     _controller = VideoPlayerController.asset('assets/videos/door_closing.mp4');
@@ -96,7 +98,7 @@ class CompetitivePageState extends ConsumerState {
                   padding: const EdgeInsets.only(top: 10),
                   child: SizedBox(
                     height: 150,
-                    child: CarouselSlider.builder(
+                    child: CarouselSlider(
                       options: CarouselOptions(
                         onPageChanged: (index, reason) {
                           // TODO: need to apply selection of table logic
@@ -107,8 +109,7 @@ class CompetitivePageState extends ConsumerState {
                         enableInfiniteScroll: false,
                         aspectRatio: 2,
                       ),
-                      itemCount: 5,
-                      itemBuilder: (BuildContext context, int itemIndex,
+                      items: (BuildContext context, int itemIndex,
                           int pageViewIndex) {
                         int itemIndexAdjusted = itemIndex + 1;
                         int tableValue = itemIndexAdjusted * 100;
