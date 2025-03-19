@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:brick_hold_em/home_page.dart';
-import 'package:brick_hold_em/login/new_user_info.dart';
+import 'package:brick_hold_em/views/login/new_user_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -190,10 +190,10 @@ class CreateAccountProfilePictureState
             createUserAuth();
           },
           style: ButtonStyle(
-              padding: MaterialStateProperty.all(const EdgeInsets.only(
+              padding: WidgetStateProperty.all(const EdgeInsets.only(
                   left: 15, right: 15, top: 5, bottom: 5)),
-              backgroundColor: MaterialStateProperty.all(Colors.red),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              backgroundColor: WidgetStateProperty.all(Colors.red),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                   const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.red)))),
@@ -205,7 +205,7 @@ class CreateAccountProfilePictureState
   }
 
   void cropImage(XFile pickedImage) async {
-    CroppedFile? _croppedFile = await ImageCropper().cropImage(
+    CroppedFile? croppedFile = await ImageCropper().cropImage(
       sourcePath: pickedImage.path,
       cropStyle: CropStyle.circle,
       aspectRatioPresets: [
@@ -224,9 +224,9 @@ class CreateAccountProfilePictureState
       ],
     );
 
-    if (_croppedFile != null) {
+    if (croppedFile != null) {
       setState(() {
-        croppedFile = _croppedFile;
+        croppedFile = croppedFile;
         isDeleteVisible = true;
       });
     }

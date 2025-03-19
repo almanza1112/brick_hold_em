@@ -1,4 +1,4 @@
-import 'package:brick_hold_em/login/login_page.dart';
+import 'package:brick_hold_em/views/login/login_page.dart';
 import 'package:brick_hold_em/settings/edit_email_page.dart';
 import 'package:brick_hold_em/settings/edit_name_page.dart';
 import 'package:brick_hold_em/settings/edit_profile_picture_page.dart';
@@ -195,7 +195,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => EditProfilePicturePage()));
+                          builder: (context) => const EditProfilePicturePage()));
                 },
                 child: Padding(
                   padding: accountRowPadding,

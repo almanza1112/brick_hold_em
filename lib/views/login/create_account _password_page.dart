@@ -1,11 +1,12 @@
-import 'package:brick_hold_em/login/create_account_username_page.dart';
-import 'package:brick_hold_em/login/new_user_info.dart';
+import 'package:brick_hold_em/views/login/create_account_username_page.dart';
+import 'package:brick_hold_em/views/login/new_user_info.dart';
 import 'package:flutter/material.dart';
 
 class CreateAccountPasswordPage extends StatefulWidget {
   const CreateAccountPasswordPage({super.key, required this.newUserInfo});
   final NewUserInfo newUserInfo;
 
+  @override
   _CreateAccountPasswordPageState createState() =>
       _CreateAccountPasswordPageState();
 }
@@ -189,10 +190,10 @@ class _CreateAccountPasswordPageState extends State<CreateAccountPasswordPage> {
             }
           },
           style: ButtonStyle(
-              padding: MaterialStateProperty.all(const EdgeInsets.only(
+              padding: WidgetStateProperty.all(const EdgeInsets.only(
                   left: 15, right: 15, top: 5, bottom: 5)),
-              backgroundColor: MaterialStateProperty.all(Colors.red),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              backgroundColor: WidgetStateProperty.all(Colors.red),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                   const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.red)))),

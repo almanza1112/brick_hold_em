@@ -1,29 +1,28 @@
-
+import 'package:brick_hold_em/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'auth_service.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
-  
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp
-  ]).then((value) => runApp(ProviderScope(child: MyApp())));
+
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((value) => runApp(const ProviderScope(child: MyApp())));
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      themeMode: ThemeMode.system,
+    return  MaterialApp(
+      title: 'Brick Hold Em',
       debugShowCheckedModeBanner: false,
-      home: AuthService().handleAuthStateNew(),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const SplashScreen(),
     );
   }
 }

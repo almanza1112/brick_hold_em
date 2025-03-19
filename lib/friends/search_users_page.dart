@@ -24,8 +24,8 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
   Stream<SearchMetadata> get _searchMetadata =>
       _productsSearcher.responses.map(SearchMetadata.fromResponse);
 
-  final PagingController<int, User> _pagingController =
-      PagingController(firstPageKey: 0);
+  // final PagingController<int, User> _pagingController =
+  //     PagingController(firstPageKey: 0);
 
   Stream<HitsPage> get _searchPage =>
       _productsSearcher.responses.map(HitsPage.fromResponse);
@@ -42,24 +42,24 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
       ),
     );
 
-    _searchPage.listen((page) {
-      if (page.pageKey == 0) {
-        _pagingController.refresh();
-      }
-      _pagingController.appendPage(page.items, page.nextPageKey);
-    }).onError((error) => _pagingController.error = error);
+    // _searchPage.listen((page) {
+    //   if (page.pageKey == 0) {
+    //     _pagingController.refresh();
+    //   }
+    //   _pagingController.appendPage(page.items, page.nextPageKey);
+    // }).onError((error) => _pagingController.error = error);
 
-    _pagingController.addPageRequestListener(
-        (pageKey) => _productsSearcher.applyState((state) => state.copyWith(
-              page: pageKey,
-            )));
+    // _pagingController.addPageRequestListener(
+    //     (pageKey) => _productsSearcher.applyState((state) => state.copyWith(
+    //           page: pageKey,
+    //         )));
   }
 
   @override
   void dispose() {
     _searchTextController.dispose();
     _productsSearcher.dispose();
-    _pagingController.dispose();
+    //_pagingController.dispose();
     super.dispose();
   }
 
@@ -94,47 +94,47 @@ class _SearchUsersPageState extends State<SearchUsersPage> {
                 );
               },
             ),
-            Expanded(
-              child: _hits(context),
-            )
+            // Expanded(
+            //   child: _hits(context),
+            // )
           ],
         ),
       ),
     );
   }
 
-  Widget _hits(BuildContext context) => PagedListView<int, User>(
-      pagingController: _pagingController,
-      builderDelegate: PagedChildBuilderDelegate<User>(
-          noItemsFoundIndicatorBuilder: (_) => const Center(
-                child: Text('No results found'),
-              ),
-          itemBuilder: (_, item, __) => Container(
-                color: Colors.white,
-                height: 70,
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(item.photoURL),
-                      radius: 20,
-                    ),
-                    const SizedBox(width: 20),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          item.username,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          item.fullName,
-                          style: const TextStyle(fontSize: 12),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              )));
+  // Widget _hits(BuildContext context) => PagedListView<int, User>(
+  //     pagingController: _pagingController,
+  //     builderDelegate: PagedChildBuilderDelegate<User>(
+  //         noItemsFoundIndicatorBuilder: (_) => const Center(
+  //               child: Text('No results found'),
+  //             ),
+  //         itemBuilder: (_, item, __) => Container(
+  //               color: Colors.white,
+  //               height: 70,
+  //               padding: const EdgeInsets.all(8),
+  //               child: Row(
+  //                 children: [
+  //                   CircleAvatar(
+  //                     backgroundImage: NetworkImage(item.photoURL),
+  //                     radius: 20,
+  //                   ),
+  //                   const SizedBox(width: 20),
+  //                   Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     mainAxisAlignment: MainAxisAlignment.center,
+  //                     children: <Widget>[
+  //                       Text(
+  //                         item.username,
+  //                         style: const TextStyle(fontWeight: FontWeight.bold),
+  //                       ),
+  //                       Text(
+  //                         item.fullName,
+  //                         style: const TextStyle(fontSize: 12),
+  //                       )
+  //                     ],
+  //                   ),
+  //                 ],
+  //               ),
+  //             )));
 }

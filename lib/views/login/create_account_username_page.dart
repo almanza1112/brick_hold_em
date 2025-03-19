@@ -1,5 +1,5 @@
-import 'package:brick_hold_em/login/create_account_profile_picture_page.dart';
-import 'package:brick_hold_em/login/new_user_info.dart';
+import 'package:brick_hold_em/views/login/create_account_profile_picture_page.dart';
+import 'package:brick_hold_em/views/login/new_user_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
@@ -126,10 +126,10 @@ class _CreateAccountUsernamePageState extends State<CreateAccountUsernamePage> {
             }
           },
           style: ButtonStyle(
-              padding: MaterialStateProperty.all(const EdgeInsets.only(
+              padding: WidgetStateProperty.all(const EdgeInsets.only(
                   left: 15, right: 15, top: 5, bottom: 5)),
-              backgroundColor: MaterialStateProperty.all(Colors.red),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              backgroundColor: WidgetStateProperty.all(Colors.red),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                   const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.red)))),

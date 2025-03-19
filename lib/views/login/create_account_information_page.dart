@@ -1,13 +1,16 @@
 import 'dart:async';
 
-import 'package:brick_hold_em/login/create_account%20_password_page.dart';
-import 'package:brick_hold_em/login/new_user_info.dart';
+import 'package:brick_hold_em/views/login/create_account%20_password_page.dart';
+import 'package:brick_hold_em/views/login/new_user_info.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:brick_hold_em/globals.dart' as globals;
 
 class CreateAccountInformationPage extends StatefulWidget {
+  const CreateAccountInformationPage({super.key});
+
+  @override
   _CreateAccountInformationPageState createState() =>
       _CreateAccountInformationPageState();
 }
@@ -119,7 +122,7 @@ class _CreateAccountInformationPageState
                           child: TextFormField(
                             validator: validateName,
                             controller: nameController,
-                            style: TextStyle(color: Colors.black),
+                            style: const TextStyle(color: Colors.black),
                             cursorColor: Colors.black,
                             keyboardType: TextInputType.name,
                             decoration: InputDecoration(
@@ -226,10 +229,10 @@ class _CreateAccountInformationPageState
             }
           },
           style: ButtonStyle(
-              padding: MaterialStateProperty.all(const EdgeInsets.only(
+              padding: WidgetStateProperty.all(const EdgeInsets.only(
                   left: 15, right: 15, top: 5, bottom: 5)),
-              backgroundColor: MaterialStateProperty.all(Colors.red),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              backgroundColor: WidgetStateProperty.all(Colors.red),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                   const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                       side: BorderSide(color: Colors.red)))),

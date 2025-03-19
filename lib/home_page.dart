@@ -9,8 +9,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:brick_hold_em/globals.dart' as globals;
 
-import 'login/create_account_username_page.dart';
-import 'login/new_user_info.dart';
+import 'views/login/create_account_username_page.dart';
+import 'views/login/new_user_info.dart';
 import 'settings_page.dart';
 import 'howtoplay_page.dart';
 import 'tournament_page.dart';
@@ -131,7 +131,7 @@ class HomePageState extends ConsumerState<HomePage> {
                       transitionDuration: transitionDuration,
                       closedColor: closedColor,
                       closedElevation: closedElevation,
-                      openBuilder: (context, closedContainer) => PurchasePage()),
+                      openBuilder: (context, closedContainer) => const PurchasePage()),
                 ))),
         Padding(
             padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -242,7 +242,7 @@ class HomePageState extends ConsumerState<HomePage> {
             closedShape: closedShape,
             closedElevation: closedElevation,
             closedColor: closedColor,
-            openBuilder: (context, action) => TournamentPage(),
+            openBuilder: (context, action) => const TournamentPage(),
           ),
         ),
         // HOW TO PLAY button
@@ -274,7 +274,7 @@ class HomePageState extends ConsumerState<HomePage> {
             closedShape: closedShape,
             closedElevation: closedElevation,
             closedColor: closedColor,
-            openBuilder: (context, action) => HowToPlayPage(),
+            openBuilder: (context, action) => const HowToPlayPage(),
           ),
         ),
         // SETTINGS button
@@ -306,7 +306,7 @@ class HomePageState extends ConsumerState<HomePage> {
             closedShape: closedShape,
             closedElevation: closedElevation,
             closedColor: closedColor,
-            openBuilder: (context, action) => SettingsPage(),
+            openBuilder: (context, action) => const SettingsPage(),
           ),
         ),
       ],
@@ -397,7 +397,7 @@ class HomePageState extends ConsumerState<HomePage> {
                     )
                   ],
                 )),
-            openBuilder: ((context, closedContainer) => ProfilePage())));
+            openBuilder: ((context, closedContainer) => const ProfilePage())));
   }
 
   // Basically here to confirm the facebook user finished the sign up process
