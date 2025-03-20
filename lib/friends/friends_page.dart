@@ -155,7 +155,7 @@ class _FriendsPageState extends State<FriendsPage> {
         .count()
         .get();
 
-    return ref.count;
+    return ref.count!;
   }
 
   Widget friendRow(Friend friend) {

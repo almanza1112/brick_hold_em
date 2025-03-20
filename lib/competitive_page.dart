@@ -10,6 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 import 'globals.dart' as globals;
+import 'package:flutter/services.dart';
 
 class CompetitivePage extends ConsumerStatefulWidget {
   const CompetitivePage({super.key});
@@ -18,27 +19,33 @@ class CompetitivePage extends ConsumerStatefulWidget {
   CompetitivePageState createState() => CompetitivePageState();
 }
 
-class CompetitivePageState extends ConsumerState {
-  EdgeInsets titlePadding = const EdgeInsets.only(top: 30, bottom: 0, left: 10);
+class CompetitivePageState extends ConsumerState<CompetitivePage> {
+  // Styling and padding
+  final EdgeInsets titlePadding =
+      const EdgeInsets.only(top: 30, bottom: 10, left: 20);
+  final TextStyle sectionTitleStyle = const TextStyle(
+      fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600);
+  final TextStyle valueStyle = const TextStyle(
+      fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold);
 
-  bool friendlySwitch = false;
-  bool privateSwitch = false;
-  TextStyle textStyle = const TextStyle(
-      fontSize: 18, color: Colors.white, fontWeight: FontWeight.w300);
-  TextStyle titleStyle = const TextStyle(
-      fontSize: 14, color: Colors.white, fontWeight: FontWeight.w600);
-
+  // Video controller for door-closing transition
   late VideoPlayerController _controller;
-  final storage = const FlutterSecureStorage();
-  late Future<String?> chips;
 
-  final CarouselSliderController _carouselController = CarouselSliderController();
+  // Secure storage to retrieve chips value.
+  final storage = const FlutterSecureStorage();
+  late Future<String?> chipsFuture;
+
+  // Carousel & Slider state
+  double currentChipValue = 200;
+  int currentTableValue = 100; // default table value from carousel
+  final int carouselItemCount = 5;
 
   @override
   void initState() {
-    _controller = VideoPlayerController.asset('assets/videos/door_closing.mp4');
-    chips = getChips();
     super.initState();
+    _controller =
+        VideoPlayerController.asset('assets/videos/door_closing.mp4');
+    chipsFuture = _getChips();
   }
 
   @override
@@ -47,242 +54,262 @@ class CompetitivePageState extends ConsumerState {
     super.dispose();
   }
 
+  Future<String?> _getChips() async {
+    return await storage.read(key: globals.FSS_CHIPS);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Force the system UI (status bar and navigation bar) to show.
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]);
+
+    // Optionally, adjust the status bar icon brightness if needed.
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.blue, // same as background
+      statusBarIconBrightness: Brightness.light,
+    ));
+
     return Stack(
       children: [
         Scaffold(
+          // Blue background is maintained.
           backgroundColor: Colors.blue,
           appBar: AppBar(
-            title: const Text('COMPETITIVE'),
             backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-            shadowColor: Colors.transparent,
-            leading: BackButton(
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
               onPressed: () {
+                // Dispose video before going back.
                 _controller.dispose();
                 Navigator.pop(context);
               },
             ),
+            // Remove title from the AppBar.
+            title: const SizedBox.shrink(),
           ),
           body: SafeArea(
-              child: Material(
-            color: Colors.blue,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Padding(
-                //   padding: titlePadding,
-                //   child: Text(
-                //     "MODE",
-                //     style: titleStyle,
-                //   ),
-                // ),
-                // SwitchListTile(
-                //     title: Text("Private", style: textStyle),
-                //     value: privateSwitch,
-                //     activeColor: Colors.green.shade500,
-                //     onChanged: (bool value) {
-                //       setState(() {
-                //         privateSwitch = value;
-                //       });
-                //     }),
-                Padding(
-                  padding: titlePadding,
-                  child: Text(
-                    "TABLE",
-                    style: titleStyle,
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Custom header for Competitive mode.
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Text(
+                      "COMPETITIVE",
+                      style: TextStyle(
+                          fontSize: 28,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
-                // Padding(
-                //   padding: const EdgeInsets.only(top: 10),
-                //   child: SizedBox(
-                //     height: 150,
-                //     child: CarouselSlider(
-                //       options: CarouselOptions(
-                //         onPageChanged: (index, reason) {
-                //           // TODO: need to apply selection of table logic
-                //         },
-                //         enlargeCenterPage: true,
-                //         enlargeFactor: .7,
-                //         enlargeStrategy: CenterPageEnlargeStrategy.height,
-                //         enableInfiniteScroll: false,
-                //         aspectRatio: 2,
-                //       ),
-                //       items: (BuildContext context, int itemIndex,
-                //           int pageViewIndex) {
-                //         int itemIndexAdjusted = itemIndex + 1;
-                //         int tableValue = itemIndexAdjusted * 100;
-                //         return Container(
-                //           height: 150,
-                //           width: 300,
-                //           decoration: BoxDecoration(
-                //               color: Colors.white,
-                //               border: Border.all(color: Colors.white)),
-                //           child: Center(
-                //               child: Text(
-                //             tableValue.toString(),
-                //             style: const TextStyle(
-                //                 color: Colors.blue,
-                //                 fontSize: 24,
-                //                 fontWeight: FontWeight.w700),
-                //           )),
-                //         );
-                //       },
-                //     ),
-                //   ),
-                // ),
-                Padding(
-                  padding: titlePadding,
-                  child: Text(
-                    "CHIPS",
-                    style: titleStyle,
+                  // TABLE selection section
+                  Padding(
+                    padding: titlePadding,
+                    child: Text("TABLE", style: sectionTitleStyle),
                   ),
-                ),
-                chipSlider(),
-                Expanded(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        _controller.initialize().then((value) {
-                          setState(() {
-                            _controller.play().then((value) {
-                              Future.delayed(const Duration(seconds: 2))
-                                  .then((val) {
-                                    addUserToTable();
-                                  });
-                            });
-                          });
-                        });
-                      },
+                  _buildTableCarousel(),
+                  const SizedBox(height: 20),
+                  // CHIPS selection section
+                  Padding(
+                    padding: titlePadding,
+                    child: Text("CHIPS", style: sectionTitleStyle),
+                  ),
+                  _buildChipSlider(),
+                  const Spacer(),
+                  // START button
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                    child: ElevatedButton(
+                      onPressed: _onStartPressed,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        // Changed to amber for contrast with blue.
+                        backgroundColor: Colors.amber,
+                      ),
                       child: const Text("START",
-                          style: TextStyle(color: Colors.white)),
-                    )
-                  ],
-                ))
-              ],
+                          style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  )
+                ],
+              ),
             ),
-          )),
+          ),
         ),
-
-        //if (_controller.value.isInitialized)
+        // Video overlay via Hero (ignoring pointer so it doesn’t block interaction)
         IgnorePointer(
-            child: Hero(
-                tag: 'videoPlayer',
-                child: _controller.value.isInitialized
-                    ? VideoPlayer(_controller)
-                    : const SizedBox.shrink())),
+          child: Hero(
+            tag: 'videoPlayer',
+            child: _controller.value.isInitialized
+                ? VideoPlayer(_controller)
+                : const SizedBox.shrink(),
+          ),
+        ),
       ],
     );
   }
 
-  double currentSliderValue = 200;
-  Widget chipSlider() {
+  /// Build the table selection carousel.
+  Widget _buildTableCarousel() {
+    return CarouselSlider.builder(
+      itemCount: carouselItemCount,
+      options: CarouselOptions(
+        height: 150,
+        enlargeCenterPage: true,
+        enableInfiniteScroll: false,
+        onPageChanged: (index, reason) {
+          setState(() {
+            // Each table increases by 100 chips requirement.
+            currentTableValue = (index + 1) * 100;
+          });
+        },
+      ),
+      itemBuilder: (context, index, realIndex) {
+        int tableValue = (index + 1) * 100;
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 5),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: Colors.white54, width: 2),
+          ),
+          child: Center(
+            child: Text(
+              tableValue.toString(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Build the chip slider widget.
+  Widget _buildChipSlider() {
     return FutureBuilder<String?>(
-        future: chips,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Text("errrrrr");
-          }
-          if (snapshot.hasData) {
-            final data = snapshot.data!;
-            final chips = double.parse(data);
-            return StatefulBuilder(builder: ((context, setState) {
-              return Column(
-                children: [
-                  Slider(
-                      thumbColor: Colors.white,
-                      activeColor: Colors.white,
-                      inactiveColor: Colors.grey,
-                      //label: "${currentSliderValue.round().toString()} asds",
-                      value: currentSliderValue,
-                      max: chips,
-                      onChanged: (double value) {
-                        setState(() {
-                          currentSliderValue = value;
-                        });
-                      }),
-                  Center(
-                    child: Text(
-                      "${currentSliderValue.round()} / ${chips.round()}",
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  // Center(
-                  //   child: RichText(text: TextSpan(
-                  //     text: "${currentSliderValue.round().toString()} / ",
-                  //     style: TextStyle(color: Colors.white, fontSize: 18),
-                  //     children: <TextSpan>[
-                  //       TextSpan(text: ref.read(userChipsProvider).toString(), style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 18))
-                  //     ]
-                  //   )),
-                  // )
-                  // Center(
-                  //   child: Row(
-                  //     crossAxisAlignment: CrossAxisAlignment.center,
-                  //     mainAxisAlignment: MainAxisAlignment.center,
-                  //     children: <Widget>[
-                  //       Text(currentSliderValue.round().toString()),
-                  //       Text(" / "),
-                  //       Text(ref.read(userChipsProvider).toString())
-                  //     ],
-                  //   ),
-                  // )
-                ],
-              );
-            }));
-          } else {
-            return const CircularProgressIndicator();
-          }
+      future: chipsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+              child: Text("Error loading chips",
+                  style: TextStyle(color: Colors.white)));
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final totalChips = double.tryParse(snapshot.data!) ?? 0;
+        // Ensure currentChipValue does not exceed totalChips.
+        if (currentChipValue > totalChips) {
+          currentChipValue = totalChips;
+        }
+        return StatefulBuilder(
+          builder: (context, setStateSlider) {
+            return Column(
+              children: [
+                Slider(
+                  thumbColor: Colors.white,
+                  activeColor: Colors.white,
+                  inactiveColor: Colors.grey,
+                  value: currentChipValue,
+                  max: totalChips,
+                  min: 0,
+                  onChanged: (double value) {
+                    setStateSlider(() {
+                      currentChipValue = value;
+                    });
+                  },
+                ),
+                Text(
+                  "${currentChipValue.round()} / ${totalChips.round()}",
+                  style: valueStyle,
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Called when the START button is pressed.
+  void _onStartPressed() {
+    // Initialize and play the video.
+    _controller.initialize().then((_) {
+      setState(() {
+        _controller.play().then((_) {
+          // After 2 seconds, add user to the table and navigate.
+          Future.delayed(const Duration(seconds: 2), () {
+            _addUserToTable();
+          });
         });
+      });
+    });
   }
 
-  Future<String?> getChips() async {
-    return await storage.read(key: globals.FSS_CHIPS);
-  }
-
-  addUserToTable() async {
-    FlutterSecureStorage storage = const FlutterSecureStorage();
+  /// Sends a POST request to add the user to the table, then navigates to GamePage.
+  void _addUserToTable() async {
     final username = await storage.read(key: globals.FSS_USERNAME);
-
     var body = {
       'uid': FirebaseAuth.instance.currentUser!.uid,
       'name': FirebaseAuth.instance.currentUser!.displayName,
       'photoURL': FirebaseAuth.instance.currentUser!.photoURL,
       'username': username,
-      'chips': currentSliderValue.round().toString()
+      'chips': currentChipValue.round().toString(),
+      'table': currentTableValue.toString(),
     };
 
-    http.Response response = await http
-        .post(Uri.parse("${globals.END_POINT}/table/join"), body: body);
+    http.Response response = await http.post(
+      Uri.parse("${globals.END_POINT}/table/join"),
+      body: body,
+    );
 
     if (response.statusCode == 201) {
       if (context.mounted) {
-        // Access body and update provider
+        // Update provider with player's position.
         Map<String, dynamic> responseBody = jsonDecode(response.body);
-        ref.read(playerPositionProvider.notifier).state = responseBody['position'];
+        ref.read(playerPositionProvider.notifier).state =
+            responseBody['position'];
 
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) => GamePage(
-              controller: _controller,
-            ),
+            pageBuilder: (context, animation1, animation2) =>
+                GamePage(controller: _controller),
             transitionDuration: Duration.zero,
             reverseTransitionDuration: Duration.zero,
           ),
         );
       }
     } else {
-      // Status code == 500, there is an error adding user to table
-      // TODO: show some error flow here, possible dospose video and show error text
-      // to try again later.
+      // On error: pause video and show an error dialog.
+      _controller.pause();
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: const Text("Error"),
+                content: const Text(
+                    "Failed to join table. Please try again later."),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("OK"))
+                ],
+              ));
     }
   }
 }

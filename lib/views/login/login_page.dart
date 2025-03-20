@@ -15,7 +15,7 @@ import 'package:brick_hold_em/globals.dart' as globals;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
   @override
   LoginPageState createState() => LoginPageState();
 }
@@ -308,7 +308,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
     });
     final LoginResult loginResult = await FacebookAuth.instance.login();
     final OAuthCredential facebookAuthCredential =
-        FacebookAuthProvider.credential(loginResult.accessToken!.token);
+        FacebookAuthProvider.credential(loginResult.accessToken!.tokenString);
     FirebaseAuth.instance
         .signInWithCredential(facebookAuthCredential)
         .then((value) async {

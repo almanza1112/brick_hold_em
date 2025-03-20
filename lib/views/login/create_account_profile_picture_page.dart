@@ -19,8 +19,7 @@ class CreateAccountProfilePicturePage extends StatefulWidget {
   final credential;
   final NewUserInfo newUserInfo;
   const CreateAccountProfilePicturePage(
-      {Key? key, this.credential, required this.newUserInfo})
-      : super(key: key);
+      {super.key, this.credential, required this.newUserInfo});
 
   @override
   CreateAccountProfilePictureState createState() =>
@@ -154,7 +153,6 @@ class CreateAccountProfilePictureState
   }
 
   Future<File> getImageFileFromAssets(String path) async {
-
     final byteData = await rootBundle.load(path);
     final file = File('${(await getTemporaryDirectory()).path}/$path');
     await file.create(recursive: true);
@@ -207,12 +205,12 @@ class CreateAccountProfilePictureState
   void cropImage(XFile pickedImage) async {
     CroppedFile? croppedFile = await ImageCropper().cropImage(
       sourcePath: pickedImage.path,
-      cropStyle: CropStyle.circle,
-      aspectRatioPresets: [
-        CropAspectRatioPreset.square,
-      ],
       uiSettings: [
         AndroidUiSettings(
+            cropStyle: CropStyle.circle,
+            aspectRatioPresets: [
+              CropAspectRatioPreset.square,
+            ],
             toolbarTitle: 'Crop Image',
             toolbarColor: Colors.teal,
             toolbarWidgetColor: Colors.white,
@@ -352,8 +350,7 @@ class CreateAccountProfilePictureState
   populateSecureStorage() async {
     FlutterSecureStorage storage = const FlutterSecureStorage();
     await storage.write(key: globals.FSS_USERNAME, value: newUserUsername);
-    await storage.write(
-        key: globals.FSS_CHIPS, value: "1000");
+    await storage.write(key: globals.FSS_CHIPS, value: "1000");
   }
 
   void setSettings() async {
