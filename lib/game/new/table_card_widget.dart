@@ -15,8 +15,14 @@ class TableCardWidget extends ConsumerWidget {
     final tappedCards = ref.watch(tappedCardsProvider);
     if (cardIndex < tappedCards.length) {
       // Build a CardWidget using the tapped card's CardKey
+      final cardKey = tappedCards[cardIndex];
       return TableCard(
-        child: CardWidget(cardKey: tappedCards[cardIndex], isOnTable: true,),
+        child: Hero(
+          tag: 'card_${cardKey.position}_${cardKey.cardName}',
+            child: CardWidget(
+          cardKey: tappedCards[cardIndex],
+          isOnTable: true,
+        )),
       );
     }
     return Container();

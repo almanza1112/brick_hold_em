@@ -976,63 +976,62 @@ class GameCardsPageState extends ConsumerState<GameCards>
           'cardsToDiscard': cardsBeingPlayed.toString(),
           'cardsInHand': cardsInHand.toString(),
           'position': ref.read(playerPositionProvider).toString(),
-          'isThereABet': ref.read(isThereABetProvider).toString()
         };
 
         // Check if you need to call or raise
         if (ref.read(doYouNeedToCallProvider)) {
           // Check if there is a bet pending with play
-          if (ref.read(isThereABetProvider) == true) {
-            String typeOfBet = ref.read(typeOfBetProvider);
-            late String amountOfBet;
+          // if (ref.read(isThereABetProvider) == true) {
+          //   //String typeOfBet = ref.read(typeOfBetProvider);
+          //   late String amountOfBet;
 
-            if (typeOfBet == "raise") {
-              amountOfBet = currentSliderValue.round().toString();
-            }
+          //   // if (typeOfBet == "raise") {
+          //   //   amountOfBet = currentSliderValue.round().toString();
+          //   // }
 
-            if (typeOfBet == "call") {
-              amountOfBet = ref.read(toCallAmmount);
-            }
-            var bet = {
-              'type': ref.read(typeOfBetProvider),
-              'amount': amountOfBet
-            };
+          //   // if (typeOfBet == "call") {
+          //   //   amountOfBet = ref.read(toCallAmmount);
+          //   // }
+          //   var bet = {
+          //     //'type': ref.read(typeOfBetProvider),
+          //     //'amount': amountOfBet
+          //   };
 
-            body['bet'] = jsonEncode(bet);
+          //   body['bet'] = jsonEncode(bet);
 
-            startChipsAnimation();
-            sendPlay(body);
-          } else {
-            // There is no bet or call made, prompt user
-            var snackBar = SnackBar(
-              content: const Text('You need to either call or raise'),
-              dismissDirection: DismissDirection.up,
-              behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.only(
-                bottom: MediaQuery.of(context).size.height - 130,
-                left: 10,
-                right: 10,
-              ),
-            );
+          //   startChipsAnimation();
+          //   sendPlay(body);
+          // } else {
+          //   // There is no bet or call made, prompt user
+          //   var snackBar = SnackBar(
+          //     content: const Text('You need to either call or raise'),
+          //     dismissDirection: DismissDirection.up,
+          //     behavior: SnackBarBehavior.floating,
+          //     margin: EdgeInsets.only(
+          //       bottom: MediaQuery.of(context).size.height - 130,
+          //       left: 10,
+          //       right: 10,
+          //     ),
+          //   );
 
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          }
+          //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          // }
         } else {
           // You don't need to call or raise
 
           // Check if there is a bet pending with play
-          if (ref.read(isThereABetProvider) == true) {
-            var bet = {
-              'type': ref.read(typeOfBetProvider),
-              'amount': currentSliderValue.round().toString()
-            };
+          // if (ref.read(isThereABetProvider) == true) {
+          //   var bet = {
+          //     //'type': ref.read(typeOfBetProvider),
+          //     'amount': currentSliderValue.round().toString()
+          //   };
 
-            body['bet'] = jsonEncode(bet);
+          //   body['bet'] = jsonEncode(bet);
 
-            // Since there is a bet user is making, start the
-            // animation of the chips to table
-            startChipsAnimation();
-          }
+          //   // Since there is a bet user is making, start the
+          //   // animation of the chips to table
+          //   startChipsAnimation();
+          // }
           sendPlay(body);
         }
       } else {
@@ -1065,7 +1064,7 @@ class GameCardsPageState extends ConsumerState<GameCards>
       // Success
 
       // Reset provider
-      ref.read(isThereABetProvider.notifier).state = false;
+      //ref.read(isThereABetProvider.notifier).state = false;
 
       // Update UI
       Future.delayed(const Duration(milliseconds: 500), () {
@@ -1099,7 +1098,7 @@ class GameCardsPageState extends ConsumerState<GameCards>
             WidgetsBinding.instance.addPostFrameCallback((_) {
               ref.read(doYouNeedToCallProvider.notifier).state = false;
 
-              ref.read(toCallAmmount.notifier).state = "0";
+              //ref.read(toCallAmmount.notifier).state = "0";
             });
             return IconButton(
                 onPressed: betModal,
@@ -1139,8 +1138,8 @@ class GameCardsPageState extends ConsumerState<GameCards>
                   doYouNeedToCall;
 
               if (doYouNeedToCall) {
-                ref.read(toCallAmmount.notifier).state =
-                    data['amount'] as String;
+                // ref.read(toCallAmmount.notifier).state =
+                //     data['amount'] as String;
               }
             });
 

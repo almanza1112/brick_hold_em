@@ -1,4 +1,13 @@
+import 'package:brick_hold_em/game/card_rules.dart';
+import 'package:brick_hold_em/providers/face_up_card_notifier.dart';
+import 'package:brick_hold_em/providers/game_providers.dart';
+import 'package:brick_hold_em/providers/hand_notifier.dart';
+import 'package:brick_hold_em/providers/tapped_cards_notifier.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:brick_hold_em/globals.dart' as globals;
 
@@ -43,6 +52,7 @@ class GameService {
     );
     if (response.statusCode == 201) {
       // Handle success (e.g., reset state or notify UI)
+      print("Play sent successfully");
     } else {
       // Handle error
     }
@@ -64,6 +74,65 @@ class GameService {
     );
     if (response.statusCode != 201) {
       // Handle error folding hand
+    }
+  }
+
+  void play(WidgetRef ref, BuildContext context) async {
+    // Read the cached face‑up card (a String) from the new notifier.
+    final faceUpCard = ref.read(faceUpCardCacheProvider);
+    if (faceUpCard.isEmpty) {
+      print("Face-up card not available.");
+      return;
+    }
+
+    // Get tapped cards (as CardKey objects) from tappedCardsProvider.
+    final tappedCards = ref.read(tappedCardsProvider);
+    // Build a list of tapped card names.
+    List<String> cardsBeingPlayed =
+        tappedCards.map((card) => card.cardName ?? "").toList();
+
+    // Create the final list by putting the face‑up card first.
+    List<String> totalCardsBeingPlayed = [faceUpCard, ...cardsBeingPlayed];
+
+    // Validate the play using CardRules.
+    final cardRules = CardRules(cards: totalCardsBeingPlayed);
+    var result = cardRules.play();
+
+    if (result == "success") {
+      // Set the play animation flag.
+      ref.read(isPlayButtonSelectedProvider.notifier).state = true;
+
+      // Get the current hand (as CardKey objects) and build a list of card names.
+      final hand = ref.read(handProvider);
+      List<String> cardsInHand =
+          hand.map((card) => card.cardName ?? "").toList();
+
+      // Build the POST body.
+      var body = {
+        'uid': FirebaseAuth.instance.currentUser!.uid,
+        'move': totalCardsBeingPlayed.toString(),
+        'cardsToDiscard': cardsBeingPlayed.toString(),
+        'cardsInHand': cardsInHand.toString(),
+        'position': ref.read(playerPositionProvider).toString(),
+      };
+
+      // If betting is required, add bet info.
+      if (ref.read(doYouNeedToCallProvider)) {
+      } else {
+        await ref.read(gameServiceProvider).sendPlay(body);
+      }
+
+      // Clear tapped cards after a successful play.
+      ref.read(tappedCardsProvider.notifier).clear();
+      // Reset the play button flag after a short delay.
+      Future.delayed(const Duration(milliseconds: 500), () {
+        ref.read(isPlayButtonSelectedProvider.notifier).state = false;
+      });
+    } else {
+      // If the play is invalid, indicate it (e.g., set an invalid play flag and vibrate).
+      ref.read(isThereAnInvalidPlayProvider.notifier).state = true;
+      HapticFeedback.heavyImpact();
+      HapticFeedback.heavyImpact();
     }
   }
 }

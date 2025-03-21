@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../game/players/player.dart';
 
+// TODO: remove this once you remove the old game_cards
 final faceUpCardProvider = StreamProvider<DatabaseEvent>((ref) {
   Query faceUpCardRef = FirebaseDatabase.instance
       .ref('tables/1/cards/discardPile')
@@ -57,19 +58,9 @@ final chipsValueProvider = StateProvider<double>((ref) => 0);
 
 // BETTING
 
-final isThereABetProvider = StateProvider<bool>((ref) => false);
-
-final typeOfBetProvider = StateProvider<String>((ref) => "check");
-
 final doYouNeedToCallProvider = StateProvider<bool>((ref) => false);
 
-final toCallAmmount = StateProvider<String>((ref) => "0");
-
 final isFoldSelectedProvider = StateProvider<bool>((ref) => false);
-
-final isRaiseSelectedProvider = StateProvider<bool>((ref) => false);
-
-final isCallCheckSelectedProvider = StateProvider<bool>((ref) => false);
 
 final isThereAnInvalidPlayProvider = StateProvider<bool>((ref) => false);
 

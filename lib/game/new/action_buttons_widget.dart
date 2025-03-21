@@ -34,7 +34,7 @@ class ActionButtonsWidget extends ConsumerWidget {
                 children: [
                   // Shuffle button
                   IconButton(
-                    onPressed: () => _shuffleHand(ref),
+                    onPressed: () => _shuffleHandButton(ref),
                     icon: const Icon(
                       Icons.shuffle,
                       color: Colors.amber,
@@ -43,7 +43,7 @@ class ActionButtonsWidget extends ConsumerWidget {
                   ),
                   // Pass button
                   IconButton(
-                    onPressed: () => _passPlay(ref),
+                    onPressed: () => _passButton(ref),
                     icon: const Icon(
                       Icons.check,
                       color: Colors.amber,
@@ -52,7 +52,7 @@ class ActionButtonsWidget extends ConsumerWidget {
                   ),
                   // Play button
                   IconButton(
-                    onPressed: () => _play(ref, context),
+                    onPressed: () => _playButton(ref, context),
                     icon: const Icon(
                       Icons.play_arrow,
                       color: Colors.amber,
@@ -70,7 +70,7 @@ class ActionButtonsWidget extends ConsumerWidget {
             left: leftPosition,
             right: rightPosition,
             child: IconButton(
-              onPressed: () => _shuffleHand(ref),
+              onPressed: () => _shuffleHandButton(ref),
               icon: const Icon(
                 Icons.shuffle,
                 color: Colors.amber,
@@ -92,7 +92,7 @@ class ActionButtonsWidget extends ConsumerWidget {
   /// These helper methods replicate the logic from your original code.
   /// In a complete refactoring you would ideally move these into your GameService.
 
-  void _shuffleHand(WidgetRef ref) {
+  void _shuffleHandButton(WidgetRef ref) {
     // Mark that a move has been made.
     //ref.read(didUserMoveCardProvider.notifier).state = true;
     // Shuffle the hand using the hand provider.
@@ -100,19 +100,15 @@ class ActionButtonsWidget extends ConsumerWidget {
     print("Shuffle hand pressed");
   }
 
-  void _passPlay(WidgetRef ref) {
+  void _passButton(WidgetRef ref) {
     // Call the passPlay logic; for example, call your GameService.
     final gameService = ref.read(gameServiceProvider);
     gameService.passPlay();
     print("Pass play pressed");
   }
 
-  void _play(WidgetRef ref, BuildContext context) async {
-    // Replicate your play() logic. This would involve:
-    //  1. Collecting the current played cards.
-    //  2. Validating the hand using CardRules.
-    //  3. Sending the play request via GameService.
-    //await ref.read(gameServiceProvider).sendPlay();
-    print("Play button pressed");
+  void _playButton(WidgetRef ref, BuildContext context) {
+    final gameService = ref.read(gameServiceProvider);
+    gameService.play(ref, context);
   }
 }

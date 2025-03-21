@@ -20,7 +20,6 @@ class GameTurnTimer extends ConsumerWidget {
         // Assume turnPlayer is stored as an int.
         final int currentTurn = event.snapshot.value as int;
         if (currentTurn == playerPosition) {
-          print("its my turn!!!");
           return ServerLinearProgressIndicatorTurn();
         } else {
           // It's not your turn: show a waiting message.
