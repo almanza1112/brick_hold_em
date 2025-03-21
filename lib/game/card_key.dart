@@ -10,10 +10,9 @@ class CardKey {
     return CardKey(
         position: position ?? this.position,
         cardName: cardName ?? this.cardName,
-        isBrick: isBrick ?? this.isBrick);
+        isBrick: isBrick ?? isBrick);
   }
 
   @override
-  String toString() =>
-      'CardKeys(position: $position, cardName: $cardName)';
+  String toString() => 'CardKey(position: $position, cardName: $cardName)';
 }

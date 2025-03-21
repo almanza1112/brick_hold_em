@@ -217,7 +217,7 @@ class GamePlayersState extends ConsumerState<GamePlayers>
                   backgroundColor: const Color.fromRGBO(255, 255, 255, 0.5),
                   radius: imageRadius,
                 ),
-              // Existing overlays (card count, blinds, etc.)
+              // Existing overlays (card count, etc.)
               if (playerDetailsVisible)
                 Positioned(
                   bottom: bottom,

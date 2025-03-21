@@ -1,3 +1,4 @@
+import 'package:brick_hold_em/game/new/services/game_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -72,9 +73,21 @@ final isCallCheckSelectedProvider = StateProvider<bool>((ref) => false);
 
 final isThereAnInvalidPlayProvider = StateProvider<bool>((ref) => false);
 
-
-// BLINDS
-final userBlindProvider = StateProvider<String>((ref) => "none");
+// Provide the game service via Riverpod.
+final gameServiceProvider = Provider((ref) => GameService());
 
 // OTHER
 final didUserMoveCardProvider = StateProvider<bool>((ref) => false);
+
+final isPlayersTurnComputedProvider = Provider<bool>((ref) {
+  final turnAsync = ref.watch(turnPlayerProvider);
+  final playerPosition = ref.watch(playerPositionProvider);
+  return turnAsync.when(
+    data: (event) {
+      final currentTurn = event.snapshot.value as int;
+      return currentTurn == playerPosition;
+    },
+    error: (_, __) => false,
+    loading: () => false,
+  );
+});

@@ -1,6 +1,5 @@
 import 'package:brick_hold_em/game/server_linear_progress_indicator_turn.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,6 +20,7 @@ class GameTurnTimer extends ConsumerWidget {
         // Assume turnPlayer is stored as an int.
         final int currentTurn = event.snapshot.value as int;
         if (currentTurn == playerPosition) {
+          print("its my turn!!!");
           return ServerLinearProgressIndicatorTurn();
         } else {
           // It's not your turn: show a waiting message.

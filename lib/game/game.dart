@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:animations/animations.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:brick_hold_em/game/chat/game_chat.dart';
+import 'package:brick_hold_em/game/new/game_cards_new.dart';
 import 'package:brick_hold_em/game/players/player.dart';
 import 'package:brick_hold_em/game/chat/table_chat.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
@@ -20,9 +21,9 @@ import 'game_turn_timer.dart';
 class GamePage extends ConsumerStatefulWidget {
   final VideoPlayerController controller;
   const GamePage({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   GamePageState createState() => GamePageState();
@@ -56,7 +57,7 @@ class GamePageState extends ConsumerState<GamePage> {
           color: Colors.green[700],
           child: Stack(
             children: [
-              const GameCards(),
+              const GameCardsNew(),
               const GameTurnTimer(),
               const GamePlayers(),
               const TableChat(),
