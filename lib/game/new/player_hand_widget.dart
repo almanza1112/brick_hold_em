@@ -1,5 +1,4 @@
 // File: player_hand_widget.dart
-import 'package:brick_hold_em/game/card_key.dart';
 import 'package:brick_hold_em/game/new/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,13 +21,6 @@ class PlayerHandWidget extends ConsumerWidget {
       );
     }
 
-    // Convert the list of card names to a list of CardKey objects.
-    List<CardKey> cards = [];
-    for (int i = 0; i < hand.length; i++) {
-      bool isBrick = hand[i] == 'brick';
-      cards.add(CardKey(position: i, cardName: hand[i], isBrick: isBrick));
-    }
-
     return Positioned(
       bottom: 100,
       left: 0,
@@ -37,11 +29,11 @@ class PlayerHandWidget extends ConsumerWidget {
         height: 70,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: cards.length,
+          itemCount: hand.length,
           itemBuilder: (context, index) {
             return CardWidget(
-              key: ValueKey('card_${cards[index].position}_${cards[index].cardName}'),
-              cardKey: cards[index],
+              key: ValueKey('card_${hand[index].position}_${hand[index].cardName}'),
+              cardKey: hand[index],
             );
           },
         ),

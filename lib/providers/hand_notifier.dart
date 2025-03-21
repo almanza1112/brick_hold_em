@@ -1,9 +1,9 @@
-// File: hand_notifier.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:brick_hold_em/game/card_key.dart';
 
-class HandNotifier extends StateNotifier<List<String>> {
+class HandNotifier extends StateNotifier<List<CardKey>> {
   HandNotifier() : super([]) {
     _fetchHand();
   }
@@ -15,7 +15,12 @@ class HandNotifier extends StateNotifier<List<String>> {
         .get();
     if (snapshot.value != null) {
       final data = snapshot.value as List<dynamic>;
-      state = List<String>.from(data);
+      final cards = <CardKey>[];
+      for (var i = 0; i < data.length; i++) {
+        bool isBrick = data[i] == 'brick';
+        cards.add(CardKey(position: i, cardName: data[i], isBrick: isBrick));
+      }
+      state = cards;
     }
   }
 
@@ -26,15 +31,17 @@ class HandNotifier extends StateNotifier<List<String>> {
     state = newHand;
   }
 
-  // In hand_notifier.dart
-  void removeCard(String cardName) {
+  void removeCard(CardKey card) {
     final newHand = [...state];
-    newHand.remove(cardName);
+    newHand.removeWhere((element) => element == card);
     state = newHand;
+  }
+
+  void addCard(CardKey card) {
+    state = [...state, card];
   }
 }
 
-// Provider for the hand.
-final handProvider = StateNotifierProvider<HandNotifier, List<String>>(
+final handProvider = StateNotifierProvider<HandNotifier, List<CardKey>>(
   (ref) => HandNotifier(),
 );

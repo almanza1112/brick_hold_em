@@ -16,7 +16,7 @@ class TableCardWidget extends ConsumerWidget {
     if (cardIndex < tappedCards.length) {
       // Build a CardWidget using the tapped card's CardKey
       return TableCard(
-        child: CardWidget(cardKey: tappedCards[cardIndex]),
+        child: CardWidget(cardKey: tappedCards[cardIndex], isOnTable: true,),
       );
     }
     return Container();
