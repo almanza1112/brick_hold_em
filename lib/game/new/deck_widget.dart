@@ -16,9 +16,7 @@ class DeckWidget extends ConsumerWidget {
     final String uid = FirebaseAuth.instance.currentUser!.uid;
     return GestureDetector(
       onTap: () async {
-        // Only allow adding a card if it is the player's turn etc.
-        final gameService = ref.read(gameServiceProvider);
-        await gameService.addCard(uid);
+        await ref.read(gameServiceProvider).addCard(uid, ref);
       },
       child: Container(
         width: 40,

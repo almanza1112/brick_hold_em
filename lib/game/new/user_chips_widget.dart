@@ -1,17 +1,15 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:brick_hold_em/providers/chip_count_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class UserChipsWidget extends StatelessWidget {
+class UserChipsWidget extends ConsumerWidget {
   final BoxConstraints constraints;
   const UserChipsWidget({super.key, required this.constraints});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     double chipsImageWidth = 70;
-    final uid = FirebaseAuth.instance.currentUser!.uid;
-    final chipStream =
-        FirebaseDatabase.instance.ref('tables/1/chips/$uid/chipCount').onValue;
+    final chipCount = ref.watch(chipCountProvider);
 
     return Positioned(
       bottom: 190,
@@ -19,33 +17,23 @@ class UserChipsWidget extends StatelessWidget {
       child: SizedBox(
         width: chipsImageWidth,
         height: chipsImageWidth,
-        child: StreamBuilder<DatabaseEvent>(
-          stream: chipStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final chipCount = snapshot.data!.snapshot.value?.toString() ?? "0";
-            return Stack(
-              children: [
-                Image.asset('assets/images/casino-chips.png',
-                    width: chipsImageWidth),
-                Center(
-                  child: Text(
-                    chipCount,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+        child: Stack(
+          children: [
+            Image.asset(
+              'assets/images/casino-chips.png',
+              width: chipsImageWidth,
+            ),
+            Center(
+              child: Text(
+                chipCount.toString(),
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
                 ),
-              ],
-            );
-          },
+              ),
+            ),
+          ],
         ),
       ),
     );

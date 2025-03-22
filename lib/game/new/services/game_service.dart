@@ -1,8 +1,11 @@
+import 'package:brick_hold_em/game/card_key.dart';
 import 'package:brick_hold_em/game/card_rules.dart';
+import 'package:brick_hold_em/providers/chip_count_notifier.dart';
 import 'package:brick_hold_em/providers/face_up_card_notifier.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:brick_hold_em/providers/hand_notifier.dart';
 import 'package:brick_hold_em/providers/tapped_cards_notifier.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -22,27 +25,65 @@ class GameService {
   final DatabaseReference playersCardsRef =
       FirebaseDatabase.instance.ref('tables/1/cards/playerCards');
   final DatabaseReference potRef =
-      FirebaseDatabase.instance.ref('tables/1/betting/pot');
+      FirebaseDatabase.instance.ref('tables/1/betting/pot1');
 
-  Future<void> addCard(String uid) async {
-    // Example: get the deck and player's hand, remove last card from deck,
-    // add it to player's hand, update chip count and pot, etc.
-    final deckEvent = await deckRef.once();
-    final playersCardsEvent =
-        await playersCardsRef.child(uid).child('hand').once();
+  Future<void> addCard(String uid, WidgetRef ref) async {
+    try {
+      // Check if the user has at least 2 chips.
+      final int chipCount = ref.read(chipCountProvider);
+      if (chipCount < 2) {
+        print("Not enough chips to add a card.");
+        // TODO: Show an error to the user here.
+        return;
+      }
 
-    var deck = List<String>.from(deckEvent.snapshot.value as List);
-    var playersCards =
-        List<String>.from(playersCardsEvent.snapshot.value as List);
+      // Fetch the current deck and player's hand from Firebase.
+      final deckEvent = await deckRef.once();
+      final playersCardsEvent =
+          await playersCardsRef.child(uid).child('hand').once();
 
-    var cardBeingAdded = deck.last;
-    playersCards.add(cardBeingAdded);
-    deck.removeLast();
+      // Convert to List<String>
+      var deck = List<String>.from(deckEvent.snapshot.value as List);
+      var playersCards =
+          List<String>.from(playersCardsEvent.snapshot.value as List);
 
-    // Here you would add logic to update chip counts and trigger animations.
-    await deckRef.update({"": deck}); // update deck
-    await playersCardsRef.child(uid).child('hand').set(playersCards);
-    // Also update pot or chip counts as needed.
+      // Draw the last card from the deck.
+      var cardBeingAdded = deck.last;
+      // Add it to the player's hand.
+      playersCards.add(cardBeingAdded);
+      // Remove it from the deck.
+      deck.removeLast();
+
+      // Update Firebase.
+      await deckRef.set(deck);
+      await playersCardsRef.child(uid).child('hand').set(playersCards);
+
+      // Update pot and chip count:
+      // Update the pot by adding 2 chips.
+      await potRef.update({'pot1': ServerValue.increment(2)});
+
+      // Subtract 2 chips from the user's chip count.
+      ref.read(chipCountProvider.notifier).subtractChips(2);
+      // Update the chip count in Firebase.
+      final uidChipRef =
+          FirebaseDatabase.instance.ref('tables/1/chips/$uid/chipCount');
+      await uidChipRef.set(ref.read(chipCountProvider).toString());
+
+      // Create a new CardKey for the drawn card.
+      bool isBrick = cardBeingAdded == 'brick';
+      final newCard = CardKey(
+          position: ref.read(handProvider).length,
+          cardName: cardBeingAdded,
+          isBrick: isBrick);
+
+      // Update the local hand by adding the new card.
+      ref.read(handProvider.notifier).addCard(newCard);
+
+      // Optionally trigger any chip animations here.
+      print("Card added: $cardBeingAdded");
+    } catch (e) {
+      print("Error in addCard: $e");
+    }
   }
 
   Future<void> sendPlay(Map<String, dynamic> body) async {

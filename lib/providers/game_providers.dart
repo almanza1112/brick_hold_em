@@ -53,9 +53,6 @@ final brickCardNumberPositionProvider = StateProvider<int>((ref) => 0);
 
 final playerChipCountProvider = StateProvider<double>((ref) => 0);
 
-// TODO: no idea why i made this or the thought behind it
-final chipsValueProvider = StateProvider<double>((ref) => 0);
-
 // BETTING
 
 final doYouNeedToCallProvider = StateProvider<bool>((ref) => false);
