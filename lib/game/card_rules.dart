@@ -41,6 +41,7 @@ class CardRules {
     // COMBOS THAT CAN BE PLAYED...
     // ONE PAIR: with 1st + 2nd card having the same suit/color, 2nd + 3rd must be the same number
     // THREE OF A KIND: all three are the same number
+    print(cards);
     var card1 = cardInfo[cards[0]] as Map<String, dynamic>;
     var card2 = cardInfo[cards[1]] as Map<String, dynamic>;
     var card3 = cardInfo[cards[2]] as Map<String, dynamic>;

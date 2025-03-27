@@ -29,7 +29,7 @@ class GameTurnTimer extends ConsumerWidget {
             right: 0,
             child: Container(
               height: 40,
-              color: Colors.red,
+              color: Colors.grey,
               child: const Center(
                 child: Text(
                   "WAITING...",

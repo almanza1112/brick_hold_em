@@ -71,6 +71,7 @@ class ServerProgressIndicatorTurnState
 
   @override
   Widget build(BuildContext context) {
+
     return SizedBox(
       height: 60,
       width: 60,
@@ -78,7 +79,7 @@ class ServerProgressIndicatorTurnState
         strokeWidth: 10,
         value: progress,
         valueColor: AlwaysStoppedAnimation<Color>(
-          Color.lerp(Colors.black, Colors.red, progress) ?? Colors.red,
+          Color.lerp(Colors.red, Colors.red, progress) ?? Colors.red,
         ),
       ),
     );

@@ -28,7 +28,7 @@ class UserChipsWidget extends ConsumerWidget {
                   child: Text(
                     chipCount.toString(),
                     style: const TextStyle(
-                      color: Colors.black,
+                      color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                     ),

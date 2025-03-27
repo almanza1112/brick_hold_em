@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:animations/animations.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:brick_hold_em/game/chat/game_chat.dart';
 import 'package:brick_hold_em/game/new/game_cards_new.dart';
