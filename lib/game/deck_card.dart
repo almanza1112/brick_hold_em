@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class DeckCard extends ConsumerWidget {
-  const DeckCard({Key? key}) : super(key: key);
+  const DeckCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -17,7 +17,7 @@ class DeckCard extends ConsumerWidget {
     if (ref.watch(isPlayersTurnProvider)) {
       if (stopAnimation) {
         return Image.asset(
-          "assets/images/backside.png",
+          "assets/images/cards/backside.png",
           fit: BoxFit.cover,
           width: tableCardWidth,
           height: tableCardHeight,
@@ -27,7 +27,7 @@ class DeckCard extends ConsumerWidget {
       }
     } else {
       return Image.asset(
-        "assets/images/backside.png",
+        "assets/images/cards/backside.png",
         fit: BoxFit.cover,
         width: tableCardWidth,
         height: tableCardHeight,

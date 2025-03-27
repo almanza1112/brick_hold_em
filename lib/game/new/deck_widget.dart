@@ -16,7 +16,9 @@ class DeckWidget extends ConsumerWidget {
     final String uid = FirebaseAuth.instance.currentUser!.uid;
     return GestureDetector(
       onTap: () async {
-        await ref.read(gameServiceProvider).addCard(uid, ref);
+        if (ref.read(isPlayersTurnComputedProvider)) {
+          await ref.read(gameServiceProvider).addCard(uid, ref);
+        }
       },
       child: Container(
         width: 40,
@@ -25,7 +27,7 @@ class DeckWidget extends ConsumerWidget {
         child: Stack(
           children: [
             // Replace with your actual deck image asset.
-            Image.asset("assets/images/backside.png", fit: BoxFit.cover),
+            Image.asset("assets/images/cards/backside.png", fit: BoxFit.cover),
             Center(
               child: StreamBuilder(
                 stream: FirebaseDatabase.instance

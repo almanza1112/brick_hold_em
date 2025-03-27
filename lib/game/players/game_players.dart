@@ -43,8 +43,8 @@ class GamePlayersState extends ConsumerState<GamePlayers>
 
             // Loop through each child from the snapshot and assign keys
             for (final child in snapshot.data!.snapshot.children) {
-              final childObj =
-                  Map<String, dynamic>.from(child.value as Map<dynamic, dynamic>);
+              final childObj = Map<String, dynamic>.from(
+                  child.value as Map<dynamic, dynamic>);
               if (childObj['uid'] != uid) {
                 final data = Player.fromMap(childObj);
                 otherPlayersList.add(data);
@@ -186,14 +186,15 @@ class GamePlayersState extends ConsumerState<GamePlayers>
               // Listen to the shared turnOrder stream and show the circular progress
               // indicator if this player's position is the current turn.
               StreamBuilder<DatabaseEvent>(
-                stream: FirebaseDatabase.instance.ref('tables/1/turnOrder').onValue,
+                stream:
+                    FirebaseDatabase.instance.ref('tables/1/turnOrder').onValue,
                 builder: (context, snapshot) {
                   if (!snapshot.hasData ||
                       snapshot.data!.snapshot.value == null) {
                     return const SizedBox();
                   }
-                  final data =
-                      Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
+                  final data = Map<String, dynamic>.from(
+                      snapshot.data!.snapshot.value as Map);
                   final int currentTurn = data['turnPlayer'] is int
                       ? data['turnPlayer'] as int
                       : int.parse(data['turnPlayer'].toString());
@@ -232,7 +233,7 @@ class GamePlayersState extends ConsumerState<GamePlayers>
                       children: [
                         if (!isFolded)
                           Image.asset(
-                            'assets/images/backside.png',
+                            'assets/images/cards/backside.png',
                             height: 35,
                             width: 25,
                           ),
@@ -295,19 +296,21 @@ class GamePlayersState extends ConsumerState<GamePlayers>
         if (snapshot.hasError) {
           return const SizedBox();
         }
-        if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-          var data = snapshot.data!.snapshot.value;
-          return Text(
-            "$data",
-            style: const TextStyle(
-                fontSize: 14,
-                color: Colors.amberAccent,
-                fontWeight: FontWeight.w700),
-          );
-        } else {
-          print('card count ${snapshot.data!.snapshot.value}');
+        if (!snapshot.hasData) {
           return const CircularProgressIndicator();
         }
+
+        final cardCount = snapshot.data!.snapshot.value;
+        if (cardCount == null) {
+          return const CircularProgressIndicator();
+        }
+        return Text(
+          "$cardCount",
+          style: const TextStyle(
+              fontSize: 14,
+              color: Colors.amberAccent,
+              fontWeight: FontWeight.w700),
+        );
       },
     );
   }

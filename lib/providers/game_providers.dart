@@ -1,4 +1,5 @@
 import 'package:brick_hold_em/game/new/services/game_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -89,6 +90,20 @@ final nextGameStartProvider = StreamProvider<int>((ref) {
       return val;
     } else if (val is String) {
       return int.tryParse(val) ?? 0;
+    }
+    return 0;
+  });
+});
+
+// User's Chips
+final chipCountStreamProvider = StreamProvider<int>((ref) {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  return FirebaseDatabase.instance
+      .ref('tables/1/chips/$uid/chipCount')
+      .onValue
+      .map((event) {
+    if (event.snapshot.value != null) {
+      return int.tryParse(event.snapshot.value.toString()) ?? 0;
     }
     return 0;
   });

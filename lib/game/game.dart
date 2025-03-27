@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:brick_hold_em/game/game_cards.dart';
 import 'package:brick_hold_em/game/players/game_players.dart';
 
 import 'game_turn_timer.dart';
@@ -55,9 +54,14 @@ class GamePageState extends ConsumerState<GamePage> {
       endDrawer: const GameChat(),
       body: SafeArea(
         child: Container(
-          color: Colors.green[700],
+          color: Colors.black,
           child: Stack(
             children: [
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 35,
+                child: Image.asset('assets/images/table.png', height: 650,)),
               const GameCardsNew(),
               const GameTurnTimer(),
               const GamePlayers(),

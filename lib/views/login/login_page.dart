@@ -75,7 +75,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
                     Hero(
                       tag: 'logoHero',
                       child: Image.asset(
-                        'assets/images/BrickHoldEmLogo.png',
+                        'assets/images/logos/BrickHoldEmLogo.png',
                         width: 120,
                         height: 120,
                       ),
@@ -228,7 +228,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
                                   IconButton(
                                     onPressed: signInWithFacebook,
                                     icon: Image.asset(
-                                      'assets/images/facebook.png',
+                                      'assets/images/logos/facebook.png',
                                       width: 48,
                                     ),
                                     iconSize: 48,
@@ -237,7 +237,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
                                   IconButton(
                                     onPressed: signInWithGoogle,
                                     icon: Image.asset(
-                                      'assets/images/google.png',
+                                      'assets/images/logos/google.png',
                                       width: 48,
                                     ),
                                     iconSize: 48,

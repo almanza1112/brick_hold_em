@@ -3,7 +3,7 @@ import 'package:brick_hold_em/auth_service.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -47,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen>
           child: ScaleTransition(
             scale: _scaleAnimation,
             child: Image.asset(
-              'assets/images/BrickHoldEmLogo.png',
+              'assets/images/logos/BrickHoldEmLogo.png',
               width: 150,
               height: 150,
             ),

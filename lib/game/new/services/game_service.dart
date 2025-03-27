@@ -1,11 +1,9 @@
 import 'package:brick_hold_em/game/card_key.dart';
 import 'package:brick_hold_em/game/card_rules.dart';
-import 'package:brick_hold_em/providers/chip_count_notifier.dart';
 import 'package:brick_hold_em/providers/face_up_card_notifier.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:brick_hold_em/providers/hand_notifier.dart';
 import 'package:brick_hold_em/providers/tapped_cards_notifier.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -25,18 +23,10 @@ class GameService {
   final DatabaseReference playersCardsRef =
       FirebaseDatabase.instance.ref('tables/1/cards/playerCards');
   final DatabaseReference potRef =
-      FirebaseDatabase.instance.ref('tables/1/betting/pot1');
+      FirebaseDatabase.instance.ref('tables/1/betting/pot');
 
   Future<void> addCard(String uid, WidgetRef ref) async {
     try {
-      // Check if the user has at least 2 chips.
-      final int chipCount = ref.read(chipCountProvider);
-      if (chipCount < 2) {
-        print("Not enough chips to add a card.");
-        // TODO: Show an error to the user here.
-        return;
-      }
-
       // Fetch the current deck and player's hand from Firebase.
       final deckEvent = await deckRef.once();
       final playersCardsEvent =
@@ -58,17 +48,6 @@ class GameService {
       await deckRef.set(deck);
       await playersCardsRef.child(uid).child('hand').set(playersCards);
 
-      // Update pot and chip count:
-      // Update the pot by adding 2 chips.
-      await potRef.update({'pot1': ServerValue.increment(2)});
-
-      // Subtract 2 chips from the user's chip count.
-      ref.read(chipCountProvider.notifier).subtractChips(2);
-      // Update the chip count in Firebase.
-      final uidChipRef =
-          FirebaseDatabase.instance.ref('tables/1/chips/$uid/chipCount');
-      await uidChipRef.set(ref.read(chipCountProvider).toString());
-
       // Create a new CardKey for the drawn card.
       bool isBrick = cardBeingAdded == 'brick';
       final newCard = CardKey(
@@ -80,7 +59,6 @@ class GameService {
       ref.read(handProvider.notifier).addCard(newCard);
 
       // Optionally trigger any chip animations here.
-      print("Card added: $cardBeingAdded");
     } catch (e) {
       print("Error in addCard: $e");
     }

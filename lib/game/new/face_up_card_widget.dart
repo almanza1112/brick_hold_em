@@ -32,7 +32,7 @@ class FaceUpCardWidget extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               children: move.map<Widget>((imageName) {
                 return Image.asset(
-                  "assets/images/$imageName.png",
+                  "assets/images/cards/$imageName.png",
                   height: 56,
                   width: 40,
                 );
@@ -64,7 +64,7 @@ class FaceUpCardWidget extends ConsumerWidget {
         _getPreviousMove(context);
       },
       child: Image.asset(
-        "assets/images/$faceUpCard.png",
+        "assets/images/cards/$faceUpCard.png",
         width: tableCardWidth,
         height: tableCardHeight,
       ),

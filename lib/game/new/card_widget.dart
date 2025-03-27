@@ -17,7 +17,7 @@ class CardWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Build the card image.
     Widget cardImage = Image.asset(
-      "assets/images/${cardKey.cardName}.png",
+      "assets/images/cards/${cardKey.cardName}.png",
       width: 50,
       height: 70,
       fit: BoxFit.cover,

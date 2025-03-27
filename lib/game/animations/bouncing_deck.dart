@@ -5,10 +5,10 @@ class BouncingDeck extends StatefulWidget {
   final double height;
 
   const BouncingDeck({
-    Key? key,
+    super.key,
     required this.width,
     required this.height,
-  }) : super(key: key);
+  });
 
   @override
   State<BouncingDeck> createState() => _BouncingDeckState();
@@ -38,7 +38,7 @@ class _BouncingDeckState extends State<BouncingDeck>
           scale:
               1.0 + 0.3 * _controller.value, // Adjust the amplitude as needed
           child: Image.asset(
-            "assets/images/backside.png",
+            "assets/images/cards/backside.png",
             fit: BoxFit.cover,
             width: widget.width,
             height: widget.height,
