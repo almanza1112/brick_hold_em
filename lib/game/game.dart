@@ -4,6 +4,7 @@ import 'package:animations/animations.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:brick_hold_em/game/chat/game_chat.dart';
 import 'package:brick_hold_em/game/new/game_cards_new.dart';
+import 'package:brick_hold_em/game/new/game_countdown.dart';
 import 'package:brick_hold_em/game/players/player.dart';
 import 'package:brick_hold_em/game/chat/table_chat.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
@@ -71,97 +72,92 @@ class GamePageState extends ConsumerState<GamePage> {
               //         : const SizedBox.shrink(),
               //   ),
               // ),
-              Center(
-                child: StreamBuilder(
-                    stream: winnerRef.onValue,
-                    builder: ((context, snapshot) {
-                      if (snapshot.hasError) {
-                        return const Text("Error");
-                      }
-
-                      if (snapshot.hasData) {
-                        final data = snapshot.data!.snapshot.value;
-
-                        if (data == "none") {
-                          // There is no winner
-                          // TODO: Fix this hacky way of resetting the game
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            ref.read(didUserMoveCardProvider.notifier).state =
-                                false;
-                          });
-
-
-                          return const SizedBox.shrink();
-                        } else {
-                          // There is a winner
-
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            ref.read(isThereAWinnerProvider.notifier).state =
-                                true;
-                          });
-
-                          if (data == uid) {
-                             // Play valid sound
-                            Source roundWonSound =
-                                AssetSource("sounds/round_won.wav");
-                            player.play(roundWonSound);
-
-                            // You are the winner
-                            return BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                                child: const Text(
-                                  "YOU WON!",
-                                  style: TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.amber),
-                                ));
-                          } else {
-                            // Play round lost sound
-                             Source roundLostSound =
-                                AssetSource("sounds/round_lost.wav");
-                            player.play(roundLostSound);
-
-                            // Another player is the winner
-                            final otherPlayersList =
-                                ref.read(otherPlayersInformationProvider);
-                            late Player winningPlayer;
-                            for (var player in otherPlayersList) {
-                              if (data == player.uid) {
-                                winningPlayer = player;
-                              }
-                            }
-
-                            return BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    CircleAvatar(
-                                      backgroundImage: NetworkImage(winningPlayer.photoURL),
-                                      radius: 60,
-                                    ),
-                                    const SizedBox(height: 12,),
-                                    Text(
-                                      "${winningPlayer.username} won",
-                                      style: const TextStyle(
-                                          fontSize: 36,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.amber),
-                                    ),
-                                  ],
-                                ));
-                          }
-                        }
-                      } else {
-                        return const CircularProgressIndicator();
-                      }
-                    })),
-              )
+              _buildWinnerOverlay()
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// This widget builds the winner overlay. When winnerRef reports a winner (not "none"),
+  /// we display the winner's information along with a countdown from nextGameStartProvider.
+  Widget _buildWinnerOverlay() {
+    return StreamBuilder(
+      stream: winnerRef.onValue,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const SizedBox.shrink();
+        }
+        if (!snapshot.hasData) {
+          return const SizedBox.shrink();
+        }
+        final data = snapshot.data!.snapshot.value;
+        if (data == "none") {
+          // No winner, show nothing.
+          return const SizedBox.shrink();
+        } else {
+          // There is a winner. Delay resetting the game until the countdown finishes.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(isThereAWinnerProvider.notifier).state = true;
+          });
+          if (data == uid) {
+            // Play round-won sound if needed.
+            Source roundWonSound = AssetSource("sounds/round_won.wav");
+            player.play(roundWonSound);
+            return BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    "YOU WON!",
+                    style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber),
+                  ),
+                  SizedBox(height: 20),
+                  GameCountdown(), // This widget shows the countdown
+                ],
+              ),
+            );
+          } else {
+            // Round lost sound, and show winning player's info.
+            Source roundLostSound = AssetSource("sounds/round_lost.wav");
+            player.play(roundLostSound);
+            final otherPlayersList = ref.read(otherPlayersInformationProvider);
+            late Player winningPlayer;
+            for (var p in otherPlayersList) {
+              if (data == p.uid) {
+                winningPlayer = p;
+              }
+            }
+            return BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(winningPlayer.photoURL),
+                    radius: 60,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "${winningPlayer.username} won",
+                    style: const TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber),
+                  ),
+                  const SizedBox(height: 20),
+                  const GameCountdown(),
+                ],
+              ),
+            );
+          }
+        }
+      },
     );
   }
 

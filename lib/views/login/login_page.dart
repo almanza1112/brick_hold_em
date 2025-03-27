@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
 import 'package:brick_hold_em/home_page.dart';
 import 'package:brick_hold_em/views/login/create_account_information_page.dart';
 import 'package:brick_hold_em/views/login/create_account_username_page.dart';
@@ -13,6 +15,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:crypto/crypto.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -203,8 +206,8 @@ class LoginPageState extends ConsumerState<LoginPage> {
                               Row(
                                 children: [
                                   Expanded(
-                                      child: Divider(
-                                          color: Colors.grey.shade400)),
+                                      child:
+                                          Divider(color: Colors.grey.shade400)),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 8),
@@ -213,8 +216,8 @@ class LoginPageState extends ConsumerState<LoginPage> {
                                             color: Colors.grey.shade600)),
                                   ),
                                   Expanded(
-                                      child: Divider(
-                                          color: Colors.grey.shade400)),
+                                      child:
+                                          Divider(color: Colors.grey.shade400)),
                                 ],
                               ),
                               const SizedBox(height: 16),
@@ -252,7 +255,9 @@ class LoginPageState extends ConsumerState<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text("Don't have an account?",
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)),
                         TextButton(
                           onPressed: () {
                             Navigator.push(
@@ -306,9 +311,42 @@ class LoginPageState extends ConsumerState<LoginPage> {
     setState(() {
       showError = false;
     });
-    final LoginResult loginResult = await FacebookAuth.instance.login();
-    final OAuthCredential facebookAuthCredential =
-        FacebookAuthProvider.credential(loginResult.accessToken!.tokenString);
+
+    // Generate nonce
+    final rawNonce = generateNonce();
+    final nonce = sha256ofString(rawNonce);
+
+    final LoginResult loginResult = await FacebookAuth.instance
+        .login(loginTracking: LoginTracking.limited, nonce: nonce);
+
+    if (loginResult.status == LoginStatus.success) {}
+
+    // Create a credential from the access token
+    OAuthCredential facebookAuthCredential;
+    if (Platform.isIOS) {
+      switch (loginResult.accessToken!.type) {
+        case AccessTokenType.classic:
+          final token = loginResult.accessToken as ClassicToken;
+          facebookAuthCredential = FacebookAuthProvider.credential(
+            token.authenticationToken!,
+          );
+          break;
+
+        case AccessTokenType.limited:
+          final token = loginResult.accessToken as LimitedToken;
+          facebookAuthCredential = OAuthCredential(
+            providerId: 'facebook.com',
+            signInMethod: 'oauth',
+            idToken: token.tokenString,
+            rawNonce: rawNonce,
+          );
+          break;
+      }
+    } else {
+      facebookAuthCredential =
+          FacebookAuthProvider.credential(loginResult.accessToken!.tokenString);
+    }
+
     FirebaseAuth.instance
         .signInWithCredential(facebookAuthCredential)
         .then((value) async {
@@ -325,6 +363,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       checkIfUserExists(userInfo);
     }).onError((error, stackTrace) {
       String errorStr = error.toString();
+      print(error);
       if (errorStr.contains("account-exists")) {
         setErrorMessage("An account with that email already exists.");
       } else {
@@ -446,5 +485,20 @@ class LoginPageState extends ConsumerState<LoginPage> {
     prefs.setBool(globals.SETTINGS_FX_SOUND, true);
     prefs.setBool(globals.SETTINGS_VIBRATE, true);
     prefs.setBool(globals.SETTINGS_GAME_LIVE_CHAT, true);
+  }
+
+  String generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
+  }
+
+  /// Returns the sha256 hash of [input] in hex notation.
+  String sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
   }
 }

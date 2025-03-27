@@ -40,6 +40,11 @@ class HandNotifier extends StateNotifier<List<CardKey>> {
   void addCard(CardKey card) {
     state = [...state, card];
   }
+
+  /// Clears the hand. You can also call _fetchHand() after clearing if needed.
+  void resetHand() {
+    state = [];
+  }
 }
 
 final handProvider = StateNotifierProvider<HandNotifier, List<CardKey>>(

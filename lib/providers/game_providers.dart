@@ -79,3 +79,17 @@ final isPlayersTurnComputedProvider = Provider<bool>((ref) {
     loading: () => false,
   );
 });
+
+// Next game
+final nextGameStartProvider = StreamProvider<int>((ref) {
+  final nextGameStartRef = FirebaseDatabase.instance.ref('tables/1/nextGameStart');
+  return nextGameStartRef.onValue.map((event) {
+    final val = event.snapshot.value;
+    if (val is int) {
+      return val;
+    } else if (val is String) {
+      return int.tryParse(val) ?? 0;
+    }
+    return 0;
+  });
+});

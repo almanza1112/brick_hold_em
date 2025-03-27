@@ -305,6 +305,7 @@ class GamePlayersState extends ConsumerState<GamePlayers>
                 fontWeight: FontWeight.w700),
           );
         } else {
+          print('card count ${snapshot.data!.snapshot.value}');
           return const CircularProgressIndicator();
         }
       },
