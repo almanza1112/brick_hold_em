@@ -117,7 +117,7 @@ class GameService {
     final cardRules = CardRules(cards: totalCardsBeingPlayed);
     var result = cardRules.play();
 
-    if (result == "success") {
+    if (result['success']) {
       // Set the play animation flag.
       ref.read(isPlayButtonSelectedProvider.notifier).state = true;
 
@@ -125,6 +125,10 @@ class GameService {
       final hand = ref.read(handProvider);
       List<String> cardsInHand =
           hand.map((card) => card.cardName ?? "").toList();
+      
+      // Get the ante multiplier from the result.
+      int anteMultiplier = result['anteMultiplier'];
+
 
       // Build the POST body.
       var body = {
@@ -133,6 +137,7 @@ class GameService {
         'cardsToDiscard': cardsBeingPlayed.toString(),
         'cardsInHand': cardsInHand.toString(),
         'position': ref.read(playerPositionProvider).toString(),
+        'anteMultiplier': anteMultiplier.toString(),
       };
 
       // If betting is required, add bet info.
