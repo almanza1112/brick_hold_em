@@ -9,6 +9,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:brick_hold_em/globals.dart' as globals;
 
@@ -23,7 +24,10 @@ class GameService {
   final DatabaseReference playersCardsRef =
       FirebaseDatabase.instance.ref('tables/1/cards/playerCards');
   final DatabaseReference potRef =
-      FirebaseDatabase.instance.ref('tables/1/betting/pot');
+      FirebaseDatabase.instance.ref('tables/1/pot');
+
+  final FlutterSecureStorage secureStorage =
+      const FlutterSecureStorage();
 
   Future<void> addCard(String uid, WidgetRef ref) async {
     try {
@@ -115,9 +119,9 @@ class GameService {
 
     // Validate the play using CardRules.
     final cardRules = CardRules(cards: totalCardsBeingPlayed);
-    var result = cardRules.play();
+    var cardRulesResult = cardRules.play();
 
-    if (result['success']) {
+    if (cardRulesResult['success']) {
       // Set the play animation flag.
       ref.read(isPlayButtonSelectedProvider.notifier).state = true;
 
@@ -127,17 +131,26 @@ class GameService {
           hand.map((card) => card.cardName ?? "").toList();
       
       // Get the ante multiplier from the result.
-      int anteMultiplier = result['anteMultiplier'];
+      int anteMultiplier = cardRulesResult['anteMultiplier'];
+      String combo = cardRulesResult['combo'];
+      String action = cardRulesResult['action'];
+      int cardsToDraw = cardRulesResult['cardsToDraw'];
 
+      final String username = await secureStorage.read(
+        key: globals.FSS_USERNAME) ?? "Unknown User";
 
       // Build the POST body.
       var body = {
         'uid': FirebaseAuth.instance.currentUser!.uid,
+        'username': username,
         'move': totalCardsBeingPlayed.toString(),
         'cardsToDiscard': cardsBeingPlayed.toString(),
         'cardsInHand': cardsInHand.toString(),
         'position': ref.read(playerPositionProvider).toString(),
         'anteMultiplier': anteMultiplier.toString(),
+        'combo': combo.toString(),
+        'action': action.toString(),
+        'cardsToDraw': cardsToDraw.toString(),
       };
 
       // If betting is required, add bet info.
@@ -154,7 +167,6 @@ class GameService {
       });
     } else {
       // If the play is invalid, indicate it (e.g., set an invalid play flag and vibrate).
-      ref.read(isThereAnInvalidPlayProvider.notifier).state = true;
       HapticFeedback.heavyImpact();
       HapticFeedback.heavyImpact();
     }

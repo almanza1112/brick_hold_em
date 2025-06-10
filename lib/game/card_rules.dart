@@ -28,11 +28,12 @@ class CardRules {
     var card1 = cardInfo[cards[0]] as Map<String, dynamic>;
     var card2 = cardInfo[cards[1]] as Map<String, dynamic>;
 
-    if (card1['value'] == card2['value'] ||
-        card1['color'] == card2['color'] ||
-        card2['value'] > card1['value']) {
-      // Single Number or Suit
-      return {"success": true, "anteMultiplier": 0};
+    if (card1['value'] == card2['value']) {
+      // Same Number
+      return {"success": true, "anteMultiplier": 0, "combo": "Same Number", "cardsToDraw": 0, "action": "none"};
+    } else if(card1['color'] == card2['color']){
+      // Same Suit
+      return {"success": true, "anteMultiplier": 0, "combo": "Same Suit", "cardsToDraw": 0, "action": "none"};
     } else {
       // There was no valid combo
       return {"success": false};
@@ -43,18 +44,17 @@ class CardRules {
     // COMBOS THAT CAN BE PLAYED...
     // ONE PAIR: with 1st + 2nd card having the same suit/color, 2nd + 3rd must be the same number
     // THREE OF A KIND: all three are the same number
-    print(cards);
     var card1 = cardInfo[cards[0]] as Map<String, dynamic>;
     var card2 = cardInfo[cards[1]] as Map<String, dynamic>;
     var card3 = cardInfo[cards[2]] as Map<String, dynamic>;
 
     if (card1['value'] == card2['value'] && card2['value'] == card3['value']) {
       // Three of a Kind: all 3 are same value
-      return {"success": true, "anteMultiplier": 1};
+      return {"success": true, "anteMultiplier": 1, "combo": "Three of a Kind", "cardsToDraw": 1, "action": "none"};
     } else if (card1['color'] == card2['color'] &&
         card2['value'] == card3['value']) {
       // One Pair: 1st and 2nd card are the same color/suit, 2nd and 3rd are the same value
-      return {"success": true, "anteMultiplier": 1};
+      return {"success": true, "anteMultiplier": 1, "combo": "One Pair", "cardsToDraw": 1, "action": "skip"};
     } else {
       // There was no valid combo
       return {"success": false};
@@ -78,18 +78,18 @@ class CardRules {
         card2['value'] == card4['value']) {
       // Three of a Kind: 1st & 2nd card are the same color/suit. 2nd, 3rd, 4th
       // are all the same value
-      return {"success": true, "anteMultiplier": 1};
+      return {"success": true, "anteMultiplier": 1, "combo": "Three of a Kind", "cardsToDraw": 1, "action": "none"};
     } else if (card1['value'] == card2['value'] &&
         card2['value'] == card3['value'] &&
         card3['value'] == card4['value'] &&
         card2['value'] == card4['value']) {
       // Four of a Kind: all cards are the same value
-      return {"success": true, "anteMultiplier": 4};
+      return {"success": true, "anteMultiplier": 4, "combo": "Four of a Kind", "cardsToDraw": 2, "action": "skip"};
     } else if (card1['value'] == card2['value'] &&
         card2['color'] == card3['color'] &&
         card3['value'] == card4['value']) {
       // Two Pair: 1st & 2nd cards have same value, 2nd & 3rd same color/suit, 3rd & 4th same value
-      return {"success": true, "anteMultiplier": 1};
+      return {"success": true, "anteMultiplier": 1, "combo": "Two Pair", "cardsToDraw": 1, "action": "none"};
     } else {
       // There is no valid combo
       return {"success": false};
@@ -113,25 +113,25 @@ class CardRules {
         card3['suit'] == card4['suit'] &&
         card4['suit'] == card5['suit']) {
       // Flush
-      return {"success": true, "anteMultiplier": 2};
+      return {"success": true, "anteMultiplier": 2, "combo": "Flush", "cardsToDraw": 2, "action": "skip"};
     } else if (card1['color'] == card2['color'] &&
         card2['value'] == card3['value'] &&
         card3['value'] == card4['value'] &&
         card4['value'] == card5['value']) {
       // Four of a Kind
-      return {"success": true, "anteMultiplier": 4};
+      return {"success": true, "anteMultiplier": 4, "combo": "Four of a Kind", "cardsToDraw": 2, "action": "skip"};
     } else if (card1['value'] == card2['value'] &&
         card2['color'] == card3['color'] &&
         card3['value'] == card4['value'] &&
         card4['value'] == card5['value']) {
       // Full House
-      return {"success": true, "anteMultiplier": 2};
+      return {"success": true, "anteMultiplier": 2, "combo": "Full House", "cardsToDraw": 2, "action": "skip"};
     } else if (card1['value'] == card2['value'] &&
         card2['value'] == card3['value'] &&
         card3['color'] == card4['color'] &&
         card4['value'] == card5['value']) {
       // full house
-      return {"success": true, "anteMultiplier": 2};
+      return {"success": true, "anteMultiplier": 2, "combo": "Full House", "cardsToDraw": 2, "action": "skip"};
     } else {
       // Create list of cardValues to determine Straight
       List<int> cardValues = [
@@ -155,7 +155,7 @@ class CardRules {
             return {"success": false};
           }
         }
-        return {"success": true, "anteMultiplier": 2};
+        return {"success": true, "anteMultiplier": 2, "combo": "Straight", "cardsToDraw": 2, "action": "skip"};
       } else {
         // There is an Ace, all variations of Ace being a bridge
         if (cardValues[0] == 1 &&
@@ -163,31 +163,31 @@ class CardRules {
             cardValues[2] == 8 &&
             cardValues[3] == 9 &&
             cardValues[4] == 10) {
-          return {"success": true, "anteMultiplier": 2};
+          return {"success": true, "anteMultiplier": 2, "combo": "Straight", "cardsToDraw": 2, "action": "skip"};
         } else if (cardValues[0] == 1 &&
             cardValues[1] == 2 &&
             cardValues[2] == 8 &&
             cardValues[3] == 9 &&
             cardValues[4] == 10) {
-          return {"success": true, "anteMultiplier": 2};
+          return {"success": true, "anteMultiplier": 2, "combo": "Straight", "cardsToDraw": 2, "action": "skip"};
         } else if (cardValues[0] == 1 &&
             cardValues[1] == 2 &&
             cardValues[2] == 3 &&
             cardValues[3] == 9 &&
             cardValues[4] == 10) {
-          return {"success": true, "anteMultiplier": 2};
+          return {"success": true, "anteMultiplier": 2, "combo": "Straight", "cardsToDraw": 2, "action": "skip"};
         } else if (cardValues[0] == 1 &&
             cardValues[1] == 2 &&
             cardValues[2] == 3 &&
             cardValues[3] == 4 &&
             cardValues[4] == 10) {
-          return {"success": true, "anteMultiplier": 2};
+          return {"success": true, "anteMultiplier": 2, "combo": "Straight", "cardsToDraw": 2, "action": "skip"};
         } else if (cardValues[0] == 1 &&
             cardValues[1] == 2 &&
             cardValues[2] == 3 &&
             cardValues[3] == 4 &&
             cardValues[4] == 5) {
-          return {"success": true, "anteMultiplier": 2};
+          return {"success": true, "anteMultiplier": 2, "combo": "Straight", "cardsToDraw": 2, "action": "skip"};
         } else {
           return {"success": false};
         }

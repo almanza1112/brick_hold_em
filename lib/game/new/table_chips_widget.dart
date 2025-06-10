@@ -13,7 +13,7 @@ class TableChipsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final potStream = FirebaseDatabase.instance.ref('tables/1/betting/pot').onValue;
+    final potStream = FirebaseDatabase.instance.ref('tables/1/pot').onValue;
     return Positioned(
       top: 180,
       left: (constraints.maxWidth / 2) - 50,

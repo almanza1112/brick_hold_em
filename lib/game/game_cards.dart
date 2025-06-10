@@ -1,13 +1,10 @@
-import 'dart:convert';
 
 import 'package:brick_hold_em/game/animations/bouncing_icon_button.dart';
-import 'package:brick_hold_em/game/card_rules.dart';
 import 'package:brick_hold_em/game/deck_card.dart';
 import 'package:brick_hold_em/game/table_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -49,8 +46,6 @@ class GameCardsPageState extends ConsumerState<GameCards>
   DatabaseReference deckCountListener =
       FirebaseDatabase.instance.ref('tables/1/cards/dealer/deckCount');
 
-  DatabaseReference potListener =
-      FirebaseDatabase.instance.ref('tables/1/betting/pot');
 
   late DatabaseReference userChipCountListener;
   late DatabaseReference userChipCountRef;
@@ -121,7 +116,6 @@ class GameCardsPageState extends ConsumerState<GameCards>
             buttons(),
             animatedChipsToTable(constraints),
             userChips(constraints),
-            tableChips(constraints),
           ],
         );
       }),
@@ -741,47 +735,6 @@ class GameCardsPageState extends ConsumerState<GameCards>
     );
   }
 
-  Widget tableChips(var constraints) {
-    return Positioned(
-        top: 180,
-        left: (constraints.constrainWidth() / 2) - (100 / 2),
-        child: SizedBox(
-          width: 100,
-          height: 100,
-          child: StreamBuilder(
-              stream: potListener.onValue,
-              builder: (((context, snapshot) {
-                if (snapshot.hasError) {
-                  return const CircularProgressIndicator();
-                }
-
-                if (snapshot.hasData) {
-                  var data =
-                      snapshot.data!.snapshot.value as Map<Object?, Object?>;
-                  return Stack(
-                    children: [
-                      Center(
-                          child: Image.asset(
-                        'assets/images/casino-chips.png',
-                        width: 50,
-                      )),
-                      Center(
-                        child: Text(
-                          "${data['pot1']}",
-                          style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white),
-                        ),
-                      )
-                    ],
-                  );
-                } else {
-                  return const Text('...');
-                }
-              }))),
-        ));
-  }
 
   Widget faceUpCard(var constraints) {
     // commented out since position will be relative to top of the screen and not the center
@@ -794,26 +747,9 @@ class GameCardsPageState extends ConsumerState<GameCards>
             left: (constraints.constrainWidth() / 2) -
                 ((tableCardWidth * 2) + 10),
             child: GestureDetector(
-                onTap: getPreviousMove, child: faceUpCardImage()))
+                onTap: getPreviousMove, child: null))
       ],
     );
-  }
-
-  Widget faceUpCardImage() {
-    final liveFaceUpCard = ref.watch(faceUpCardProvider);
-
-    return liveFaceUpCard.when(
-        data: (event) {
-          var map = event.snapshot.value! as Map<Object?, Object?>;
-          var d = map[map.keys.first] as List<Object?>;
-          return Image.asset(
-            "assets/images/${d[d.length - 1]}.png",
-            width: tableCardWidth,
-            height: tableCardHeight,
-          );
-        },
-        error: ((error, stackTrace) => Text(error.toString())),
-        loading: () => const CircularProgressIndicator());
   }
 
   getPreviousMove() async {
@@ -883,14 +819,7 @@ class GameCardsPageState extends ConsumerState<GameCards>
                           color: Colors.amber,
                           size: 36,
                         )),
-                    IconButton(
-                        onPressed: play,
-                        icon: const Icon(
-                          Icons.play_arrow,
-                          color: Colors.amber,
-                          size: 36,
-                        )),
-                    //betButton()
+                    
                   ],
                 ),
               ),
@@ -917,142 +846,6 @@ class GameCardsPageState extends ConsumerState<GameCards>
         },
         error: ((error, stackTrace) => Text(error.toString())),
         loading: () => const Center(child: CircularProgressIndicator()));
-  }
-
-  play() async {
-    // Get faceUpCard from the StreamProvider = faceUpCardProvider
-    final faceUpCardRefOnce = ref.read(faceUpCardProvider);
-    final map =
-        faceUpCardRefOnce.asData!.value.snapshot.value as Map<Object?, Object?>;
-    var data = map[map.keys.first] as List<Object?>;
-
-    // Create empty list for cards that are being played (tapped cards)
-    List<String> cardsBeingPlayed = <String>[];
-
-    // Loop through tappCards list to populate cardsBeingPlayed list
-    for (int i = 0; i < tappedCards.length; i++) {
-      ValueKey<CardKey> t = tappedCards[i].key! as ValueKey<CardKey>;
-      cardsBeingPlayed.add(t.value.cardName!);
-    }
-
-    // Create list that adds faceUpCard
-    List<String> totalCardsBeingPlayed = [
-      data[data.length - 1].toString(),
-      ...cardsBeingPlayed
-    ];
-
-    // Make sure list with the faceUpCard(totalCardsBeingPlayed) is a
-    // valid hand to be played
-    final cardRules = CardRules(cards: totalCardsBeingPlayed);
-    var result = cardRules.play();
-
-    // It is a valid play
-    if (result == "success") {
-      // Play valid sound
-      //Source validPlaySound = AssetSource("sounds/valid.wav");
-      //player.play(validPlaySound);
-
-      // Makes tapped cards on table animate to discard pile
-      ref.read(isPlayButtonSelectedProvider.notifier).state = true;
-
-      // There is at least one card in hand
-      if (cardWidgetsBuilderList.isNotEmpty) {
-        // Create list of cards that are in hand that will be sent to server
-        List<String> cardsInHand = <String>[];
-
-        // Loop through current cards in hand list
-        for (int i = 0; i < cardWidgetsBuilderList.length; i++) {
-          // Get key of each card
-          ValueKey<CardKey> t =
-              cardWidgetsBuilderList[i].key! as ValueKey<CardKey>;
-
-          // Add each card name into list
-          cardsInHand.add(t.value.cardName!);
-        }
-        // Create post body
-        var body = {
-          'uid': uid,
-          'move': totalCardsBeingPlayed.toString(),
-          'cardsToDiscard': cardsBeingPlayed.toString(),
-          'cardsInHand': cardsInHand.toString(),
-          'position': ref.read(playerPositionProvider).toString(),
-        };
-
-        // Check if you need to call or raise
-        if (ref.read(doYouNeedToCallProvider)) {
-          // Check if there is a bet pending with play
-          // if (ref.read(isThereABetProvider) == true) {
-          //   //String typeOfBet = ref.read(typeOfBetProvider);
-          //   late String amountOfBet;
-
-          //   // if (typeOfBet == "raise") {
-          //   //   amountOfBet = currentSliderValue.round().toString();
-          //   // }
-
-          //   // if (typeOfBet == "call") {
-          //   //   amountOfBet = ref.read(toCallAmmount);
-          //   // }
-          //   var bet = {
-          //     //'type': ref.read(typeOfBetProvider),
-          //     //'amount': amountOfBet
-          //   };
-
-          //   body['bet'] = jsonEncode(bet);
-
-          //   startChipsAnimation();
-          //   sendPlay(body);
-          // } else {
-          //   // There is no bet or call made, prompt user
-          //   var snackBar = SnackBar(
-          //     content: const Text('You need to either call or raise'),
-          //     dismissDirection: DismissDirection.up,
-          //     behavior: SnackBarBehavior.floating,
-          //     margin: EdgeInsets.only(
-          //       bottom: MediaQuery.of(context).size.height - 130,
-          //       left: 10,
-          //       right: 10,
-          //     ),
-          //   );
-
-          //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          // }
-        } else {
-          // You don't need to call or raise
-
-          // Check if there is a bet pending with play
-          // if (ref.read(isThereABetProvider) == true) {
-          //   var bet = {
-          //     //'type': ref.read(typeOfBetProvider),
-          //     'amount': currentSliderValue.round().toString()
-          //   };
-
-          //   body['bet'] = jsonEncode(bet);
-
-          //   // Since there is a bet user is making, start the
-          //   // animation of the chips to table
-          //   startChipsAnimation();
-          // }
-          sendPlay(body);
-        }
-      } else {
-        // No cards left, you are the winner
-        playerCardCount.remove().then((value) {
-          print("removed success");
-        });
-      }
-    } else {
-      // TODO: make this more visibly known to the user that it isnt a valid hand
-      // It is not a valid hand, show user that it isnt
-      ref.read(isThereAnInvalidPlayProvider.notifier).state = true;
-
-      // Play invalid sound
-     //Source invalidPlaySound = AssetSource("sounds/invalid.wav");
-      //player.play(invalidPlaySound);
-
-      // Vibrate phone
-      HapticFeedback.heavyImpact();
-      HapticFeedback.heavyImpact();
-    }
   }
 
   void sendPlay(var body) async {
@@ -1337,8 +1130,6 @@ class GameCardsPageState extends ConsumerState<GameCards>
         .update({"dealer/deck": deck, "playerCards/$uid/hand": playersCards});
 
     await userChipCountRef.update({'chipCount': ref.read(playerChipCountProvider) - 10});
-
-    await potListener.update({'pot1': 10});
 
     // THIS IS IMPORTANT FOR WHEN GAME RESTARTS
     // MUST GGO ALONG WITH setState() BELOW

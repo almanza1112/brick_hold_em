@@ -6,15 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../game/players/player.dart';
 
-// TODO: remove this once you remove the old game_cards
-final faceUpCardProvider = StreamProvider<DatabaseEvent>((ref) {
-  Query faceUpCardRef = FirebaseDatabase.instance
-      .ref('tables/1/cards/discardPile')
-      .limitToLast(1);
-
-  return faceUpCardRef.onValue;
-});
-
 final turnPlayerProvider = StreamProvider<DatabaseEvent>((ref) {
   DatabaseReference turnPlayerRef =
       FirebaseDatabase.instance.ref('tables/1/turnOrder/turnPlayer');
@@ -55,12 +46,16 @@ final brickCardNumberPositionProvider = StateProvider<int>((ref) => 0);
 final playerChipCountProvider = StateProvider<double>((ref) => 0);
 
 // BETTING
-
 final doYouNeedToCallProvider = StateProvider<bool>((ref) => false);
 
-final isFoldSelectedProvider = StateProvider<bool>((ref) => false);
-
+// TODO: need to check if this is the best way to handle invalid plays animation
 final isThereAnInvalidPlayProvider = StateProvider<bool>((ref) => false);
+
+final anteToCallProvider = StreamProvider<DatabaseEvent>((ref) {
+  return FirebaseDatabase.instance
+      .ref('tables/1/anteToCall')
+      .onValue;
+});
 
 // Provide the game service via Riverpod.
 final gameServiceProvider = Provider((ref) => GameService());

@@ -20,8 +20,8 @@ class ActionButtonsWidget extends ConsumerWidget {
 
     return liveTurnPlayerAsyncValue.when(
       data: (event) {
-        final turnPlayerUid = event.snapshot.value;
-        if (turnPlayerUid == playerPosition) {
+        final turnPlayerPosition = event.snapshot.value;
+        if (turnPlayerPosition == playerPosition) {
           // It is the player's turn. Show full buttons.
           return Positioned(
             bottom: 40,
@@ -42,14 +42,14 @@ class ActionButtonsWidget extends ConsumerWidget {
                     ),
                   ),
                   // Pass button
-                  IconButton(
-                    onPressed: () => _passButton(ref),
-                    icon: const Icon(
-                      Icons.check,
-                      color: Colors.amber,
-                      size: 36,
-                    ),
-                  ),
+                  // IconButton(
+                  //   onPressed: () => _passButton(ref),
+                  //   icon: const Icon(
+                  //     Icons.check,
+                  //     color: Colors.amber,
+                  //     size: 36,
+                  //   ),
+                  // ),
                   // Play button
                   IconButton(
                     onPressed: () => _playButton(ref, context),
@@ -89,8 +89,9 @@ class ActionButtonsWidget extends ConsumerWidget {
     );
   }
 
-  /// These helper methods replicate the logic from your original code.
-  /// In a complete refactoring you would ideally move these into your GameService.
+  // TODO:
+  // These helper methods replicate the logic from my original code.
+  // In a complete refactoring I would ideally move these into your GameService.
 
   void _shuffleHandButton(WidgetRef ref) {
     // Mark that a move has been made.
