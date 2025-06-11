@@ -48,6 +48,38 @@ final playerChipCountProvider = StateProvider<double>((ref) => 0);
 // BETTING
 final doYouNeedToCallProvider = StateProvider<bool>((ref) => false);
 
+enum BottomState { needToCall, myTurn, waiting }
+
+final bottomStateProvider = Provider<BottomState>((ref) {
+  final turnAsync = ref.watch(turnPlayerProvider);
+  final anteAsync = ref.watch(anteToCallProvider);
+  final myPos     = ref.read(playerPositionProvider);
+
+  // If any stream is still loading, treat it as “waiting”
+  if (turnAsync is AsyncLoading || anteAsync is AsyncLoading) {
+    return BottomState.waiting;
+  }
+
+  // On error, also “waiting”
+  if (turnAsync is AsyncError || anteAsync is AsyncError) {
+    return BottomState.waiting;
+  }
+
+  // Both have data:
+  final currentTurn = (turnAsync as AsyncData).value.snapshot.value as int;
+  final anteData    = (anteAsync as AsyncData).value.snapshot.value as Map?;
+  final needCallPos = anteData?['playerToCallPosition'] as int?  ?? -1;
+  final didCall     = anteData?['didPlayerCall']      as bool? ?? true;
+
+  if (needCallPos == myPos && !didCall) {
+    return BottomState.needToCall;
+  }
+  if (currentTurn == myPos) {
+    return BottomState.myTurn;
+  }
+  return BottomState.waiting;
+});
+
 // TODO: need to check if this is the best way to handle invalid plays animation
 final isThereAnInvalidPlayProvider = StateProvider<bool>((ref) => false);
 

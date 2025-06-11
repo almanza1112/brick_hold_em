@@ -1,4 +1,4 @@
-import 'package:brick_hold_em/game/server_linear_progress_indicator_turn.dart';
+import 'package:brick_hold_em/game/new/bottom_controls/server_linear_progress_indicator_turn.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,20 +54,46 @@ class GameTurnTimer extends ConsumerWidget {
     int? playerToCallPosition;
     int? amountToCall;
     String? nextTurnPlayerUsername;
-    int? cardsToDraw; // Default to 2 cards to draw
+    int? cardsToDraw;
+    bool? didPlayerCall;
 
     if (rawAnte is Map<Object?, Object?>) {
       // If you wrote this in your Realtime DB:
       //   tables/1/anteToCall: { "playerPos": 2, "drawCount": 2 }
-      playerToCallPosition = (rawAnte['playerToCallPosition'] as int?) ;
-      amountToCall = (rawAnte['amountToCall'] as int?) ;
+      playerToCallPosition = (rawAnte['playerToCallPosition'] as int?);
+      amountToCall = (rawAnte['amountToCall'] as int?);
       nextTurnPlayerUsername = (rawAnte['nextTurnPlayerUsername'] as String?);
       cardsToDraw = (rawAnte['cardsToDraw'] as int?);
+      didPlayerCall = (rawAnte['didPlayerCall'] as bool?);
     }
 
     // 1) If it’s your turn, show the timer:
     if (currentTurn == myPosition) {
       return const ServerLinearProgressIndicatorTurn();
+    }
+
+    if (didPlayerCall == true) {
+      return const Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        child: SizedBox(
+          height: 40,
+          child: ColoredBox(
+            color: Colors.grey,
+            child: Center(
+              child: Text(
+                "WAITING…",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
     // 2) Otherwise, if someone needs to ante right now, show a descriptive message:

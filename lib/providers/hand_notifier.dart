@@ -10,16 +10,24 @@ class HandNotifier extends StateNotifier<List<CardKey>> {
 
   Future<void> _fetchHand() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
-    final snapshot = await FirebaseDatabase.instance
-        .ref('tables/1/cards/playerCards/$uid/hand')
-        .get();
-    if (snapshot.value != null) {
-      final data = snapshot.value as List<dynamic>;
+    final handRef =
+        FirebaseDatabase.instance.ref('tables/1/cards/playerCards/$uid/hand');
+    final snapshot = await handRef.get();
+
+    if (snapshot.exists) {
       final cards = <CardKey>[];
-      for (var i = 0; i < data.length; i++) {
-        bool isBrick = data[i] == 'brick';
-        cards.add(CardKey(position: i, cardName: data[i], isBrick: isBrick));
+      int index = 0;
+
+      // snapshot.children are in ascending push-key order
+      for (final child in snapshot.children) {
+        final cardName = child.value as String;
+        final isBrick = cardName == 'brick';
+        cards.add(
+          CardKey(position: index, cardName: cardName, isBrick: isBrick),
+        );
+        index++;
       }
+
       state = cards;
     }
   }

@@ -15,7 +15,7 @@ import 'package:video_player/video_player.dart';
 
 import 'package:brick_hold_em/game/players/game_players.dart';
 
-import 'game_turn_timer.dart';
+import 'new/bottom_controls/game_turn_timer.dart';
 
 class GamePage extends ConsumerStatefulWidget {
   final VideoPlayerController controller;

@@ -26,43 +26,48 @@ class GameService {
   final DatabaseReference potRef =
       FirebaseDatabase.instance.ref('tables/1/pot');
 
-  final FlutterSecureStorage secureStorage =
-      const FlutterSecureStorage();
+  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
   Future<void> addCard(String uid, WidgetRef ref) async {
     try {
-      // Fetch the current deck and player's hand from Firebase.
-      final deckEvent = await deckRef.once();
-      final playersCardsEvent =
-          await playersCardsRef.child(uid).child('hand').once();
+      final tableRef = FirebaseDatabase.instance.ref('tables/1');
 
-      // Convert to List<String>
-      var deck = List<String>.from(deckEvent.snapshot.value as List);
-      var playersCards =
-          List<String>.from(playersCardsEvent.snapshot.value as List);
+      // 1) Fetch the single top card (key + name)
+      final topCardSnapshot = await deckRef.orderByKey().limitToLast(1).once();
+      final deckMap = topCardSnapshot.snapshot.value as Map<dynamic, dynamic>?;
 
-      // Draw the last card from the deck.
-      var cardBeingAdded = deck.last;
-      // Add it to the player's hand.
-      playersCards.add(cardBeingAdded);
-      // Remove it from the deck.
-      deck.removeLast();
+      if (deckMap == null || deckMap.isEmpty) {
+        // TODO: Handle empty deck case
+        // I have a listener in the backend that will reshuffle the deck but do I need
+        // anything else here?
+        print("Deck is empty—no card to draw.");
+        return;
+      }
+      final String cardKey = deckMap.keys.first as String;
+      final String cardName = deckMap[cardKey] as String;
 
-      // Update Firebase.
-      await deckRef.set(deck);
-      await playersCardsRef.child(uid).child('hand').set(playersCards);
+      // 2) Reserve a new push-key for the player's hand
+      final newHandRef = playersCardsRef.child(uid).child('hand').push();
+      final String newHandKey = newHandRef.key!;
 
-      // Create a new CardKey for the drawn card.
-      bool isBrick = cardBeingAdded == 'brick';
+      // 3) Build a multi-location update:
+      //    - Remove the deck child at `cards/dealer/deck/$cardKey`
+      //    - Add the card under `cards/playerCards/$uid/hand/$newHandKey`
+      final updates = <String, dynamic>{
+        'cards/dealer/deck/$cardKey': null,
+        'cards/playerCards/$uid/hand/$newHandKey': cardName,
+      };
+
+      // 4) Apply in one atomic call
+      await tableRef.update(updates);
+
+      // 5) Locally sync your Riverpod hand state
       final newCard = CardKey(
-          position: ref.read(handProvider).length,
-          cardName: cardBeingAdded,
-          isBrick: isBrick);
-
-      // Update the local hand by adding the new card.
+        position: ref.read(handProvider).length,
+        cardName: cardName,
+        isBrick: (cardName == 'brick'),
+      );
       ref.read(handProvider.notifier).addCard(newCard);
-
-      // Optionally trigger any chip animations here.
     } catch (e) {
       print("Error in addCard: $e");
     }
@@ -100,7 +105,18 @@ class GameService {
     }
   }
 
+  Future<void> skipPlayerTurn() async {
+    http.Response response =
+        await http.get(Uri.parse("${globals.END_POINT}/table/skipturn"));
+    if (response.statusCode != 200) {
+      // Handle error
+    }
+  }
+
   void play(WidgetRef ref, BuildContext context) async {
+    final tappedNotifier = ref.read(tappedCardsProvider.notifier);
+    final playBtnNotifier = ref.read(isPlayButtonSelectedProvider.notifier);
+
     // Read the cached face‑up card (a String) from the new notifier.
     final faceUpCard = ref.read(faceUpCardCacheProvider);
     if (faceUpCard.isEmpty) {
@@ -123,21 +139,21 @@ class GameService {
 
     if (cardRulesResult['success']) {
       // Set the play animation flag.
-      ref.read(isPlayButtonSelectedProvider.notifier).state = true;
+      playBtnNotifier.state = true;
 
       // Get the current hand (as CardKey objects) and build a list of card names.
       final hand = ref.read(handProvider);
       List<String> cardsInHand =
           hand.map((card) => card.cardName ?? "").toList();
-      
+
       // Get the ante multiplier from the result.
       int anteMultiplier = cardRulesResult['anteMultiplier'];
       String combo = cardRulesResult['combo'];
       String action = cardRulesResult['action'];
       int cardsToDraw = cardRulesResult['cardsToDraw'];
 
-      final String username = await secureStorage.read(
-        key: globals.FSS_USERNAME) ?? "Unknown User";
+      final String username =
+          await secureStorage.read(key: globals.FSS_USERNAME) ?? "Unknown User";
 
       // Build the POST body.
       var body = {
@@ -160,10 +176,11 @@ class GameService {
       }
 
       // Clear tapped cards after a successful play.
-      ref.read(tappedCardsProvider.notifier).clear();
+      tappedNotifier.clear();
+
       // Reset the play button flag after a short delay.
       Future.delayed(const Duration(milliseconds: 500), () {
-        ref.read(isPlayButtonSelectedProvider.notifier).state = false;
+        playBtnNotifier.state = false;
       });
     } else {
       // If the play is invalid, indicate it (e.g., set an invalid play flag and vibrate).
