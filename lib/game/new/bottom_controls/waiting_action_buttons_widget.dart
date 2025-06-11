@@ -18,9 +18,23 @@ class WaitingActionButtonsWidget extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          IconButton(
-            onPressed: () => ref.read(handProvider.notifier).shuffleHand(),
-            icon: const Icon(Icons.shuffle, color: Colors.amber, size: 36),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 5),
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.amber,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+                side: const BorderSide(color: Colors.amber, width: 1.0),
+              ),
+            ),
+            child: Text(
+              'SHUFFLE',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+            onPressed: () {
+              ref.read(handProvider.notifier).shuffleHand();
+            },
           ),
         ],
       ),
