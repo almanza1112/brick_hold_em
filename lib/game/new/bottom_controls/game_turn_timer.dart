@@ -69,7 +69,8 @@ class GameTurnTimer extends ConsumerWidget {
 
     // 1) If it’s your turn, show the timer:
     if (currentTurn == myPosition) {
-      return const ServerLinearProgressIndicatorTurn();
+      // If it’s your turn, show a progress indicator with a message:
+      return ServerLinearProgressIndicatorTurn(label: "YOU need to pay $amountToCall and draw $cardsToDraw", didPlayerCall: didPlayerCall!,);
     }
 
     if (didPlayerCall == true) {

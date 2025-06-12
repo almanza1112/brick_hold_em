@@ -30,7 +30,7 @@ class WaitingActionButtonsWidget extends ConsumerWidget {
             ),
             child: Text(
               'SHUFFLE',
-              style: TextStyle(fontWeight: FontWeight.w800),
+              style: TextStyle(fontWeight: FontWeight.w800), 
             ),
             onPressed: () {
               ref.read(handProvider.notifier).shuffleHand();

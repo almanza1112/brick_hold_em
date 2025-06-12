@@ -3,10 +3,13 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class ServerLinearProgressIndicatorTurn extends StatefulWidget {
-  const ServerLinearProgressIndicatorTurn({super.key});
+  final String label;
+  final bool didPlayerCall;
+  const ServerLinearProgressIndicatorTurn(
+      {super.key, required this.label, required this.didPlayerCall});
 
   @override
-  _ServerLinearProgressIndicatorTurnState createState() =>
+  State<ServerLinearProgressIndicatorTurn> createState() =>
       _ServerLinearProgressIndicatorTurnState();
 }
 
@@ -94,9 +97,10 @@ class _ServerLinearProgressIndicatorTurnState
               backgroundColor: Colors.grey[300],
             ),
             Text(
-              "$remainingSeconds",
+              //"$remainingSeconds", // this is how it was before with a countdown timer
+              widget.didPlayerCall ? "$remainingSeconds" : widget.label,
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),

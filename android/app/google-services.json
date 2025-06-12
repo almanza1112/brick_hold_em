@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "814375727309",
+    "firebase_url": "https://brick-hold-em-default-rtdb.firebaseio.com",
     "project_id": "brick-hold-em",
     "storage_bucket": "brick-hold-em.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "814375727309-07q8l747hioh6q7fn717m0j58bpabkb6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.brick_hold_em",
+            "certificate_hash": "e502ea1f00523183e5a688000fdb4368268254bd"
+          }
+        },
         {
           "client_id": "814375727309-co7lim3l3ujpav27qb5s1nn5blirb6ni.apps.googleusercontent.com",
           "client_type": 3
@@ -29,6 +38,13 @@
             {
               "client_id": "814375727309-co7lim3l3ujpav27qb5s1nn5blirb6ni.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "814375727309-unr7ibkbn2tu9qdhe7378u9mmi6a5kav.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.brickHoldEm"
+              }
             }
           ]
         }

@@ -399,20 +399,26 @@ class LoginPageState extends ConsumerState<LoginPage> {
 
   // Google sign-in method.
   Future<void> signInWithGoogle() async {
+
     setState(() {
       showError = false;
     });
     await GoogleSignIn(scopes: ["email"]).signOut();
     final GoogleSignInAccount? googleUser =
         await GoogleSignIn(scopes: ["email"]).signIn();
-    Map result = await isEmailUsed(googleUser!.email, "google.com");
+
+    // TODO: isEmailUsed not working. need to fix this
+    //Map result = await isEmailUsed(googleUser!.email, "google.com");
+
     final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+        await googleUser!.authentication;
+
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-    if (result['result'] == "Authentication method matches.") {
+
+    //if (result['result'] == "Authentication method matches.") {
       await FirebaseAuth.instance
           .signInWithCredential(credential)
           .then((value) {
@@ -434,19 +440,19 @@ class LoginPageState extends ConsumerState<LoginPage> {
           }
         }).onError((error, stackTrace) {});
       }).onError((error, stackTrace) {});
-    } else if (result['result'] == "Authentication method does not match.") {
-      setErrorMessage("An account with that email already exists.");
-    } else if (result['result'] == "New user.") {
-      var newUserInfo = NewUserInfo(
-        fullName: googleUser.displayName,
-        email: googleUser.email,
-        photoURL: googleUser.photoUrl,
-        loginType: globals.LOGIN_TYPE_GOOGLE,
-      );
-      navigateToUsername(credential, newUserInfo);
-    } else {
-      print("Unexpected authentication result.");
-    }
+    // } else if (result['result'] == "Authentication method does not match.") {
+    //   setErrorMessage("An account with that email already exists.");
+    // } else if (result['result'] == "New user.") {
+    //   var newUserInfo = NewUserInfo(
+    //     fullName: googleUser.displayName,
+    //     email: googleUser.email,
+    //     photoURL: googleUser.photoUrl,
+    //     loginType: globals.LOGIN_TYPE_GOOGLE,
+    //   );
+    //   navigateToUsername(credential, newUserInfo);
+    // } else {
+    //   print("Unexpected authentication result.");
+    // }
   }
 
   Future<Map> isEmailUsed(String email, String providerID) async {
