@@ -1,9 +1,11 @@
+// lib/views/sign_up/create_account_username_step.dart
+
+import 'package:flutter/material.dart';
 import 'package:brick_hold_em/widgets/input_field.dart';
 import 'package:brick_hold_em/widgets/step_title.dart';
-import 'package:flutter/material.dart';
 import 'package:brick_hold_em/models/new_user.dart';
 
-/// Step 2: Choose a username with modern styling
+/// Step 2: Choose a username with modern styling and validation
 class UsernameStep extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final NewUser user;
@@ -17,13 +19,12 @@ class UsernameStep extends StatefulWidget {
   });
 
   @override
-  State<UsernameStep> createState() =>
-      _UsernameStepState();
+  UsernameStepState createState() => UsernameStepState();
 }
 
-class _UsernameStepState
-    extends State<UsernameStep> {
+class UsernameStepState extends State<UsernameStep> {
   late final TextEditingController _ctrl;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -38,35 +39,48 @@ class _UsernameStepState
   }
 
   String? _validator(String? v) {
-    if (v == null || v.isEmpty) return "Please enter a username";
+    if (v == null || v.isEmpty) return 'Please enter a username';
     final rx = RegExp(r'^[a-zA-Z0-9_.-]+$');
-    return rx.hasMatch(v)
-        ? null
-        : 'Only letters, numbers, and characters . _ -';
+    return rx.hasMatch(v) ? null : 'Only letters, numbers, and . _ - allowed';
+  }
+
+  /// Called by wizard's Next: runs local validation and shows errors
+  Future<bool> validateAndSubmit() async {
+    setState(() => _isLoading = true);
+    // trigger rebuild to show spinner
+    await Future.delayed(Duration.zero);
+
+    final valid = widget.formKey.currentState?.validate() ?? false;
+
+    setState(() => _isLoading = false);
+    return valid;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.grey.shade100,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Form(
-          key: widget.formKey,
-          child: ListView(
-            children: [
-              const StepTitle('Choose a Username'),
-
-              InputField(
-                controller: _ctrl,
-                label: 'Username',
-                validator: _validator,
-                onChanged: (v) => widget.onChanged(v.trim()),
-              ),
-            ],
+    return Stack(
+      children: [
+        Container(
+          color: Colors.grey.shade100,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Form(
+            key: widget.formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: ListView(
+              children: [
+                const StepTitle('Choose a Username'),
+                InputField(
+                  controller: _ctrl,
+                  label: 'Username',
+                  validator: _validator,
+                  onChanged: (v) => widget.onChanged(v.trim()),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
+        if (_isLoading) const Center(child: CircularProgressIndicator()),
+      ],
     );
   }
 }

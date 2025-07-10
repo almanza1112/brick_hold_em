@@ -7,12 +7,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:brick_hold_em/models/new_user.dart';
 import 'information_step.dart';
 import 'username_step.dart';
 import 'password_step.dart';
-import 'create_account_profile_picture_step.dart';
+import 'profile_picture_step.dart';
 import 'package:brick_hold_em/globals.dart' as globals;
 import 'package:brick_hold_em/home_page.dart';
 
@@ -30,6 +29,10 @@ class SignUpWizardPageState extends ConsumerState<SignUpWizardPage> {
   NewUser _newUser = const NewUser();
   final _formKeys = List.generate(_totalSteps, (_) => GlobalKey<FormState>());
 
+  // Key for InformationStep
+  final _infoStepKey = GlobalKey<InformationStepState>();
+  final _usernameStepKey = GlobalKey<UsernameStepState>();
+
   void _goTo(int step) {
     setState(() => _currentStep = step);
     _pageController.animateToPage(
@@ -39,21 +42,47 @@ class SignUpWizardPageState extends ConsumerState<SignUpWizardPage> {
     );
   }
 
-  void _next() {
-    FocusManager.instance.primaryFocus?.unfocus();
+  Future<void> _next() async {
+    FocusScope.of(context).unfocus();
 
-    if (!(_formKeys[_currentStep].currentState?.validate() ?? false)) return;
-    if (_currentStep == _totalSteps - 1) {
-      _submit();
-    } else {
+    bool canProceed = false;
+
+    switch (_currentStep) {
+      case 0:
+        // Step 0: personal info + email check
+        canProceed = await _infoStepKey.currentState!.validateAndSubmit();
+        break;
+      case 1:
+        // Step 1: username
+        canProceed = await _usernameStepKey.currentState!.validateAndSubmit();
+        break;
+      case 2:
+        // Step 2: password (just form validate)
+        canProceed = _formKeys[2].currentState?.validate() ?? false;
+        break;
+      case 3:
+        // Step 3: profile picture (no form)
+        canProceed = true;
+        break;
+    }
+
+    if (!canProceed) return;
+
+    if (_currentStep < _totalSteps - 1) {
       _goTo(_currentStep + 1);
+    } else {
+      await _submit();
     }
   }
 
   void _back() {
-    FocusManager.instance.primaryFocus?.unfocus();
-
-    if (_currentStep > 0) _goTo(_currentStep - 1);
+    // Dismiss keyboard
+    FocusScope.of(context).unfocus();
+    if (_currentStep > 0) {
+      _goTo(_currentStep - 1);
+    } else {
+      Navigator.pop(context);
+    }
   }
 
   Future<void> _submit() async {
@@ -78,30 +107,36 @@ class SignUpWizardPageState extends ConsumerState<SignUpWizardPage> {
         'chips': 1000,
       });
 
+      // 3) Upload profile picture if one was picked
       if (_newUser.photoURL != null && _newUser.photoURL!.isNotEmpty) {
-        final file = File(_newUser.photoURL!);
-        final ref =
+        // `_newUser.photoURL` holds the local file path from your picker/cropper
+        final localFile = File(_newUser.photoURL!);
+        final uid = FirebaseAuth.instance.currentUser!.uid;
+
+        // Create a reference under your storage bucket
+        final storageRef =
             FirebaseStorage.instance.ref('images/$uid/profile_picture.png');
-        final upload = await ref.putFile(file);
-        final downloadURL = await upload.ref.getDownloadURL();
-        await user.updatePhotoURL(downloadURL);
+
+        // Upload the file
+        final uploadTask = await storageRef.putFile(localFile);
+
+        // Get the downloadable URL
+        final downloadURL = await uploadTask.ref.getDownloadURL();
+
+        // 4) Write that URL back to the user’s Firestore document
         await FirebaseFirestore.instance
             .collection('users')
             .doc(uid)
             .update({'photoURL': downloadURL});
+
+        // (Optionally) also update the FirebaseAuth photoURL
+        await FirebaseAuth.instance.currentUser!.updatePhotoURL(downloadURL);
       }
 
       await user.updateDisplayName(_newUser.fullName);
 
       final storage = const FlutterSecureStorage();
       await storage.write(key: globals.FSS_USERNAME, value: _newUser.username);
-      await storage.write(key: globals.FSS_CHIPS, value: '1000');
-
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setBool(globals.SETTINGS_BACKGROUND_SOUND, true);
-      prefs.setBool(globals.SETTINGS_FX_SOUND, true);
-      prefs.setBool(globals.SETTINGS_VIBRATE, true);
-      prefs.setBool(globals.SETTINGS_GAME_LIVE_CHAT, true);
 
       Navigator.of(context).pop();
       Navigator.pushReplacement(
@@ -148,7 +183,7 @@ class SignUpWizardPageState extends ConsumerState<SignUpWizardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor:Colors.grey.shade100,
+        backgroundColor: Colors.grey.shade100,
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
@@ -169,11 +204,13 @@ class SignUpWizardPageState extends ConsumerState<SignUpWizardPage> {
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
                   InformationStep(
+                    key: _infoStepKey,
                     formKey: _formKeys[0],
                     user: _newUser,
                     onChanged: (u) => _newUser = u,
                   ),
                   UsernameStep(
+                    key: _usernameStepKey,
                     formKey: _formKeys[1],
                     user: _newUser,
                     onChanged: (username) =>
@@ -205,10 +242,11 @@ class SignUpWizardPageState extends ConsumerState<SignUpWizardPage> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 14, horizontal: 24),
                       ),
-                      child: const Text('BACK', style: TextStyle(color: Colors.white)),
+                      child: const Text('BACK',
+                          style: TextStyle(color: Colors.white)),
                     )
                   else
-                    const SizedBox(width: 80),
+                    const SizedBox(width: 20),
                   const Spacer(),
                   ElevatedButton(
                     onPressed: _next,
