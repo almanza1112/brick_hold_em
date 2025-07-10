@@ -1,8 +1,8 @@
 import 'package:brick_hold_em/views/login/login_page.dart';
-import 'package:brick_hold_em/settings/edit_email_page.dart';
-import 'package:brick_hold_em/settings/edit_name_page.dart';
-import 'package:brick_hold_em/settings/edit_profile_picture_page.dart';
-import 'package:brick_hold_em/settings/edit_username_page.dart';
+import 'package:brick_hold_em/views/settings/edit_email_page.dart';
+import 'package:brick_hold_em/views/settings/edit_name_page.dart';
+import 'package:brick_hold_em/views/settings/edit_profile_picture_page.dart';
+import 'package:brick_hold_em/views/settings/edit_username_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -209,8 +209,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       Image(
                           width: 30,
                           height: 30,
-                          image: NetworkImage(
-                              FirebaseAuth.instance.currentUser!.photoURL!)),
+                          image: FirebaseAuth.instance.currentUser!.photoURL != null
+                              ? NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!)
+                              : const AssetImage('assets/images/poker_player.jpeg'),
+                      ),
                       Icon(
                         Icons.arrow_forward_ios,
                         color: iconColor,
@@ -301,50 +303,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       vibrate = value;
                       setSwitchState(globals.SETTINGS_VIBRATE, value);
                     });
-                  }),
-
-              Padding(
-                padding: titlePadding,
-                child: Text(
-                  "GAME",
-                  style: titleStyle,
-                ),
-              ),
-
-              // LIVE CHAT
-              SwitchListTile(
-                  title: Text(
-                    "Live Chat",
-                    style: textStyle,
-                  ),
-                  value: liveChat,
-                  onChanged: (bool value) {
-                    setState(() {
-                      liveChat = value;
-                      setSwitchState(globals.SETTINGS_GAME_LIVE_CHAT, value);
-                    });
-                  }),
-
-              Padding(
-                padding: titlePadding,
-                child: Text(
-                  "NOTIFICATIONS",
-                  style: titleStyle,
-                ),
-              ),
-
-              // DAILY
-              SwitchListTile(
-                  title: Text(
-                    "Daily",
-                    style: textStyle,
-                  ),
-                  value: dailyNotifications,
-                  onChanged: (bool value) {
-                    setState(() {
-                      dailyNotifications = value;
-                    });
-                  }),
+                  }),             
             ],
           ),
         ));

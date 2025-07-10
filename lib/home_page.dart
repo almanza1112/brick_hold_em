@@ -5,7 +5,6 @@ import 'package:brick_hold_em/howtoplay_page.dart';
 import 'package:brick_hold_em/purchase_page.dart';
 import 'package:brick_hold_em/settings_page.dart';
 import 'package:brick_hold_em/tournament_page.dart';
-import 'package:brick_hold_em/views/sign_up/username_step.dart';
 import 'package:brick_hold_em/models/new_user.dart';
 import 'package:brick_hold_em/profile_page.dart';
 import 'package:animations/animations.dart';
