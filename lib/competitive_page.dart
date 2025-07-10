@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:brick_hold_em/game/game.dart';
 import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -277,7 +275,7 @@ class CompetitivePageState extends ConsumerState<CompetitivePage> {
           'name': FirebaseAuth.instance.currentUser!.displayName,
           'photoURL': FirebaseAuth.instance.currentUser!.photoURL,
           'username': username,
-          'chips': chips.toString(),
+          'chips': chips,
         },
       );
       final data = result.data as Map<String, dynamic>;
@@ -294,11 +292,12 @@ class CompetitivePageState extends ConsumerState<CompetitivePage> {
       );
     } catch (e) {
       _controller.pause();
+      if (!mounted) return;
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
           title: const Text('Error'),
-          content: Text(e.toString() ?? 'Failed to join table.'),
+          content: Text(e.toString()),
           actions: [
             TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))
           ],
