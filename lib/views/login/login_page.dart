@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:brick_hold_em/home_page.dart';
-import 'package:brick_hold_em/views/login/create_account_information_page.dart';
-import 'package:brick_hold_em/views/login/create_account_username_page.dart';
-import 'package:brick_hold_em/views/login/new_user_info.dart';
+import 'package:brick_hold_em/views/sign_up/username_step.dart';
+import 'package:brick_hold_em/models/new_user.dart';
+import 'package:brick_hold_em/views/sign_up/sign_up_wizard_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -202,48 +202,48 @@ class LoginPageState extends ConsumerState<LoginPage> {
                                 child: const Text("Login",
                                     style: TextStyle(fontSize: 18)),
                               ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(
-                                      child:
-                                          Divider(color: Colors.grey.shade400)),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8),
-                                    child: Text("or",
-                                        style: TextStyle(
-                                            color: Colors.grey.shade600)),
-                                  ),
-                                  Expanded(
-                                      child:
-                                          Divider(color: Colors.grey.shade400)),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              // Social login buttons.
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                    onPressed: signInWithFacebook,
-                                    icon: Image.asset(
-                                      'assets/images/logos/facebook.png',
-                                      width: 48,
-                                    ),
-                                    iconSize: 48,
-                                  ),
-                                  const SizedBox(width: 16),
-                                  IconButton(
-                                    onPressed: signInWithGoogle,
-                                    icon: Image.asset(
-                                      'assets/images/logos/google.png',
-                                      width: 48,
-                                    ),
-                                    iconSize: 48,
-                                  ),
-                                ],
-                              ),
+                              // const SizedBox(height: 16),
+                              // Row(
+                              //   children: [
+                              //     Expanded(
+                              //         child:
+                              //             Divider(color: Colors.grey.shade400)),
+                              //     Padding(
+                              //       padding: const EdgeInsets.symmetric(
+                              //           horizontal: 8),
+                              //       child: Text("or",
+                              //           style: TextStyle(
+                              //               color: Colors.grey.shade600)),
+                              //     ),
+                              //     Expanded(
+                              //         child:
+                              //             Divider(color: Colors.grey.shade400)),
+                              //   ],
+                              // ),
+                              // const SizedBox(height: 16),
+                              // // Social login buttons.
+                              // Row(
+                              //   mainAxisAlignment: MainAxisAlignment.center,
+                              //   children: [
+                              //     IconButton(
+                              //       onPressed: signInWithFacebook,
+                              //       icon: Image.asset(
+                              //         'assets/images/logos/facebook.png',
+                              //         width: 48,
+                              //       ),
+                              //       iconSize: 48,
+                              //     ),
+                              //     const SizedBox(width: 16),
+                              //     IconButton(
+                              //       onPressed: signInWithGoogle,
+                              //       icon: Image.asset(
+                              //         'assets/images/logos/google.png',
+                              //         width: 48,
+                              //       ),
+                              //       iconSize: 48,
+                              //     ),
+                              //   ],
+                              // ),
                             ],
                           ),
                         ),
@@ -264,7 +264,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    const CreateAccountInformationPage(),
+                                    const SignUpWizardPage(),
                               ),
                             );
                           },
@@ -354,7 +354,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       String fullName = userData["name"];
       String email = userData["email"];
       String photoURL = userData["picture"]["data"]["url"];
-      var userInfo = NewUserInfo(
+      var userInfo = NewUser(
         fullName: fullName,
         email: email,
         photoURL: photoURL,
@@ -373,7 +373,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
   }
 
   // Check if user exists in Firestore.
-  void checkIfUserExists(NewUserInfo newUserInfo) {
+  void checkIfUserExists(NewUser newUserInfo) {
     String uid = FirebaseAuth.instance.currentUser!.uid;
     FirebaseFirestore.instance.collection("users").doc(uid).get().then(
       (doc) async {
@@ -468,16 +468,16 @@ class LoginPageState extends ConsumerState<LoginPage> {
     });
   }
 
-  void navigateToUsername(var credential, NewUserInfo newUserInfo) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CreateAccountUsernamePage(
-          credential: credential,
-          newUserInfo: newUserInfo,
-        ),
-      ),
-    );
+  void navigateToUsername(var credential, NewUser newUserInfo) {
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => CreateAccountUsernamePage(
+    //       credential: credential,
+    //       newUserInfo: newUserInfo,
+    //     ),
+    //   ),
+    // );
   }
 
   void navigateToHomePage() {

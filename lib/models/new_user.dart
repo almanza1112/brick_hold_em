@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 @immutable
-class NewUserInfo {
+class NewUser {
   final String? fullName;
   final String? email;
   final String? password;
@@ -9,7 +9,7 @@ class NewUserInfo {
   final String? photoURL;
   final String? loginType; // Only three login types "facebook", "google", "email"
 
-  const NewUserInfo({
+  const NewUser({
     this.fullName, 
     this.email, 
     this.password, 
@@ -18,7 +18,7 @@ class NewUserInfo {
     this.loginType,
     });
 
-  NewUserInfo copyWith({
+  NewUser copyWith({
     String? fullName,
     String? email,
     String? password,
@@ -26,7 +26,7 @@ class NewUserInfo {
     String? photoURL,
     String? loginType,
   }) {
-    return NewUserInfo(
+    return NewUser(
       fullName: fullName ?? this.fullName,
       email: email ?? this.email,
       password: password ?? this.password,

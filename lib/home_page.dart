@@ -5,8 +5,8 @@ import 'package:brick_hold_em/howtoplay_page.dart';
 import 'package:brick_hold_em/purchase_page.dart';
 import 'package:brick_hold_em/settings_page.dart';
 import 'package:brick_hold_em/tournament_page.dart';
-import 'package:brick_hold_em/views/login/create_account_username_page.dart';
-import 'package:brick_hold_em/views/login/new_user_info.dart';
+import 'package:brick_hold_em/views/sign_up/username_step.dart';
+import 'package:brick_hold_em/models/new_user.dart';
 import 'package:brick_hold_em/profile_page.dart';
 import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -305,7 +305,7 @@ class HomePageState extends ConsumerState<HomePage> {
     FirebaseFirestore.instance.collection("users").doc(uid).get().then((doc) {
       if (!doc.exists) {
         // User does not exist, proceed to create a new account.
-        var newUserInfo = NewUserInfo(
+        var newUserInfo = NewUser(
           fullName: FirebaseAuth.instance.currentUser!.displayName,
           email: FirebaseAuth.instance.currentUser!.email,
           photoURL: FirebaseAuth.instance.currentUser!.photoURL,
@@ -318,16 +318,16 @@ class HomePageState extends ConsumerState<HomePage> {
     });
   }
 
-  void _navigateToUsername(var credential, NewUserInfo newUserInfo) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CreateAccountUsernamePage(
-          credential: credential,
-          newUserInfo: newUserInfo,
-        ),
-      ),
-    );
+  void _navigateToUsername(var credential, NewUser newUserInfo) {
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => CreateAccountUsernamePage(
+    //       credential: credential,
+    //       newUserInfo: newUserInfo,
+    //     ),
+    //   ),
+    // );
   }
 }
 
