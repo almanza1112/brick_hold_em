@@ -3,6 +3,7 @@ import 'package:brick_hold_em/providers/game_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -31,7 +32,6 @@ class CompetitivePageState extends ConsumerState<CompetitivePage> {
 
   late VideoPlayerController _controller;
   final storage = const FlutterSecureStorage();
-  late Future<String?> chipsFuture;
 
   List<Map<String, dynamic>> _tables = [];
   bool _loadingTables = true;
@@ -41,7 +41,6 @@ class CompetitivePageState extends ConsumerState<CompetitivePage> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.asset('assets/videos/door_closing.mp4');
-    chipsFuture = _getChips();
     _loadTables();
   }
 
@@ -114,8 +113,10 @@ class CompetitivePageState extends ConsumerState<CompetitivePage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top: 30, bottom: 10, left: 20),
-                    child: Text('Ante: $_selectedAnte', style: sectionTitleStyle),
+                    padding:
+                        const EdgeInsets.only(top: 30, bottom: 10, left: 20),
+                    child:
+                        Text('Ante: $_selectedAnte', style: sectionTitleStyle),
                   ),
                   Expanded(child: _buildTableGrid()),
                 ],
@@ -141,7 +142,8 @@ class CompetitivePageState extends ConsumerState<CompetitivePage> {
     }
     if (_tables.isEmpty) {
       return const Center(
-        child: Text('No tables available for this ante', style: TextStyle(color: Colors.white)),
+        child: Text('No tables available for this ante',
+            style: TextStyle(color: Colors.white)),
       );
     }
     return GridView.builder(
@@ -180,7 +182,8 @@ class CompetitivePageState extends ConsumerState<CompetitivePage> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) {
         final options = [2, 5, 10, 25, 50, 100, 250, 500];
         return ListView(
@@ -208,7 +211,8 @@ class CompetitivePageState extends ConsumerState<CompetitivePage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.blue,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) {
         double sliderChips = table['ante'].toDouble();
         return Padding(
@@ -219,24 +223,38 @@ class CompetitivePageState extends ConsumerState<CompetitivePage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Players: ${table['player_count']}/6', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                  Text('Players: ${table['player_count']}/6',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold)),
                   const SizedBox(height: 24),
-                  FutureBuilder<String?>(
-                    future: chipsFuture,
+                  FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .get(),
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) return const CircularProgressIndicator();
-                      final maxChips = double.tryParse(snapshot.data!) ?? 0;
+                      if (!snapshot.hasData) {
+                        return const CircularProgressIndicator();
+                      }
+                      final maxChips = (snapshot.data!.get('chips') as num).toDouble();
                       return Column(
                         children: [
                           Slider(
-                            value: sliderChips.clamp(table['ante'].toDouble(), maxChips).toDouble(),
+                            value: sliderChips
+                                .clamp(table['ante'].toDouble(), maxChips)
+                                .toDouble(),
                             min: table['ante'].toDouble(),
                             max: maxChips,
                             divisions: (maxChips - table['ante']).toInt(),
                             label: sliderChips.round().toString(),
-                            onChanged: (val) => setState(() => sliderChips = val),
+                            onChanged: (val) =>
+                                setState(() => sliderChips = val),
                           ),
-                          Text('Chips: ${sliderChips.round()} / ${maxChips.round()}', style: valueStyle),
+                          Text(
+                              'Chips: ${sliderChips.round()} / ${maxChips.round()}',
+                              style: valueStyle),
                         ],
                       );
                     },
@@ -249,10 +267,16 @@ class CompetitivePageState extends ConsumerState<CompetitivePage> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 40),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('START', style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: const Text('START',
+                        style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(height: 20),
                 ],
@@ -299,7 +323,9 @@ class CompetitivePageState extends ConsumerState<CompetitivePage> {
           title: const Text('Error'),
           content: Text(e.toString()),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'))
           ],
         ),
       );
